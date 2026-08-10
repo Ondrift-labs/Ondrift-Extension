@@ -1,0 +1,41 @@
+import { defineManifest } from "@crxjs/vite-plugin";
+
+export const manifest = {
+  manifest_version: 3,
+  name: "Ondrift",
+  short_name: "Ondrift",
+  version: "0.1.0",
+  minimum_chrome_version: "116",
+  description:
+    "Rewrite and score prompts on ChatGPT and Claude with your own Gemini API key.",
+  permissions: ["storage"],
+  host_permissions: [
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  action: {
+    default_title: "Open Ondrift",
+    default_popup: "popup.html"
+  },
+  options_ui: {
+    page: "options.html",
+    open_in_tab: true
+  },
+  background: {
+    service_worker: "src/entries/BackgroundEntry.ts",
+    type: "module"
+  },
+  content_scripts: [
+    {
+      matches: ["https://chatgpt.com/*", "https://claude.ai/*"],
+      js: ["src/content.ts"],
+      run_at: "document_idle"
+    }
+  ],
+  content_security_policy: {
+    extension_pages: "script-src 'self'; object-src 'self'"
+  }
+} satisfies chrome.runtime.ManifestV3;
+
+export default defineManifest(manifest);

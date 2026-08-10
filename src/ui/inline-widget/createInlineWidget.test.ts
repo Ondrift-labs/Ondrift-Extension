@@ -1,0 +1,45 @@
+import { describe, expect, it, vi } from 'vitest';
+import { createInlineWidget } from './createInlineWidget';
+
+describe('createInlineWidget', () => {
+  it('emits rewrite and apply actions', () => {
+    const onRewrite = vi.fn();
+    const onApply = vi.fn();
+    const widget = createInlineWidget({ onRewrite, onApply, onRetry: vi.fn(), onOpenSettings: vi.fn() });
+    widget.setState({ status: 'ready', promptLength: 80 });
+    widget.element.shadowRoot?.querySelector<HTMLButtonElement>('.od-button')?.click();
+    expect(onRewrite).toHaveBeenCalledOnce();
+
+    widget.setState({ status: 'result', score: 88, previousScore: 54, rationale: 'Adds constraints.', improvedText: 'Return three concise options.' });
+    const buttons = widget.element.shadowRoot?.querySelectorAll<HTMLButtonElement>('.od-actions .od-button');
+    buttons?.[1]?.click();
+    expect(onApply).toHaveBeenCalledWith('Return three concise options.');
+  });
+
+  it('disables rewriting until the prompt is long enough', () => {
+    const onRewrite = vi.fn();
+    const widget = createInlineWidget({ onRewrite, onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings: vi.fn() });
+    widget.setState({ status: 'ready', promptLength: 11 });
+    const rewrite = widget.element.shadowRoot?.querySelector<HTMLButtonElement>('.od-button');
+
+    expect(rewrite).toBeDisabled();
+    rewrite?.click();
+    expect(onRewrite).not.toHaveBeenCalled();
+  });
+
+  it('renders provider text as text, not executable markup', () => {
+    const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings: vi.fn() });
+    widget.setState({ status: 'result', score: 40, rationale: '<img src=x>', improvedText: '<script>bad()</script>' });
+    expect(widget.element.shadowRoot?.querySelector('.od-preview')?.textContent).toBe('<script>bad()</script>');
+    expect(widget.element.shadowRoot?.querySelector('script')).toBeNull();
+    expect(widget.element.shadowRoot?.querySelector('img')).toBeNull();
+  });
+
+  it('routes missing-key users to settings', () => {
+    const onOpenSettings = vi.fn();
+    const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings });
+    widget.setState({ status: 'missing_key' });
+    widget.element.shadowRoot?.querySelector<HTMLButtonElement>('.od-actions button')?.click();
+    expect(onOpenSettings).toHaveBeenCalledOnce();
+  });
+});
