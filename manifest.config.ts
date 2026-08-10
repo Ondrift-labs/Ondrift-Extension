@@ -8,6 +8,12 @@ export const manifest = {
   minimum_chrome_version: "116",
   description:
     "Rewrite and score prompts on ChatGPT, Claude, Gemini, and Perplexity with your own Gemini API key.",
+  icons: {
+    16: "icons/ondrift-16.png",
+    32: "icons/ondrift-32.png",
+    48: "icons/ondrift-48.png",
+    128: "icons/ondrift-128.png"
+  },
   permissions: ["storage"],
   host_permissions: [
     "https://chatgpt.com/*",
@@ -19,7 +25,12 @@ export const manifest = {
   ],
   action: {
     default_title: "Open Ondrift",
-    default_popup: "popup.html"
+    default_popup: "popup.html",
+    default_icon: {
+      16: "icons/ondrift-16.png",
+      32: "icons/ondrift-32.png",
+      48: "icons/ondrift-48.png"
+    }
   },
   options_ui: {
     page: "options.html",

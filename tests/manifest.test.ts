@@ -41,4 +41,18 @@ describe("extension manifest", () => {
       "script-src 'self'; object-src 'self'",
     );
   });
+
+  it("uses the Ondrift artwork for extension and toolbar icons", () => {
+    expect(manifest.icons).toEqual({
+      16: "icons/ondrift-16.png",
+      32: "icons/ondrift-32.png",
+      48: "icons/ondrift-48.png",
+      128: "icons/ondrift-128.png",
+    });
+    expect(manifest.action.default_icon).toEqual({
+      16: "icons/ondrift-16.png",
+      32: "icons/ondrift-32.png",
+      48: "icons/ondrift-48.png",
+    });
+  });
 });
