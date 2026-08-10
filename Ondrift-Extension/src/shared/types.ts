@@ -1,0 +1,89 @@
+export type SiteId = "chatgpt" | "claude";
+export type ProviderId = "gemini" | "openai" | "claude";
+
+export interface UsageMetadata {
+  promptTokenCount?: number;
+  candidatesTokenCount?: number;
+  totalTokenCount?: number;
+}
+
+export interface RewriteResult {
+  improvedText: string;
+  score: number;
+  rationale: string;
+  usageMetadata?: UsageMetadata;
+}
+
+export interface RewriteRequest {
+  prompt: string;
+  persona?: string;
+  service: SiteId;
+}
+
+export type ProviderErrorCode =
+  | "invalid_key"
+  | "quota_exceeded"
+  | "network"
+  | "invalid_response"
+  | "not_configured"
+  | "unknown";
+
+export interface SerializedProviderError {
+  code: ProviderErrorCode;
+  message: string;
+  retryable: boolean;
+}
+
+export interface ExtensionSettings {
+  provider: ProviderId;
+  apiKeys: Partial<Record<ProviderId, string>>;
+  persona: string;
+  enabledSites: Record<SiteId, boolean>;
+  onboardingComplete: boolean;
+  saveHistory: boolean;
+  consentGranted: boolean;
+}
+
+export interface HistoryEntry {
+  id?: number;
+  service: SiteId;
+  sourceUrl: string;
+  originalText: string;
+  improvedText?: string;
+  score?: number;
+  rationale?: string;
+  applied: boolean;
+  createdAt: number;
+  usageMetadata?: UsageMetadata;
+}
+
+export interface HistoryQuery {
+  search?: string;
+  service?: SiteId;
+  limit?: number;
+  offset?: number;
+}
+
+export interface HistoryAggregates {
+  totalPrompts: number;
+  rewritesApplied: number;
+  adoptionRate: number;
+  averageScore: number | null;
+  totalTokens: number;
+  byService: Record<SiteId, number>;
+}
+
+export type RuntimeRequest =
+  | { type: "rewrite"; payload: RewriteRequest }
+  | { type: "validate_api_key"; payload: { provider: ProviderId; apiKey: string } }
+  | { type: "settings_get" }
+  | { type: "settings_set"; payload: Partial<ExtensionSettings> }
+  | { type: "history_add"; payload: HistoryEntry }
+  | { type: "history_list"; payload?: HistoryQuery }
+  | { type: "history_delete"; payload: { id: number } }
+  | { type: "history_clear" }
+  | { type: "history_aggregates" };
+
+export type RuntimeResponse<T = unknown> =
+  | { ok: true; data: T }
+  | { ok: false; error: SerializedProviderError };

@@ -1,0 +1,1 @@
+import "./core/content-script";

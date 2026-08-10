@@ -1,0 +1,31 @@
+import { describe, expect, it } from "vitest";
+import { SettingsStore, type LocalStorageArea } from "../src/storage/settings";
+
+class MemoryStorage implements LocalStorageArea {
+  values: Record<string, unknown> = {};
+  async get(): Promise<Record<string, unknown>> { return this.values; }
+  async set(items: Record<string, unknown>): Promise<void> { Object.assign(this.values, items); }
+}
+
+describe("SettingsStore", () => {
+  it("returns safe local defaults", async () => {
+    await expect(new SettingsStore(new MemoryStorage()).get()).resolves.toEqual({
+      provider: "gemini",
+      apiKeys: {},
+      persona: "general",
+      enabledSites: { chatgpt: true, claude: true },
+      onboardingComplete: false,
+      saveHistory: true,
+      consentGranted: false,
+    });
+  });
+
+  it("deep-merges API keys and site toggles without losing prior values", async () => {
+    const store = new SettingsStore(new MemoryStorage());
+    await store.update({ apiKeys: { gemini: " first " }, enabledSites: { chatgpt: false, claude: true } });
+    const result = await store.update({ apiKeys: { openai: "second" }, enabledSites: { claude: false, chatgpt: false } });
+    expect(result.apiKeys).toEqual({ gemini: " first ", openai: "second" });
+    expect(result.enabledSites).toEqual({ chatgpt: false, claude: false });
+    await expect(store.apiKey("gemini")).resolves.toBe("first");
+  });
+});

@@ -1,0 +1,57 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ChatGptAdapter } from "../src/adapters/chatgpt.adapter";
+import { ClaudeAdapter } from "../src/adapters/claude.adapter";
+import { AdapterRegistry } from "../src/core/adapter-registry";
+
+describe("site adapter URL matching", () => {
+  beforeEach(() => { document.body.replaceChildren(); });
+  it("matches only exact supported hosts", () => {
+    expect(new ChatGptAdapter().matches("https://chatgpt.com/c/abc")).toBe(true);
+    expect(new ChatGptAdapter().matches("https://evil.example/?chatgpt.com")).toBe(false);
+    expect(new ClaudeAdapter().matches("https://claude.ai/new")).toBe(true);
+    expect(new ClaudeAdapter().matches("not-a-url")).toBe(false);
+  });
+
+  it("resolves the correct adapter through the registry", () => {
+    const registry = new AdapterRegistry();
+    expect(registry.resolve("https://claude.ai/chat/1")?.id).toBe("claude");
+    expect(registry.resolve("https://example.com")).toBeNull();
+  });
+
+  it("reads and applies textarea values through native input semantics", () => {
+    document.body.innerHTML = '<form><textarea id="prompt-textarea">draft</textarea><button data-testid="send-button"></button></form>';
+    const input = document.querySelector("textarea")!;
+    const inputListener = vi.fn();
+    const changeListener = vi.fn();
+    input.addEventListener("input", inputListener);
+    input.addEventListener("change", changeListener);
+    const adapter = new ChatGptAdapter();
+    expect(adapter.getPromptText()).toBe("draft");
+    adapter.setPromptText("improved");
+    expect(input.value).toBe("improved");
+    expect(inputListener).toHaveBeenCalledOnce();
+    expect(changeListener).toHaveBeenCalledOnce();
+  });
+
+  it("reads and applies contenteditable prompts", () => {
+    document.body.innerHTML = '<div class="ProseMirror" contenteditable="true">draft</div>';
+    const adapter = new ClaudeAdapter();
+    expect(adapter.getPromptText()).toBe("draft");
+    adapter.setPromptText("improved");
+    expect(adapter.getPromptText()).toBe("improved");
+  });
+
+  it("detects submit keys only inside the prompt and de-duplicates click fallthrough", () => {
+    document.body.innerHTML = '<form><textarea id="prompt-textarea">send me</textarea><button type="button" data-testid="send-button"></button></form><input id="other">';
+    const callback = vi.fn();
+    const adapter = new ChatGptAdapter();
+    const cleanup = adapter.onSubmit(callback);
+    document.querySelector("#other")!.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(callback).not.toHaveBeenCalled();
+    document.querySelector("textarea")!.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    document.querySelector("button")!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(callback).toHaveBeenCalledOnce();
+    expect(callback).toHaveBeenCalledWith("send me");
+    cleanup();
+  });
+});
