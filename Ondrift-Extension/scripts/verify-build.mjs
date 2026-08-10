@@ -38,6 +38,7 @@ invariant(
 );
 invariant(manifest.action?.default_popup === "popup.html", "popup entry is missing");
 invariant(manifest.options_ui?.page === "options.html", "options entry is missing");
+invariant(manifest.icons?.[128] === "icons/ondrift-128.png", "Ondrift extension artwork is missing");
 
 const emittedEntries = [
   manifest.background.service_worker,
@@ -46,6 +47,7 @@ const emittedEntries = [
   manifest.options_ui.page,
 ];
 await Promise.all(emittedEntries.map((entry) => access(resolve(distRoot, entry))));
+await Promise.all(Object.values(manifest.icons).map((entry) => access(resolve(distRoot, entry))));
 
 const outputFiles = await readdir(distRoot, { recursive: true });
 invariant(
