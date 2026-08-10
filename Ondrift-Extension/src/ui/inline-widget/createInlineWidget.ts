@@ -1,3 +1,5 @@
+import type { LanguageId } from '../../shared/types';
+import { inlineMessages } from './messages';
 import { inlineWidgetStyles } from './styles';
 import type { InlineWidgetController, InlineWidgetHandlers, InlineWidgetState } from './types';
 
@@ -13,57 +15,80 @@ const icons = {
 export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidgetController {
   const host = document.createElement('aside');
   host.setAttribute('data-ondrift-widget', '');
-  host.setAttribute('aria-label', 'Ondrift prompt rewrite');
   const root = host.attachShadow({ mode: 'open' });
-  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><header class="od-header"><span class="od-mark">O</span><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button class="od-icon-button" data-settings aria-label="Open Ondrift settings">${icons.settings}</button><button class="od-icon-button" data-dismiss aria-label="Dismiss Ondrift">${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div></section>`;
+  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><header class="od-header"><span class="od-mark">O</span><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-settings>${icons.settings}</button><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div></section>`;
   const body = root.querySelector<HTMLElement>('[data-body]')!;
   const status = root.querySelector<HTMLElement>('[data-status]')!;
+  const settingsButton = root.querySelector<HTMLButtonElement>('[data-settings]')!;
+  const dismissButton = root.querySelector<HTMLButtonElement>('[data-dismiss]')!;
   let currentState: InlineWidgetState = { status: 'ready', promptLength: 0 };
+  let currentLanguage: LanguageId = 'en';
 
-  root.querySelector('[data-settings]')?.addEventListener('click', handlers.onOpenSettings);
-  root.querySelector('[data-dismiss]')?.addEventListener('click', () => { host.hidden = true; handlers.onDismiss?.(); });
+  settingsButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); handlers.onOpenSettings(); });
+  dismissButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); host.hidden = true; handlers.onDismiss?.(); });
 
   function button(label: string, className: string, action: () => void, iconMarkup = '') {
     const element = document.createElement('button');
+    element.type = 'button';
     element.className = className;
-    element.innerHTML = `${iconMarkup}<span>${label}</span>`;
+    element.innerHTML = `${iconMarkup}<span></span>`;
+    element.querySelector('span')!.textContent = label;
     element.addEventListener('click', action);
     return element;
   }
 
   function render(state: InlineWidgetState) {
     currentState = state;
+    const messages = inlineMessages[currentLanguage];
+    host.lang = currentLanguage;
+    host.setAttribute('aria-label', messages.ariaLabel);
+    settingsButton.setAttribute('aria-label', messages.settings);
+    dismissButton.setAttribute('aria-label', messages.dismiss);
     host.hidden = false;
     body.replaceChildren();
-    status.textContent = state.status === 'result' || state.status === 'applied' ? `Score ${state.score}` : '';
+    status.textContent = state.status === 'result' || state.status === 'applied' ? `${messages.score} ${state.score}` : '';
     if (state.status === 'ready') {
       const wrap = document.createElement('div'); wrap.className = 'od-ready';
-      const copy = document.createElement('p'); copy.textContent = state.promptLength < 12 ? 'Add a little more detail to make the rewrite useful.' : 'Ready to score clarity, context, and constraints.';
-      const rewrite = button('Rewrite & score', 'od-button', handlers.onRewrite, icons.spark); if (state.promptLength < 12) rewrite.setAttribute('disabled', '');
-      wrap.append(copy, rewrite); body.append(wrap); return;
+      const description = document.createElement('p'); description.textContent = state.promptLength < 12 ? messages.shortPrompt : messages.ready;
+      const rewrite = button(messages.rewrite, 'od-button', handlers.onRewrite, icons.spark); if (state.promptLength < 12) rewrite.disabled = true;
+      wrap.append(description, rewrite); body.append(wrap); return;
     }
-    if (state.status === 'loading') { body.innerHTML = '<div class="od-loading"><span class="od-spinner"></span><span>Reading for intent, context, and useful constraints…</span></div>'; return; }
+    if (state.status === 'loading') {
+      body.innerHTML = '<div class="od-loading"><span class="od-spinner"></span><span data-loading></span></div>';
+      body.querySelector('[data-loading]')!.textContent = messages.loading; return;
+    }
     if (state.status === 'result') {
       const wrap = document.createElement('div');
-      const delta = state.previousScore === undefined ? '' : `${state.score - state.previousScore >= 0 ? '+' : ''}${state.score - state.previousScore} points`;
-      wrap.innerHTML = `<div class="od-score-row"><span class="od-score">${Math.round(state.score)}</span><span class="od-score-copy"><strong>${state.score >= 85 ? 'Strong and specific' : state.score >= 65 ? 'Clear foundation' : 'Needs more direction'}</strong><span>${delta}</span></span></div><p class="od-rationale"></p><span class="od-preview-label">Suggested rewrite</span><p class="od-preview"></p><div class="od-actions"></div>`;
+      const delta = state.previousScore === undefined ? '' : `${state.score - state.previousScore >= 0 ? '+' : ''}${state.score - state.previousScore} ${messages.points}`;
+      wrap.innerHTML = `<div class="od-score-row"><span class="od-score">${Math.round(state.score)}</span><span class="od-score-copy"><strong></strong><span></span></span></div><p class="od-rationale"></p><span class="od-preview-label"></span><p class="od-preview"></p><div class="od-actions"></div>`;
+      wrap.querySelector<HTMLElement>('.od-score-copy strong')!.textContent = state.score >= 85 ? messages.strong : state.score >= 65 ? messages.foundation : messages.needsDirection;
+      wrap.querySelector<HTMLElement>('.od-score-copy span')!.textContent = delta;
       wrap.querySelector<HTMLElement>('.od-rationale')!.textContent = state.rationale;
+      wrap.querySelector<HTMLElement>('.od-preview-label')!.textContent = messages.suggested;
       wrap.querySelector<HTMLElement>('.od-preview')!.textContent = state.improvedText;
       const actions = wrap.querySelector<HTMLElement>('.od-actions')!;
-      actions.append(button('Try again', 'od-button od-button--secondary', handlers.onRetry, icons.retry), button('Apply to prompt', 'od-button', () => handlers.onApply(state.improvedText), icons.check));
+      actions.append(button(messages.retry, 'od-button od-button--secondary', handlers.onRetry, icons.retry), button(messages.apply, 'od-button', () => handlers.onApply(state.improvedText), icons.check));
       body.append(wrap); return;
     }
-    if (state.status === 'applied') { body.innerHTML = `<div class="od-applied">${icons.check}<span>Applied. You can keep editing before you send.</span></div>`; return; }
+    if (state.status === 'applied') {
+      body.innerHTML = `<div class="od-applied">${icons.check}<span></span></div>`;
+      body.querySelector('.od-applied span')!.textContent = messages.applied; return;
+    }
     const isMissing = state.status === 'missing_key';
     const kind = state.status === 'error' ? state.kind : 'invalid_key';
-    const title = isMissing ? 'Connect an API key first' : kind === 'quota' ? 'Gemini quota reached' : kind === 'network' ? 'Connection interrupted' : kind === 'invalid_key' ? 'API key needs attention' : kind === 'request' ? 'Request rejected' : kind === 'unavailable' ? 'Gemini unavailable' : 'Rewrite unavailable';
-    const detail = isMissing ? 'Setup takes about a minute and your key stays in this browser.' : state.status === 'error' && state.message ? state.message : kind === 'quota' ? 'Your provider limit is exhausted for now. Try again after it resets.' : kind === 'network' ? 'Chrome could not reach Gemini. Check browser, VPN, or firewall access.' : kind === 'invalid_key' ? 'Verify or replace the key in Ondrift settings.' : kind === 'request' ? 'Gemini rejected the request. Reload Ondrift and retry.' : kind === 'unavailable' ? 'Gemini and the compatible fallback model are currently unavailable.' : 'Your prompt was not changed. Please try again.';
+    const title = isMissing ? messages.connectKey : kind === 'quota' ? messages.quotaTitle : kind === 'network' ? messages.networkTitle : kind === 'invalid_key' ? messages.invalidKeyTitle : kind === 'request' ? messages.requestTitle : kind === 'unavailable' ? messages.unavailableTitle : messages.rewriteUnavailable;
+    const detail = isMissing ? messages.missingKeyDetail : kind === 'quota' ? messages.quotaDetail : kind === 'network' ? messages.networkDetail : kind === 'invalid_key' ? messages.invalidKeyDetail : kind === 'request' ? messages.requestDetail : kind === 'unavailable' ? messages.unavailableDetail : messages.unknownDetail;
     const message = document.createElement('div'); message.className = 'od-message'; message.innerHTML = `<span class="od-message-icon">${isMissing ? icons.settings : icons.retry}</span><div><strong></strong><p></p><div class="od-actions"></div></div>`;
     message.querySelector('strong')!.textContent = title; message.querySelector('p')!.textContent = detail;
-    const action = isMissing || kind === 'invalid_key' ? button('Open settings', 'od-button', handlers.onOpenSettings) : button('Try again', 'od-button', handlers.onRetry, icons.retry);
+    const action = isMissing || kind === 'invalid_key' ? button(messages.openSettings, 'od-button', handlers.onOpenSettings) : button(messages.retry, 'od-button', handlers.onRetry, icons.retry);
     message.querySelector('.od-actions')!.append(action); body.append(message);
   }
 
   render(currentState);
-  return { element: host, setState: render, destroy() { host.remove(); } };
+  return {
+    element: host,
+    setState: render,
+    setLanguage(language) { currentLanguage = language; render(currentState); },
+    destroy() { host.remove(); },
+  };
 }

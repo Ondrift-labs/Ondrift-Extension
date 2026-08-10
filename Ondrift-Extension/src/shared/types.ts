@@ -1,5 +1,6 @@
 export type SiteId = "chatgpt" | "claude" | "gemini" | "perplexity";
 export type ProviderId = "gemini" | "openai" | "claude";
+export type LanguageId = "ko" | "en" | "ja";
 
 export interface UsageMetadata {
   promptTokenCount?: number;
@@ -18,6 +19,7 @@ export interface RewriteRequest {
   prompt: string;
   persona?: string;
   service: SiteId;
+  language?: LanguageId;
 }
 
 export type ProviderErrorCode =
@@ -41,6 +43,7 @@ export interface ExtensionSettings {
   provider: ProviderId;
   apiKeys: Partial<Record<ProviderId, string>>;
   persona: string;
+  language: LanguageId;
   enabledSites: Record<SiteId, boolean>;
   onboardingComplete: boolean;
   saveHistory: boolean;
@@ -85,7 +88,8 @@ export type RuntimeRequest =
   | { type: "history_list"; payload?: HistoryQuery }
   | { type: "history_delete"; payload: { id: number } }
   | { type: "history_clear" }
-  | { type: "history_aggregates" };
+  | { type: "history_aggregates" }
+  | { type: "open_options" };
 
 export type RuntimeResponse<T = unknown> =
   | { ok: true; data: T }

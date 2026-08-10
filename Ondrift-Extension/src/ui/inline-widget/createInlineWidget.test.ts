@@ -42,4 +42,34 @@ describe('createInlineWidget', () => {
     widget.element.shadowRoot?.querySelector<HTMLButtonElement>('.od-actions button')?.click();
     expect(onOpenSettings).toHaveBeenCalledOnce();
   });
+
+  it('runs header settings and dismiss actions without submitting the host page', () => {
+    const onOpenSettings = vi.fn();
+    const onDismiss = vi.fn();
+    const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings, onDismiss });
+    const root = widget.element.shadowRoot;
+    if (!root) throw new Error('Widget shadow root is missing.');
+    const settings = root.querySelector<HTMLButtonElement>('[data-settings]');
+    const dismiss = root.querySelector<HTMLButtonElement>('[data-dismiss]');
+
+    expect(settings?.type).toBe('button');
+    settings?.click();
+    dismiss?.click();
+
+    expect(onOpenSettings).toHaveBeenCalledOnce();
+    expect(onDismiss).toHaveBeenCalledOnce();
+    expect(widget.element.hidden).toBe(true);
+    expect(root.querySelector('style')?.textContent).toContain(':host([hidden])');
+  });
+
+  it('switches the inline interface between Korean, English, and Japanese', () => {
+    const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings: vi.fn() });
+
+    widget.setLanguage('ko');
+    expect(widget.element.shadowRoot?.textContent).toContain('개선 및 점수 확인');
+    widget.setLanguage('ja');
+    expect(widget.element.shadowRoot?.textContent).toContain('改善して採点');
+    widget.setLanguage('en');
+    expect(widget.element.shadowRoot?.textContent).toContain('Rewrite & score');
+  });
 });

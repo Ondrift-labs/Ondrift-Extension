@@ -1,11 +1,13 @@
 export type ProviderId = 'gemini' | 'openai' | 'claude';
 export type SiteId = 'chatgpt' | 'claude' | 'gemini' | 'perplexity';
 export type PersonaId = 'general' | 'developer' | 'writer' | 'student' | 'translator';
+export type LanguageId = 'ko' | 'en' | 'ja';
 
 export interface UiSettings {
   provider: ProviderId;
   apiKeyConfigured: boolean;
   persona: PersonaId;
+  language: LanguageId;
   siteAccess: Record<SiteId, boolean>;
   saveHistory: boolean;
   consentGranted: boolean;
@@ -54,6 +56,7 @@ export const DEFAULT_SETTINGS: UiSettings = {
   provider: 'gemini',
   apiKeyConfigured: false,
   persona: 'general',
+  language: 'en',
   siteAccess: { chatgpt: true, claude: true, gemini: true, perplexity: true },
   saveHistory: true,
   consentGranted: false,

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, type ApiKeyValidationResult, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
+import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, type ApiKeyValidationResult, type LanguageId, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
 import { Icon } from '../shared/Icon';
 import '../shared/ui.css';
 import './options.css';
@@ -51,6 +51,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
       </section>
 
       <section id="persona"><div className="section-title"><span>02</span><div><h2>Rewrite style</h2><p>A focused preset guides what Ondrift emphasizes. You can still edit every result.</p></div></div>
+        <div className="settings-card"><label className="ui-field"><span className="ui-label">Language</span><select className="ui-select" value={settings.language} onChange={(event) => update('language', event.target.value as LanguageId)}><option value="ko">한국어</option><option value="en">English</option><option value="ja">日本語</option></select><span className="ui-help">Controls the inline Ondrift interface and the language of rewritten prompts.</span></label></div>
         <div className="persona-grid">{personas.map((persona) => <label className={`persona-option${settings.persona === persona.id ? ' persona-option--selected' : ''}`} key={persona.id}><input type="radio" name="persona" checked={settings.persona === persona.id} onChange={() => update('persona', persona.id)} /><span><strong>{persona.name}</strong><small>{persona.description}</small></span><Icon name="check" /></label>)}</div>
       </section>
 

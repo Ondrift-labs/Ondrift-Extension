@@ -8,12 +8,14 @@ export interface MessageHandlerDependencies {
   settings: SettingsStore;
   history: HistoryStore;
   provider: typeof getProvider;
+  openOptions: () => Promise<void>;
 }
 
 const defaults: MessageHandlerDependencies = {
   settings: settingsStore,
   history: historyStore,
   provider: getProvider,
+  openOptions: () => chrome.runtime.openOptionsPage(),
 };
 
 export async function handleRuntimeRequest(
@@ -29,7 +31,7 @@ export async function handleRuntimeRequest(
         }
         const apiKey = settings.apiKeys[settings.provider]?.trim();
         if (!apiKey) throw new ProviderError("not_configured", "Add an API key in Ondrift settings.");
-        return { ok: true, data: await dependencies.provider(settings.provider).rewrite(message.payload, apiKey) };
+        return { ok: true, data: await dependencies.provider(settings.provider).rewrite({ ...message.payload, language: settings.language }, apiKey) };
       }
       case "validate_api_key":
         await dependencies.provider(message.payload.provider).validateKey(message.payload.apiKey);
@@ -54,6 +56,9 @@ export async function handleRuntimeRequest(
         return { ok: true, data: undefined };
       case "history_aggregates":
         return { ok: true, data: await dependencies.history.aggregates() };
+      case "open_options":
+        await dependencies.openOptions();
+        return { ok: true, data: undefined };
       default: {
         const neverMessage: never = message;
         throw new ProviderError("unknown", `Unsupported message: ${String(neverMessage)}`);

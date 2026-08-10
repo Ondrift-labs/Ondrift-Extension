@@ -24,6 +24,7 @@ function fromExtensionSettings(settings: ExtensionSettings, preferences: UiPrefe
     provider: settings.provider,
     apiKeyConfigured: Boolean(settings.apiKeys[settings.provider]?.trim()),
     persona: (settings.persona as UiSettings['persona'] | undefined) ?? DEFAULT_SETTINGS.persona,
+    language: settings.language ?? DEFAULT_SETTINGS.language,
     siteAccess: settings.enabledSites,
     saveHistory: preferences.saveHistory,
     consentGranted: settings.onboardingComplete || preferences.consentGranted,
@@ -58,6 +59,7 @@ export const chromeUiBridge: UiBridge = {
       payload: {
         provider: next.provider,
         persona: next.persona,
+        language: next.language,
         enabledSites: next.siteAccess,
         onboardingComplete: next.consentGranted,
       },
