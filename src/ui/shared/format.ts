@@ -1,14 +1,22 @@
-import type { HistoryItem, UsageSummary } from './contracts';
+import type { HistoryItem, LanguageId, UsageSummary } from './contracts';
+import { LOCALE_TAGS } from './i18n';
 
-export function formatRelativeTime(timestamp: number, now = Date.now()): string {
+const RELATIVE_TIME_UNITS: Record<LanguageId, { justNow: string; minutes: (n: number) => string; hours: (n: number) => string; days: (n: number) => string }> = {
+  ko: { justNow: '방금 전', minutes: (n) => `${n}분 전`, hours: (n) => `${n}시간 전`, days: (n) => `${n}일 전` },
+  en: { justNow: 'Just now', minutes: (n) => `${n}m ago`, hours: (n) => `${n}h ago`, days: (n) => `${n}d ago` },
+  ja: { justNow: 'たった今', minutes: (n) => `${n}分前`, hours: (n) => `${n}時間前`, days: (n) => `${n}日前` },
+};
+
+export function formatRelativeTime(timestamp: number, now = Date.now(), language: LanguageId = 'en'): string {
+  const units = RELATIVE_TIME_UNITS[language] ?? RELATIVE_TIME_UNITS.en;
   const minutes = Math.max(0, Math.round((now - timestamp) / 60_000));
-  if (minutes < 1) return 'Just now';
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return units.justNow;
+  if (minutes < 60) return units.minutes(minutes);
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return units.hours(hours);
   const days = Math.round(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(timestamp);
+  if (days < 7) return units.days(days);
+  return new Intl.DateTimeFormat(LOCALE_TAGS[language] ?? LOCALE_TAGS.en, { month: 'short', day: 'numeric' }).format(timestamp);
 }
 
 export function summarizeUsage(items: HistoryItem[], now = Date.now()): UsageSummary {

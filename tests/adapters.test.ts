@@ -4,10 +4,23 @@ import { ClaudeAdapter } from "../src/adapters/claude.adapter";
 import { GeminiAdapter } from "../src/adapters/gemini.adapter";
 import { PerplexityAdapter } from "../src/adapters/perplexity.adapter";
 import { AdapterRegistry } from "../src/core/adapter-registry";
-import { findComposerAnchor } from "../src/adapters/site-adapter";
+import { findComposerAnchor, writeEditable } from "../src/adapters/site-adapter";
 
 describe("site adapter URL matching", () => {
-  beforeEach(() => { document.body.replaceChildren(); });
+  beforeEach(() => {
+    document.body.replaceChildren();
+    Object.defineProperty(document, "execCommand", {
+      configurable: true,
+      value: vi.fn((_command: string, _showUi: boolean, value: string) => {
+        const selection = window.getSelection();
+        if (!selection?.rangeCount) return false;
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(document.createTextNode(value));
+        return true;
+      }),
+    });
+  });
   it("matches only exact supported hosts", () => {
     expect(new ChatGptAdapter().matches("https://chatgpt.com/c/abc")).toBe(true);
     expect(new ChatGptAdapter().matches("https://evil.example/?chatgpt.com")).toBe(false);
@@ -51,6 +64,49 @@ describe("site adapter URL matching", () => {
     adapter.setPromptText("improved");
     expect(document.querySelector("textarea")?.value).toBe("hidden");
     expect(adapter.getPromptText()).toBe("improved");
+  });
+
+  it("lets a controlled contenteditable own a cancelled beforeinput without a second insertion", () => {
+    document.body.innerHTML = '<div contenteditable="true" role="textbox">draft</div>';
+    const editor = document.querySelector<HTMLElement>("[contenteditable]")!;
+    const execCommand = vi.fn(() => true);
+    Object.defineProperty(document, "execCommand", { configurable: true, value: execCommand });
+    editor.addEventListener("beforeinput", (event) => {
+      event.preventDefault();
+      editor.textContent = (event as InputEvent).data;
+    });
+
+    writeEditable(editor, "improved");
+
+    expect(editor.textContent).toBe("improved");
+    expect(execCommand).not.toHaveBeenCalled();
+  });
+
+  it("does not insert twice when beforeinput synchronously updates a controlled editor", () => {
+    document.body.innerHTML = '<div contenteditable="true" role="textbox">draft</div>';
+    const editor = document.querySelector<HTMLElement>("[contenteditable]")!;
+    const execCommand = vi.fn(() => true);
+    Object.defineProperty(document, "execCommand", { configurable: true, value: execCommand });
+    editor.addEventListener("beforeinput", (event) => {
+      editor.textContent = (event as InputEvent).data;
+    });
+
+    writeEditable(editor, "improved");
+
+    expect(editor.textContent).toBe("improved");
+    expect(execCommand).not.toHaveBeenCalled();
+  });
+
+  it("does not force-replace a managed editor when its input handlers reject the rewrite", () => {
+    document.body.innerHTML = '<div contenteditable="true" role="textbox">draft</div>';
+    const editor = document.querySelector<HTMLElement>("[contenteditable]")!;
+    const replaceChildren = vi.spyOn(editor, "replaceChildren");
+    Object.defineProperty(document, "execCommand", { configurable: true, value: vi.fn(() => false) });
+
+    writeEditable(editor, "improved");
+
+    expect(editor.textContent).toBe("draft");
+    expect(replaceChildren).not.toHaveBeenCalled();
   });
 
   it("reads and applies textarea values through native input semantics", () => {

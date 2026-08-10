@@ -35,6 +35,15 @@ describe('createInlineWidget', () => {
     expect(widget.element.shadowRoot?.querySelector('img')).toBeNull();
   });
 
+  it('keeps runtime error details localized instead of exposing English internals', () => {
+    const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings: vi.fn() });
+    widget.setLanguage('ko');
+    widget.setState({ status: 'error', kind: 'unknown', message: 'The site did not accept the rewritten prompt.' });
+
+    expect(widget.element.shadowRoot?.textContent).toContain('프롬프트는 변경되지 않았습니다.');
+    expect(widget.element.shadowRoot?.textContent).not.toContain('The site did not accept');
+  });
+
   it('routes missing-key users to settings', () => {
     const onOpenSettings = vi.fn();
     const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings });
