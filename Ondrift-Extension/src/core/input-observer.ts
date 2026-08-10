@@ -18,8 +18,10 @@ export function observeInput(
     const next = locateInput();
     if (next !== current || (next && !next.isConnected)) {
       current = next?.isConnected ? next : null;
-      onChange(current);
     }
+    // Supported chat apps frequently replace the widget's parent while keeping
+    // the same composer node. Re-emit so consumers can reconcile detached UI.
+    onChange(current);
   };
   const schedule = () => {
     if (timer !== undefined) clearTimeout(timer);

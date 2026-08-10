@@ -50,6 +50,30 @@ export function firstVisible(selectors: readonly string[]): HTMLElement | null {
   return null;
 }
 
+export function findComposerAnchor(input: HTMLElement): HTMLElement {
+  const form = input.closest<HTMLElement>("form");
+  let element = input.parentElement;
+  let depth = 0;
+  while (element && element !== document.body && depth < 10) {
+    const style = getComputedStyle(element);
+    const hasVisibleBorder = [
+      style.borderTopWidth,
+      style.borderRightWidth,
+      style.borderBottomWidth,
+      style.borderLeftWidth,
+      element.style.border,
+      element.style.borderTop,
+      element.style.borderRight,
+      element.style.borderBottom,
+      element.style.borderLeft,
+    ].some((width) => Number.parseFloat(width) > 0);
+    if (hasVisibleBorder) return element;
+    element = element.parentElement;
+    depth += 1;
+  }
+  return form?.parentElement ?? form ?? input.parentElement ?? input;
+}
+
 export function installSubmitListener(
   getInput: () => HTMLElement | null,
   submitSelectors: readonly string[],
