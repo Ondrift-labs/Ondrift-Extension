@@ -66,6 +66,27 @@ describe("site adapter URL matching", () => {
     expect(adapter.getPromptText()).toBe("improved");
   });
 
+  it("updates Perplexity's controlled editor state before submit", () => {
+    document.body.innerHTML = '<div contenteditable="true" role="textbox">draft</div><button aria-label="Submit"></button>';
+    const editor = document.querySelector<HTMLElement>("[contenteditable]")!;
+    let controlledValue = "draft";
+    let submittedValue = "";
+    editor.addEventListener("paste", (event) => {
+      event.preventDefault();
+      controlledValue = (event as ClipboardEvent).clipboardData?.getData("text/plain") ?? "";
+      editor.textContent = controlledValue;
+    });
+    document.querySelector("button")!.addEventListener("click", () => { submittedValue = controlledValue; });
+
+    const adapter = new PerplexityAdapter();
+    adapter.setPromptText("improved");
+    document.querySelector<HTMLButtonElement>("button")!.click();
+
+    expect(adapter.getPromptText()).toBe("improved");
+    expect(submittedValue).toBe("improved");
+    expect(document.execCommand).not.toHaveBeenCalled();
+  });
+
   it("lets a controlled contenteditable own a cancelled beforeinput without a second insertion", () => {
     document.body.innerHTML = '<div contenteditable="true" role="textbox">draft</div>';
     const editor = document.querySelector<HTMLElement>("[contenteditable]")!;
