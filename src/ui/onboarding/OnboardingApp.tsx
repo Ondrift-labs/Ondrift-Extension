@@ -49,7 +49,7 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
 
   return <main className="onboarding-shell">
     <header className="onboarding-header">
-      <a className="brand" href="#main" aria-label={common.brandHomeAria}><span className="brand-mark">O</span><span>Ondrift</span></a>
+      <a className="brand" href="#main" aria-label={common.brandHomeAria}><img className="brand-logo" src="/icons/ondrift-32.png" alt="" /><span>Ondrift</span></a>
       <div className="onboarding-header-right">
         <label className="language-select"><span className="sr-only">{common.languageLabel}</span><select aria-label={copy.languageSelectorAria} value={language} onChange={(event) => changeLanguage(event.target.value as LanguageId)}>{SUPPORTED_LANGUAGES.map((id) => <option key={id} value={id}>{LANGUAGE_NAMES[id]}</option>)}</select></label>
         <span className="step-count">{copy.stepCount(step, 3)}</span>

@@ -2,7 +2,6 @@ html { scroll-behavior: smooth; }
 .options-shell { display: grid; grid-template-columns: 210px minmax(0, 720px); justify-content: center; gap: 64px; min-height: 100vh; padding: 54px 32px 100px; }
 .options-sidebar { position: sticky; top: 36px; align-self: start; height: calc(100vh - 72px); display: flex; flex-direction: column; }
 .options-brand { display: flex; align-items: center; gap: 9px; font-weight: 760; }
-.options-brand .brand-mark { width: 25px; height: 25px; font-size: 13px; }
 .options-sidebar nav { display: grid; gap: 3px; margin-top: 42px; }
 .options-sidebar nav a { border-left: 2px solid transparent; padding: 7px 10px; color: var(--muted); font-size: 12px; text-decoration: none; }
 .options-sidebar nav a:hover, .options-sidebar nav a:focus { border-left-color: var(--accent); color: var(--ink); }

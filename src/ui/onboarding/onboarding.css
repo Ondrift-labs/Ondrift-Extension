@@ -2,7 +2,6 @@
 .onboarding-header { height: 62px; display: flex; align-items: center; justify-content: space-between; max-width: 940px; width: 100%; margin: auto; padding: 0 28px; }
 .onboarding-header-right { display: flex; align-items: center; gap: 14px; }
 .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); text-decoration: none; font-weight: 760; letter-spacing: -.02em; }
-.brand-mark { display: grid; place-items: center; width: 25px; height: 25px; border: 1px solid var(--ink); border-radius: 50%; font-family: Georgia, serif; font-size: 14px; }
 .language-select select { min-height: 30px; border: 1px solid var(--line-strong); border-radius: 6px; padding: 4px 8px; color: var(--ink); background: var(--paper); font-size: 12px; }
 .step-count { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .step-track { background: var(--line); }

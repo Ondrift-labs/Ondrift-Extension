@@ -53,6 +53,18 @@ export const manifest = {
       run_at: "document_idle"
     }
   ],
+  web_accessible_resources: [
+    {
+      resources: ["icons/ondrift-32.png"],
+      matches: [
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://www.perplexity.ai/*",
+        "https://perplexity.ai/*"
+      ]
+    }
+  ],
   content_security_policy: {
     extension_pages: "script-src 'self'; object-src 'self'"
   }

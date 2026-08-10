@@ -32,7 +32,8 @@ describe('createInlineWidget', () => {
     widget.setState({ status: 'result', score: 40, rationale: '<img src=x>', improvedText: '<script>bad()</script>' });
     expect(widget.element.shadowRoot?.querySelector('.od-preview')?.textContent).toBe('<script>bad()</script>');
     expect(widget.element.shadowRoot?.querySelector('script')).toBeNull();
-    expect(widget.element.shadowRoot?.querySelector('img')).toBeNull();
+    expect(widget.element.shadowRoot?.querySelector('.od-preview img')).toBeNull();
+    expect(widget.element.shadowRoot?.querySelector<HTMLImageElement>('.od-logo')?.src).toContain('/icons/ondrift-32.png');
   });
 
   it('keeps runtime error details localized instead of exposing English internals', () => {

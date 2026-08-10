@@ -6,7 +6,7 @@ button { font:inherit; }
 button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-shell { width:min(390px,calc(100vw - 24px)); border:1px solid var(--od-line); border-radius:9px; color:var(--od-ink); background:var(--od-paper); box-shadow:0 12px 36px rgb(28 31 27 / 16%); overflow:hidden; }
 .od-header { min-height:42px; display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--od-line); }
-.od-mark { display:grid; place-items:center; width:22px; height:22px; border:1px solid var(--od-ink); border-radius:50%; font:500 12px Georgia,serif; }
+.od-logo { display:block; width:23px; height:23px; object-fit:contain; }
 .od-title { font-size:12px; font-weight:720; letter-spacing:-.01em; }
 .od-status { margin-left:auto; color:var(--od-muted); font-size:10px; }
 .od-icon-button { position:relative; z-index:1; width:26px; height:26px; display:grid; place-items:center; border:0; border-radius:5px; color:var(--od-muted); background:transparent; cursor:pointer; pointer-events:auto; }

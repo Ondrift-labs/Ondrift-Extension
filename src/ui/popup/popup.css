@@ -2,7 +2,7 @@ body { width: 380px; }
 .popup-shell { min-height: 520px; background: var(--canvas); }
 .popup-header { display: flex; align-items: center; justify-content: space-between; height: 54px; padding: 0 16px; border-bottom: 1px solid var(--line); background: var(--paper); }
 .popup-brand { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 760; }
-.popup-brand .brand-mark { width: 23px; height: 23px; font-size: 12px; }
+.popup-brand-logo { display: block; width: 24px; height: 24px; object-fit: contain; }
 .icon-button { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 6px; color: var(--muted); background: transparent; cursor: pointer; }
 .icon-button:hover { color: var(--ink); background: #efefe9; }
 .icon-button svg { width: 17px; }
