@@ -14,10 +14,7 @@ let latestScore = 0;
 const widget = createInlineWidget({
   onRewrite: () => { void runRewrite(); },
   onRetry: () => { void runRewrite(); },
-  onApply: () => {
-    contentController.apply();
-    widget.setState({ status: "applied", score: latestScore, improvedText: latestImprovedText });
-  },
+  onApply: () => { void applyRewrite(); },
   onOpenSettings: () => { void chrome.runtime.openOptionsPage(); },
 });
 widget.element.style.display = "block";
@@ -34,6 +31,19 @@ function promptLength(): number {
 
 function showReady(): void {
   widget.setState({ status: "ready", promptLength: promptLength() });
+}
+
+async function applyRewrite(): Promise<void> {
+  try {
+    await contentController.apply();
+    widget.setState({ status: "applied", score: latestScore, improvedText: latestImprovedText });
+  } catch (error) {
+    widget.setState({
+      status: "error",
+      kind: "unknown",
+      message: error instanceof Error ? error.message : "The rewritten prompt could not be applied.",
+    });
+  }
 }
 
 async function runRewrite(): Promise<void> {

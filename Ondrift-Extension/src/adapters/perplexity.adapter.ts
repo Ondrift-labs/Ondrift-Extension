@@ -2,10 +2,11 @@ import type { SiteAdapter } from "./site-adapter";
 import { firstVisible, installSubmitListener, readEditable, writeEditable } from "./site-adapter";
 
 const INPUT_SELECTORS = [
-  "textarea[placeholder*='Ask' i]",
-  "textarea[aria-label*='Ask' i]",
   "div[contenteditable='true'][role='textbox']",
   "div[contenteditable='true'][data-lexical-editor='true']",
+  "div[contenteditable='true'][aria-label*='Ask' i]",
+  "textarea[placeholder*='Ask' i]",
+  "textarea[aria-label*='Ask' i]",
 ] as const;
 const SUBMIT_SELECTORS = [
   "button[aria-label*='Submit' i]",

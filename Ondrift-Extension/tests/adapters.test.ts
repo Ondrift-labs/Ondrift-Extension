@@ -43,6 +43,16 @@ describe("site adapter URL matching", () => {
     expect(adapter.getPromptText()).toBe("improved");
   });
 
+  it("prefers Perplexity's real editor over an aria-hidden helper input", () => {
+    document.body.innerHTML = '<textarea aria-hidden="true" placeholder="Ask anything">hidden</textarea><div contenteditable="true" role="textbox">visible</div>';
+    const adapter = new PerplexityAdapter();
+
+    expect(adapter.getPromptText()).toBe("visible");
+    adapter.setPromptText("improved");
+    expect(document.querySelector("textarea")?.value).toBe("hidden");
+    expect(adapter.getPromptText()).toBe("improved");
+  });
+
   it("reads and applies textarea values through native input semantics", () => {
     document.body.innerHTML = '<form><textarea id="prompt-textarea">draft</textarea><button data-testid="send-button"></button></form>';
     const input = document.querySelector("textarea")!;
