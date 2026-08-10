@@ -6,6 +6,7 @@ export interface SiteAdapter {
   readonly id: SiteId;
   matches(url: string): boolean;
   getInputElement(): HTMLElement | null;
+  getComposerAnchor?(input: HTMLElement): HTMLElement | null;
   getPromptText(): string;
   setPromptText(text: string): void;
   getConversationTitle(): string | null;

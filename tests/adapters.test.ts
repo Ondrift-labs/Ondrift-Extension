@@ -187,4 +187,79 @@ describe("site adapter URL matching", () => {
     expect(findComposerAnchor(input).id).toBe("composer");
     getStyle.mockRestore();
   });
+
+  describe("Gemini inline-widget placement regression", () => {
+    function renderGeminiComposer(): void {
+      document.body.innerHTML = `
+        <div class="input-area-container">
+          <div class="text-input-field">
+            <div class="leading-actions"><button aria-label="Add"></button></div>
+            <rich-textarea><div class="ql-editor" contenteditable="true" role="textbox">draft</div></rich-textarea>
+            <div class="trailing-actions">
+              <button aria-label="Flash"></button>
+              <button aria-label="Use microphone"></button>
+              <button class="send-button" aria-label="Send message"></button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    it("uses Gemini's outer composer container as the widget anchor", () => {
+      renderGeminiComposer();
+      const adapter = new GeminiAdapter();
+      const input = adapter.getInputElement()!;
+      const anchor = adapter.getComposerAnchor(input)!;
+
+      expect(anchor.className).toBe("input-area-container");
+      widgetLandsOutsideComposer(anchor, input);
+    });
+
+    it("re-resolves a safe anchor after the SPA replaces the entire composer subtree", () => {
+      renderGeminiComposer();
+      const adapter = new GeminiAdapter();
+      const firstInput = adapter.getInputElement()!;
+      const firstAnchor = adapter.getComposerAnchor(firstInput)!;
+      expect(firstAnchor.className).toBe("input-area-container");
+      widgetLandsOutsideComposer(firstAnchor, firstInput);
+
+      // Angular-style route transition: the whole subtree is torn down and rebuilt
+      // with fresh nodes, as happens when Gemini navigates between chats.
+      renderGeminiComposer();
+      const secondInput = adapter.getInputElement()!;
+      expect(secondInput).not.toBe(firstInput);
+      expect(secondInput.isConnected).toBe(true);
+      expect(firstInput.isConnected).toBe(false);
+
+      const secondAnchor = adapter.getComposerAnchor(secondInput)!;
+
+      expect(secondAnchor).not.toBe(firstAnchor);
+      expect(secondAnchor.className).toBe("input-area-container");
+      widgetLandsOutsideComposer(secondAnchor, secondInput);
+    });
+
+    it("falls back to the generic anchor when Gemini's outer container is absent", () => {
+      document.body.innerHTML = '<form id="composer"><rich-textarea><div class="ql-editor" contenteditable="true" role="textbox">draft</div></rich-textarea></form>';
+      const adapter = new GeminiAdapter();
+      const input = new GeminiAdapter().getInputElement()!;
+
+      expect(adapter.getComposerAnchor(input)?.id).toBe("composer");
+    });
+
+    function widgetLandsOutsideComposer(outerComposer: HTMLElement, input: HTMLElement): void {
+      const widget = document.createElement("aside");
+      widget.setAttribute("data-ondrift-widget", "");
+      outerComposer.insertAdjacentElement("afterend", widget);
+
+      expect(outerComposer.contains(widget)).toBe(false);
+      expect(widget.parentElement).toBe(outerComposer.parentElement);
+      expect(outerComposer.compareDocumentPosition(widget) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+      expect(widget.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
+      for (const control of document.querySelectorAll("button")) {
+        expect(widget.contains(control)).toBe(false);
+        expect(control.contains(widget)).toBe(false);
+        expect(widget.compareDocumentPosition(control) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
+      }
+    }
+  });
 });
