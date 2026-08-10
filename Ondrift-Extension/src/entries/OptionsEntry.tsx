@@ -5,6 +5,7 @@ import { uiBridge } from "../core/ui-bridge";
 import { OnboardingApp } from "../ui/onboarding";
 import { OptionsApp } from "../ui/options";
 import type { UiSettings } from "../ui/shared/contracts";
+import { getUiCopy, normalizeLanguage } from "../ui/shared/i18n";
 
 function OptionsEntry() {
   const [settings, setSettings] = useState<UiSettings | null>(null);
@@ -14,15 +15,22 @@ function OptionsEntry() {
     uiBridge.getSettings().then(setSettings).catch(() => setFailed(true));
   }, []);
 
+  const browserLanguage = normalizeLanguage(globalThis.navigator?.language);
+  const common = getUiCopy(settings?.language ?? browserLanguage).common;
+
+  useEffect(() => {
+    document.documentElement.lang = settings?.language ?? browserLanguage;
+  }, [browserLanguage, settings?.language]);
+
   if (failed) {
     return (
       <main role="alert">
-        <h1>Ondrift settings could not load</h1>
-        <p>Reload this page. Your local settings and history have not been changed.</p>
+        <h1>{common.settingsLoadErrorTitle}</h1>
+        <p>{common.settingsLoadErrorBody}</p>
       </main>
     );
   }
-  if (!settings) return <main role="status">Loading Ondrift settings…</main>;
+  if (!settings) return <main role="status">{common.settingsLoading}</main>;
   return settings.consentGranted ? (
     <OptionsApp bridge={uiBridge} />
   ) : (

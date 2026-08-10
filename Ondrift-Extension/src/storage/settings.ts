@@ -28,11 +28,13 @@ export class SettingsStore {
   async get(): Promise<ExtensionSettings> {
     const result = await (this.area ?? localArea()).get(STORAGE_KEY);
     const stored = result[STORAGE_KEY] as Partial<ExtensionSettings> | undefined;
+    const language = stored?.language;
     return {
       ...DEFAULT_SETTINGS,
       ...stored,
       apiKeys: { ...DEFAULT_SETTINGS.apiKeys, ...stored?.apiKeys },
       enabledSites: { ...DEFAULT_SETTINGS.enabledSites, ...stored?.enabledSites },
+      language: language === "ko" || language === "en" || language === "ja" ? language : DEFAULT_SETTINGS.language,
     };
   }
 

@@ -31,9 +31,22 @@ export function writeEditable(element: HTMLElement, text: string): void {
     range.selectNodeContents(element);
     selection?.removeAllRanges();
     selection?.addRange(range);
-    const inserted = typeof document.execCommand === "function" && document.execCommand("insertText", false, text);
-    if (!inserted) element.textContent = text;
+    const beforeInputAccepted = element.dispatchEvent(new InputEvent("beforeinput", {
+      bubbles: true,
+      cancelable: true,
+      inputType: "insertText",
+      data: text,
+    }));
+    if (beforeInputAccepted && readEditable(element) !== text.trim()) {
+      const inserted = typeof document.execCommand === "function" && document.execCommand("insertText", false, text);
+      if (!inserted && typeof DataTransfer !== "undefined" && typeof ClipboardEvent !== "undefined") {
+        const transfer = new DataTransfer();
+        transfer.setData("text/plain", text);
+        element.dispatchEvent(new ClipboardEvent("paste", { bubbles: true, cancelable: true, clipboardData: transfer }));
+      }
+    }
     selection?.removeAllRanges();
+    if (!beforeInputAccepted) return;
   }
   element.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text }));
   element.dispatchEvent(new Event("change", { bubbles: true }));

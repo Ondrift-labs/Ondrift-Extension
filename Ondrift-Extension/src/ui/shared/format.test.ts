@@ -26,8 +26,29 @@ describe('popup view logic', () => {
     expect(filterHistory(history, '   ')).toBe(history);
   });
 
-  it('formats recent timestamps compactly', () => {
+  it('formats recent timestamps compactly in English by default', () => {
     expect(formatRelativeTime(now - 60_000, now)).toBe('1m ago');
     expect(formatRelativeTime(now - 3 * 3_600_000, now)).toBe('3h ago');
+    expect(formatRelativeTime(now - 10_000, now)).toBe('Just now');
+    expect(formatRelativeTime(now - 2 * 86_400_000, now)).toBe('2d ago');
+  });
+
+  it('localizes relative time units for Korean and Japanese', () => {
+    expect(formatRelativeTime(now - 60_000, now, 'ko')).toBe('1분 전');
+    expect(formatRelativeTime(now - 3 * 3_600_000, now, 'ko')).toBe('3시간 전');
+    expect(formatRelativeTime(now - 2 * 86_400_000, now, 'ko')).toBe('2일 전');
+    expect(formatRelativeTime(now - 10_000, now, 'ko')).toBe('방금 전');
+
+    expect(formatRelativeTime(now - 60_000, now, 'ja')).toBe('1分前');
+    expect(formatRelativeTime(now - 3 * 3_600_000, now, 'ja')).toBe('3時間前');
+    expect(formatRelativeTime(now - 2 * 86_400_000, now, 'ja')).toBe('2日前');
+    expect(formatRelativeTime(now - 10_000, now, 'ja')).toBe('たった今');
+  });
+
+  it('falls back to a locale-aware month/day date once a week has passed', () => {
+    const older = now - 9 * 86_400_000;
+    expect(formatRelativeTime(older, now, 'en')).toMatch(/[A-Za-z]{3}\s\d{1,2}/);
+    expect(formatRelativeTime(older, now, 'ja')).toMatch(/\d{1,2}月\d{1,2}日/);
+    expect(formatRelativeTime(older, now, 'ko')).toMatch(/\d{1,2}월\s?\d{1,2}일/);
   });
 });

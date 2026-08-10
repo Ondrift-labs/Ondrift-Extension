@@ -30,4 +30,11 @@ describe("SettingsStore", () => {
     expect(result.language).toBe("ko");
     await expect(store.apiKey("gemini")).resolves.toBe("first");
   });
+
+  it("falls back to English when stored language data is invalid", async () => {
+    const storage = new MemoryStorage();
+    storage.values["ondrift.settings"] = { language: "unsupported" };
+
+    await expect(new SettingsStore(storage).get()).resolves.toMatchObject({ language: "en" });
+  });
 });

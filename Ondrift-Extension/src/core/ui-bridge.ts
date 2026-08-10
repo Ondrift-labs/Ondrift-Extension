@@ -96,6 +96,6 @@ export const uiBridge: UiBridge = {
     await sendRuntimeMessage<void>({ type: "history_clear" });
   },
   openOptions() {
-    return chrome.runtime.openOptionsPage();
+    return sendRuntimeMessage<void>({ type: "open_options" });
   },
 };

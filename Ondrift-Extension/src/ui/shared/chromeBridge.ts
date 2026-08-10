@@ -82,5 +82,5 @@ export const chromeUiBridge: UiBridge = {
   async getHistory() { return (await send<HistoryEntry[]>({ type: 'history_list', payload: { limit: 200 } })).map(mapHistory); },
   async deleteHistory(id) { await send<void>({ type: 'history_delete', payload: { id: Number(id) } }); },
   async clearHistory() { await send<void>({ type: 'history_clear' }); },
-  openOptions() { return chrome.runtime.openOptionsPage(); },
+  openOptions() { return send<void>({ type: 'open_options' }); },
 };
