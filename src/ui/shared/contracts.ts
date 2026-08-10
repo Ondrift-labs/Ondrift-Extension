@@ -13,7 +13,7 @@ export interface UiSettings {
 
 export interface ApiKeyValidationResult {
   ok: boolean;
-  reason?: 'invalid_key' | 'quota' | 'network' | 'unknown';
+  reason?: 'invalid_key' | 'quota' | 'network' | 'request' | 'unavailable' | 'unknown';
 }
 
 export interface HistoryItem {

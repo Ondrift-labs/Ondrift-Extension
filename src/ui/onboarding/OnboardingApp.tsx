@@ -10,7 +10,9 @@ type ValidationState = 'idle' | 'checking' | 'valid' | ApiKeyValidationResult['r
 const validationCopy: Record<Exclude<ValidationState, 'idle' | 'checking' | 'valid' | undefined>, string> = {
   invalid_key: 'That key was not accepted. Copy the full key from Google AI Studio and try again.',
   quota: 'The key works, but its current quota is exhausted. Check the project quota or try again tomorrow.',
-  network: 'We could not reach Gemini. Check your connection and try again.',
+  network: 'Chrome could not reach Gemini. Check browser, VPN, or firewall access and try again.',
+  request: 'Gemini rejected the verification request. Reload Ondrift and try again.',
+  unavailable: 'Gemini is temporarily unavailable for this project. Ondrift also tried a compatible fallback model.',
   unknown: 'We could not verify this key. Nothing was saved; please try again.',
 };
 

@@ -73,7 +73,7 @@ export const chromeUiBridge: UiBridge = {
       return { ok: true };
     } catch (error) {
       const code = (error as Error & { code?: ProviderErrorCode }).code;
-      return { ok: false, reason: code === 'invalid_key' ? 'invalid_key' : code === 'quota_exceeded' ? 'quota' : code === 'network' ? 'network' : 'unknown' };
+      return { ok: false, reason: code === 'invalid_key' ? 'invalid_key' : code === 'quota_exceeded' ? 'quota' : code === 'network' ? 'network' : code === 'request_rejected' ? 'request' : code === 'model_unavailable' || code === 'service_unavailable' ? 'unavailable' : 'unknown' };
     }
   },
   openExternal(url) { return chrome.tabs.create({ url }).then(() => undefined); },

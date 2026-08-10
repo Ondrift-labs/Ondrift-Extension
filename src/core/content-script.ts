@@ -51,7 +51,7 @@ async function runRewrite(): Promise<void> {
     const code = error instanceof ProviderError ? error.code : "unknown";
     widget.setState({
       status: "error",
-      kind: code === "quota_exceeded" ? "quota" : code === "network" ? "network" : code === "invalid_key" ? "invalid_key" : code === "invalid_response" ? "parse" : "unknown",
+      kind: code === "quota_exceeded" ? "quota" : code === "network" ? "network" : code === "invalid_key" ? "invalid_key" : code === "request_rejected" ? "request" : code === "model_unavailable" || code === "service_unavailable" ? "unavailable" : code === "invalid_response" ? "parse" : "unknown",
       message: error instanceof Error ? error.message : undefined,
     });
   }
