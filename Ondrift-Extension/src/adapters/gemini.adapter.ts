@@ -19,6 +19,11 @@ export class GeminiAdapter implements SiteAdapter {
     try { return new URL(url).hostname === "gemini.google.com"; } catch { return false; }
   }
   getInputElement(): HTMLElement | null { return firstVisible(INPUT_SELECTORS); }
+  getComposerAnchor(input: HTMLElement): HTMLElement | null {
+    return input.closest<HTMLElement>(".input-area-container")
+      ?? input.closest<HTMLElement>(".input-area")
+      ?? input.closest<HTMLElement>("form");
+  }
   getPromptText(): string { return readEditable(this.getInputElement()); }
   setPromptText(text: string): void {
     const input = this.getInputElement();

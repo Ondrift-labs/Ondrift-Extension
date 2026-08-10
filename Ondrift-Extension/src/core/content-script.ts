@@ -80,7 +80,8 @@ contentController.subscribe(({ input }) => {
   const listener = () => showReady();
   input.addEventListener("input", listener);
   removeInputListener = () => input.removeEventListener("input", listener);
-  const anchor = findComposerAnchor(input);
+  const adapter = adapterRegistry.resolve();
+  const anchor = adapter?.getComposerAnchor?.(input) ?? findComposerAnchor(input);
   anchor.insertAdjacentElement("afterend", widget.element);
   showReady();
 });
