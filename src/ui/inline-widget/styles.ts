@@ -1,5 +1,6 @@
 export const inlineWidgetStyles = `
 :host { all: initial; color-scheme: light; --od-ink:#20211e; --od-muted:#686b64; --od-paper:#fffef9; --od-line:#d7d8cf; --od-accent:#256b57; --od-accent-soft:#e4f0eb; --od-danger:#a13e32; font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+:host([hidden]) { display:none !important; }
 * { box-sizing:border-box; }
 button { font:inherit; }
 button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
@@ -8,7 +9,7 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-mark { display:grid; place-items:center; width:22px; height:22px; border:1px solid var(--od-ink); border-radius:50%; font:500 12px Georgia,serif; }
 .od-title { font-size:12px; font-weight:720; letter-spacing:-.01em; }
 .od-status { margin-left:auto; color:var(--od-muted); font-size:10px; }
-.od-icon-button { width:26px; height:26px; display:grid; place-items:center; border:0; border-radius:5px; color:var(--od-muted); background:transparent; cursor:pointer; }
+.od-icon-button { position:relative; z-index:1; width:26px; height:26px; display:grid; place-items:center; border:0; border-radius:5px; color:var(--od-muted); background:transparent; cursor:pointer; pointer-events:auto; }
 .od-icon-button:hover { color:var(--od-ink); background:#f0f0ea; }
 .od-icon-button svg { width:14px; height:14px; }
 .od-body { padding:12px; }

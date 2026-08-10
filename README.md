@@ -5,6 +5,9 @@ ChatGPT, Claude, Gemini, and Perplexity. It calls Gemini directly from the exten
 the API key supplied by the user; there is no Ondrift backend, account, or cloud
 sync in the Free MVP.
 
+The settings page supports Korean, English, and Japanese. The selected language
+is used by the inline Ondrift widget and for rewritten prompts and rationales.
+
 ## Development
 
 ```sh

@@ -15,7 +15,7 @@ const widget = createInlineWidget({
   onRewrite: () => { void runRewrite(); },
   onRetry: () => { void runRewrite(); },
   onApply: () => { void applyRewrite(); },
-  onOpenSettings: () => { void chrome.runtime.openOptionsPage(); },
+  onOpenSettings: () => { void sendRuntimeMessage<void>({ type: "open_options" }); },
 });
 widget.element.style.display = "block";
 widget.element.style.marginTop = "8px";
@@ -50,6 +50,7 @@ async function runRewrite(): Promise<void> {
   widget.setState({ status: "loading" });
   try {
     const settings = await sendRuntimeMessage<ExtensionSettings>({ type: "settings_get" });
+    widget.setLanguage(settings.language);
     const result = await contentController.rewrite(settings.persona);
     latestImprovedText = result.improvedText;
     latestScore = result.score;
@@ -89,6 +90,7 @@ async function boot(): Promise<void> {
   if (!adapter) return;
   try {
     const settings = await sendRuntimeMessage<ExtensionSettings>({ type: "settings_get" });
+    widget.setLanguage(settings.language);
     if (!settings.enabledSites[adapter.id]) return;
   } catch {
     // The background may be waking up; rewrite will surface a structured error if it remains unavailable.

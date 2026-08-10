@@ -11,6 +11,7 @@ function dependencies(overrides: Partial<MessageHandlerDependencies> = {}): Mess
         enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true },
         onboardingComplete: true,
         persona: "general",
+        language: "en" as const,
         saveHistory: true,
         consentGranted: true,
       })),
@@ -24,6 +25,7 @@ function dependencies(overrides: Partial<MessageHandlerDependencies> = {}): Mess
       rewrite: vi.fn(async () => ({ improvedText: "better", score: 90, rationale: "clear" })),
       validateKey: vi.fn(async () => undefined),
     })),
+    openOptions: vi.fn(async () => undefined),
     ...overrides,
   };
 }
@@ -38,7 +40,7 @@ describe("handleRuntimeRequest", () => {
 
   it("rejects disabled sites before calling a provider", async () => {
     const deps = dependencies({
-      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: { gemini: "key" }, enabledSites: { chatgpt: false, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", saveHistory: true, consentGranted: true })) } as never,
+      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: { gemini: "key" }, enabledSites: { chatgpt: false, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: true })) } as never,
     });
     await expect(handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "chatgpt" } }, deps))
       .resolves.toMatchObject({ ok: false, error: { code: "not_configured" } });
@@ -60,9 +62,16 @@ describe("handleRuntimeRequest", () => {
     expect(deps.history.add).toHaveBeenCalledWith(payload);
   });
 
+  it("opens extension settings through the background context", async () => {
+    const deps = dependencies();
+
+    await expect(handleRuntimeRequest({ type: "open_options" }, deps)).resolves.toEqual({ ok: true, data: undefined });
+    expect(deps.openOptions).toHaveBeenCalledOnce();
+  });
+
   it("does not persist history before consent", async () => {
     const deps = dependencies({
-      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: {}, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true }, onboardingComplete: false, persona: "general", saveHistory: true, consentGranted: false })) } as never,
+      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: {}, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true }, onboardingComplete: false, persona: "general", language: "en", saveHistory: true, consentGranted: false })) } as never,
     });
     const payload = { service: "chatgpt" as const, sourceUrl: "https://chatgpt.com", originalText: "private", applied: false, createdAt: 1 };
     await expect(handleRuntimeRequest({ type: "history_add", payload }, deps)).resolves.toEqual({ ok: true, data: 0 });
@@ -71,7 +80,7 @@ describe("handleRuntimeRequest", () => {
 
   it("does not treat completed onboarding as history consent", async () => {
     const deps = dependencies({
-      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: {}, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", saveHistory: true, consentGranted: false })) } as never,
+      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: {}, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: false })) } as never,
     });
     const payload = { service: "claude" as const, sourceUrl: "https://claude.ai", originalText: "private", applied: false, createdAt: 1 };
     await expect(handleRuntimeRequest({ type: "history_add", payload }, deps)).resolves.toEqual({ ok: true, data: 0 });

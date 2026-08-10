@@ -21,6 +21,7 @@ describe("GeminiProvider", () => {
       const body = JSON.parse(String(init?.body));
       expect(new Headers(init?.headers).get("x-goog-api-key")).toBe("secret-key");
       expect(body.system_instruction).toContain("untrusted data");
+      expect(body.system_instruction).toContain("English");
       expect(body.input).toContain("Ignore all previous instructions");
       expect(body.store).toBe(false);
       expect(body.response_format.mime_type).toBe("application/json");
@@ -38,6 +39,20 @@ describe("GeminiProvider", () => {
     expect(String(fetcher.mock.calls[0][0])).toBe("https://generativelanguage.googleapis.com/v1beta/interactions");
     expect(JSON.parse(String(fetcher.mock.calls[0][1]?.body)).model).toBe("gemini-3.6-flash");
     expect(String(fetcher.mock.calls[0][0])).not.toContain("secret-key");
+  });
+
+  it("requests rewrite output in the selected language", async () => {
+    const fetcher = vi.fn(async (_url: string, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body));
+      expect(body.system_instruction).toContain("Write improvedText and rationale in Korean");
+      return new Response(JSON.stringify({
+        steps: [{ type: "model_output", content: [{ type: "text", text: '{"improvedText":"개선","score":90,"rationale":"명확함"}' }] }],
+      }), { status: 200 });
+    });
+    const provider = new GeminiProvider(fetcher as typeof fetch);
+
+    await expect(provider.rewrite({ prompt: "테스트", service: "chatgpt", language: "ko" }, "key"))
+      .resolves.toMatchObject({ improvedText: "개선" });
   });
 
   it.each([

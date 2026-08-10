@@ -17,5 +17,7 @@ export interface InlineWidgetHandlers {
 export interface InlineWidgetController {
   element: HTMLElement;
   setState(state: InlineWidgetState): void;
+  setLanguage(language: LanguageId): void;
   destroy(): void;
 }
+import type { LanguageId } from '../../shared/types';

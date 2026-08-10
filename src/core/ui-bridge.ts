@@ -14,6 +14,7 @@ function toUiSettings(settings: ExtensionSettings): UiSettings {
     provider: settings.provider,
     apiKeyConfigured: Boolean(settings.apiKeys[settings.provider]?.trim()),
     persona: (settings.persona || "general") as PersonaId,
+    language: settings.language || "en",
     siteAccess: settings.enabledSites,
     saveHistory: settings.saveHistory,
     consentGranted: settings.consentGranted,
@@ -59,6 +60,7 @@ export const uiBridge: UiBridge = {
     const runtimePatch: Partial<ExtensionSettings> = {};
     if (patch.provider !== undefined) runtimePatch.provider = patch.provider;
     if (patch.persona !== undefined) runtimePatch.persona = patch.persona;
+    if (patch.language !== undefined) runtimePatch.language = patch.language;
     if (patch.siteAccess !== undefined) runtimePatch.enabledSites = patch.siteAccess;
     if (patch.saveHistory !== undefined) runtimePatch.saveHistory = patch.saveHistory;
     if (patch.consentGranted !== undefined) {

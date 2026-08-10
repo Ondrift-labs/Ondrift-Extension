@@ -13,6 +13,7 @@ describe("SettingsStore", () => {
       provider: "gemini",
       apiKeys: {},
       persona: "general",
+      language: "en",
       enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true },
       onboardingComplete: false,
       saveHistory: true,
@@ -23,9 +24,10 @@ describe("SettingsStore", () => {
   it("deep-merges API keys and site toggles without losing prior values", async () => {
     const store = new SettingsStore(new MemoryStorage());
     await store.update({ apiKeys: { gemini: " first " }, enabledSites: { chatgpt: false, claude: true, gemini: true, perplexity: true } });
-    const result = await store.update({ apiKeys: { openai: "second" }, enabledSites: { claude: false, chatgpt: false, gemini: true, perplexity: true } });
+    const result = await store.update({ apiKeys: { openai: "second" }, enabledSites: { claude: false, chatgpt: false, gemini: true, perplexity: true }, language: "ko" });
     expect(result.apiKeys).toEqual({ gemini: " first ", openai: "second" });
     expect(result.enabledSites).toEqual({ chatgpt: false, claude: false, gemini: true, perplexity: true });
+    expect(result.language).toBe("ko");
     await expect(store.apiKey("gemini")).resolves.toBe("first");
   });
 });
