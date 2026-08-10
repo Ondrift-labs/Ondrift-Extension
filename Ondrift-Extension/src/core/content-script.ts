@@ -5,9 +5,11 @@ import type { ExtensionSettings } from "../shared/types";
 import { sendRuntimeMessage } from "./rewrite-client";
 import { adapterRegistry } from "./adapter-registry";
 import { findComposerAnchor } from "../adapters/site-adapter";
+import { placeFloatingWidget, type FloatingWidgetPlacement } from "./floating-widget-position";
 
 let currentInput: HTMLElement | null = null;
 let removeInputListener: (() => void) | undefined;
+let floatingPlacement: FloatingWidgetPlacement | undefined;
 let latestImprovedText = "";
 let latestScore = 0;
 
@@ -31,23 +33,27 @@ function promptLength(): number {
 
 function showReady(): void {
   widget.setState({ status: "ready", promptLength: promptLength() });
+  floatingPlacement?.update();
 }
 
 async function applyRewrite(): Promise<void> {
   try {
     await contentController.apply();
     widget.setState({ status: "applied", score: latestScore, improvedText: latestImprovedText });
+    floatingPlacement?.update();
   } catch (error) {
     widget.setState({
       status: "error",
       kind: "unknown",
       message: error instanceof Error ? error.message : "The rewritten prompt could not be applied.",
     });
+    floatingPlacement?.update();
   }
 }
 
 async function runRewrite(): Promise<void> {
   widget.setState({ status: "loading" });
+  floatingPlacement?.update();
   try {
     const settings = await sendRuntimeMessage<ExtensionSettings>({ type: "settings_get" });
     widget.setLanguage(settings.language);
@@ -55,9 +61,11 @@ async function runRewrite(): Promise<void> {
     latestImprovedText = result.improvedText;
     latestScore = result.score;
     widget.setState({ status: "result", score: result.score, rationale: result.rationale, improvedText: result.improvedText });
+    floatingPlacement?.update();
   } catch (error) {
     if (error instanceof ProviderError && error.code === "not_configured") {
       widget.setState({ status: "missing_key" });
+      floatingPlacement?.update();
       return;
     }
     const code = error instanceof ProviderError ? error.code : "unknown";
@@ -66,12 +74,15 @@ async function runRewrite(): Promise<void> {
       kind: code === "quota_exceeded" ? "quota" : code === "network" ? "network" : code === "invalid_key" ? "invalid_key" : code === "request_rejected" ? "request" : code === "model_unavailable" || code === "service_unavailable" ? "unavailable" : code === "invalid_response" ? "parse" : "unknown",
       message: error instanceof Error ? error.message : undefined,
     });
+    floatingPlacement?.update();
   }
 }
 
 contentController.subscribe(({ input }) => {
   if (input === currentInput && widget.element.isConnected) return;
   removeInputListener?.();
+  floatingPlacement?.destroy();
+  floatingPlacement = undefined;
   currentInput = input;
   if (!input) {
     widget.element.remove();
@@ -82,7 +93,16 @@ contentController.subscribe(({ input }) => {
   removeInputListener = () => input.removeEventListener("input", listener);
   const adapter = adapterRegistry.resolve();
   const anchor = adapter?.getComposerAnchor?.(input) ?? findComposerAnchor(input);
-  anchor.insertAdjacentElement("afterend", widget.element);
+  if (adapter?.id === "gemini") {
+    floatingPlacement = placeFloatingWidget(widget.element, anchor);
+  } else {
+    widget.element.style.position = "relative";
+    widget.element.style.marginTop = "8px";
+    widget.element.style.width = "";
+    widget.element.style.left = "";
+    widget.element.style.top = "";
+    anchor.insertAdjacentElement("afterend", widget.element);
+  }
   showReady();
 });
 
@@ -103,6 +123,7 @@ void boot();
 
 window.addEventListener("pagehide", () => {
   removeInputListener?.();
+  floatingPlacement?.destroy();
   widget.destroy();
   contentController.stop();
 }, { once: true });
