@@ -4,6 +4,7 @@ import { ClaudeAdapter } from "../src/adapters/claude.adapter";
 import { GeminiAdapter } from "../src/adapters/gemini.adapter";
 import { PerplexityAdapter } from "../src/adapters/perplexity.adapter";
 import { AdapterRegistry } from "../src/core/adapter-registry";
+import { findComposerAnchor } from "../src/adapters/site-adapter";
 
 describe("site adapter URL matching", () => {
   beforeEach(() => { document.body.replaceChildren(); });
@@ -65,6 +66,13 @@ describe("site adapter URL matching", () => {
     expect(adapter.getPromptText()).toBe("improved");
   });
 
+  it("detects Claude's role-based composer variant", () => {
+    document.body.innerHTML = '<div contenteditable="true" role="textbox" aria-label="Write a message">draft</div>';
+    const adapter = new ClaudeAdapter();
+
+    expect(adapter.getPromptText()).toBe("draft");
+  });
+
   it("detects submit keys only inside the prompt and de-duplicates click fallthrough", () => {
     document.body.innerHTML = '<form><textarea id="prompt-textarea">send me</textarea><button type="button" data-testid="send-button"></button></form><input id="other">';
     const callback = vi.fn();
@@ -77,5 +85,19 @@ describe("site adapter URL matching", () => {
     expect(callback).toHaveBeenCalledOnce();
     expect(callback).toHaveBeenCalledWith("send me");
     cleanup();
+  });
+
+  it("mounts the widget after the bordered composer instead of over the input", () => {
+    document.body.innerHTML = '<section id="composer"><div><textarea id="prompt"></textarea></div></section>';
+    const input = document.querySelector<HTMLElement>("#prompt")!;
+    const getStyle = vi.spyOn(window, "getComputedStyle").mockImplementation((element) => ({
+      borderTopWidth: (element as HTMLElement).id === "composer" ? "1px" : "0px",
+      borderRightWidth: "0px",
+      borderBottomWidth: "0px",
+      borderLeftWidth: "0px",
+    }) as CSSStyleDeclaration);
+
+    expect(findComposerAnchor(input).id).toBe("composer");
+    getStyle.mockRestore();
   });
 });

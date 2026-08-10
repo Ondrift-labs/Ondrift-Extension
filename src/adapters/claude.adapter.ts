@@ -3,11 +3,14 @@ import { firstVisible, installSubmitListener, readEditable, writeEditable } from
 
 const INPUT_SELECTORS = [
   "div.ProseMirror[contenteditable='true']",
+  "div[contenteditable='true'][role='textbox']",
+  "div[contenteditable='true'][aria-label*='message' i]",
+  "div[contenteditable='true'][data-testid*='composer' i]",
   "fieldset div[contenteditable='true']",
   "div[contenteditable='true'][data-placeholder]",
   "textarea[placeholder]",
 ] as const;
-const SUBMIT_SELECTORS = ["button[aria-label*='Send']", "button[data-testid*='send']", "fieldset button[type='button']"] as const;
+const SUBMIT_SELECTORS = ["button[aria-label*='Send' i]", "button[data-testid*='send' i]", "fieldset button[type='button']"] as const;
 
 export class ClaudeAdapter implements SiteAdapter {
   readonly id = "claude" as const;

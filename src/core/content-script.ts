@@ -4,6 +4,7 @@ import { ProviderError } from "../providers/errors";
 import type { ExtensionSettings } from "../shared/types";
 import { sendRuntimeMessage } from "./rewrite-client";
 import { adapterRegistry } from "./adapter-registry";
+import { findComposerAnchor } from "../adapters/site-adapter";
 
 let currentInput: HTMLElement | null = null;
 let removeInputListener: (() => void) | undefined;
@@ -58,7 +59,7 @@ async function runRewrite(): Promise<void> {
 }
 
 contentController.subscribe(({ input }) => {
-  if (input === currentInput) return;
+  if (input === currentInput && widget.element.isConnected) return;
   removeInputListener?.();
   currentInput = input;
   if (!input) {
@@ -68,8 +69,8 @@ contentController.subscribe(({ input }) => {
   const listener = () => showReady();
   input.addEventListener("input", listener);
   removeInputListener = () => input.removeEventListener("input", listener);
-  const anchor = input.closest("form") ?? input.parentElement;
-  anchor?.insertAdjacentElement("afterend", widget.element);
+  const anchor = findComposerAnchor(input);
+  anchor.insertAdjacentElement("afterend", widget.element);
   showReady();
 });
 
