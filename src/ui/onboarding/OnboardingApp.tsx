@@ -51,7 +51,7 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
       {phase === 'intro' && <>
         <p className="ui-eyebrow">A clearer prompt, before you send</p>
         <h1>Bring better instructions to every conversation.</h1>
-        <p className="onboarding-lead">Ondrift sits beside the prompt box in ChatGPT and Claude. It scores your draft, explains what is missing, and offers a rewrite you can apply in one click.</p>
+        <p className="onboarding-lead">Ondrift sits beside the prompt box in ChatGPT, Claude, Gemini, and Perplexity. It scores your draft, explains what is missing, and offers a rewrite you can apply in one click.</p>
         <div className="promise-list">
           <div><span>01</span><p><strong>Works where you already write</strong>Use the same focused workflow across supported AI sites.</p></div>
           <div><span>02</span><p><strong>Your key, your browser</strong>Your Gemini API key stays in local extension storage.</p></div>
@@ -76,7 +76,7 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
       {phase === 'privacy' && <>
         <p className="ui-eyebrow">Privacy choice</p>
         <h1>Local by design, explicit by default.</h1>
-        <div className="data-route" aria-label="How your data moves"><div><strong>Your prompt</strong><span>ChatGPT or Claude</span></div><Icon name="arrow" /><div><strong>Gemini API</strong><span>Using your key</span></div><Icon name="arrow" /><div><strong>Local history</strong><span>This browser only</span></div></div>
+        <div className="data-route" aria-label="How your data moves"><div><strong>Your prompt</strong><span>Supported AI site</span></div><Icon name="arrow" /><div><strong>Gemini API</strong><span>Using your key</span></div><Icon name="arrow" /><div><strong>Local history</strong><span>This browser only</span></div></div>
         <div className="privacy-notes">
           <p><strong>Ondrift reads</strong> the text you ask it to rewrite, the supported site, score, and whether you applied the suggestion.</p>
           <p><strong>Ondrift does not collect</strong> AI response bodies, browsing history, or data from unsupported sites.</p>
@@ -86,7 +86,7 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
         <div className="onboarding-actions"><button className="ui-button ui-button--quiet" onClick={() => setPhase('key')}>Back</button><button className="ui-button ui-button--primary" disabled={!consent} onClick={finish}>Enable Ondrift <Icon name="check" /></button></div>
       </>}
 
-      {phase === 'complete' && <div className="complete-state"><span className="complete-mark"><Icon name="check" /></span><p className="ui-eyebrow">Setup complete</p><h1>You’re ready to write.</h1><p>Open ChatGPT or Claude and start a prompt. Ondrift will appear beside the composer when there is something useful to improve.</p><button className="ui-button ui-button--primary" onClick={() => bridge.openExternal('https://chatgpt.com/')}>Open ChatGPT <Icon name="external" /></button></div>}
+      {phase === 'complete' && <div className="complete-state"><span className="complete-mark"><Icon name="check" /></span><p className="ui-eyebrow">Setup complete</p><h1>You’re ready to write.</h1><p>Open ChatGPT, Claude, Gemini, or Perplexity and start a prompt. Ondrift will appear beside the composer when there is something useful to improve.</p><button className="ui-button ui-button--primary" onClick={() => bridge.openExternal('https://chatgpt.com/')}>Open ChatGPT <Icon name="external" /></button></div>}
     </section>
     <footer>Private, local, and reversible. No Ondrift account required.</footer>
   </main>;

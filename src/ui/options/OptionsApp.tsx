@@ -55,7 +55,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
       </section>
 
       <section id="sites"><div className="section-title"><span>03</span><div><h2>Supported sites</h2><p>Ondrift only reads prompt text on sites you explicitly enable.</p></div></div>
-        <div className="settings-card settings-card--rows"><ToggleRow title="ChatGPT" detail="Show the rewrite widget on chatgpt.com." checked={settings.siteAccess.chatgpt} onChange={(value) => updateSite('chatgpt', value)} /><ToggleRow title="Claude" detail="Show the rewrite widget on claude.ai." checked={settings.siteAccess.claude} onChange={(value) => updateSite('claude', value)} /></div>
+        <div className="settings-card settings-card--rows"><ToggleRow title="ChatGPT" detail="Show the rewrite widget on chatgpt.com." checked={settings.siteAccess.chatgpt} onChange={(value) => updateSite('chatgpt', value)} /><ToggleRow title="Claude" detail="Show the rewrite widget on claude.ai." checked={settings.siteAccess.claude} onChange={(value) => updateSite('claude', value)} /><ToggleRow title="Gemini" detail="Show the rewrite widget on gemini.google.com." checked={settings.siteAccess.gemini} onChange={(value) => updateSite('gemini', value)} /><ToggleRow title="Perplexity" detail="Show the rewrite widget on perplexity.ai." checked={settings.siteAccess.perplexity} onChange={(value) => updateSite('perplexity', value)} /></div>
       </section>
 
       <section id="privacy"><div className="section-title"><span>04</span><div><h2>Privacy & local data</h2><p>No cloud account, sync, or developer-operated server is used in this version.</p></div></div>

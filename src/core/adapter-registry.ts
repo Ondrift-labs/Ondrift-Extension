@@ -1,11 +1,18 @@
 import type { SiteAdapter } from "../adapters/site-adapter";
 import { ChatGptAdapter } from "../adapters/chatgpt.adapter";
 import { ClaudeAdapter } from "../adapters/claude.adapter";
+import { GeminiAdapter } from "../adapters/gemini.adapter";
+import { PerplexityAdapter } from "../adapters/perplexity.adapter";
 
 export class AdapterRegistry {
   private readonly adapters: SiteAdapter[] = [];
 
-  constructor(adapters: SiteAdapter[] = [new ChatGptAdapter(), new ClaudeAdapter()]) {
+  constructor(adapters: SiteAdapter[] = [
+    new ChatGptAdapter(),
+    new ClaudeAdapter(),
+    new GeminiAdapter(),
+    new PerplexityAdapter(),
+  ]) {
     adapters.forEach((adapter) => this.register(adapter));
   }
 

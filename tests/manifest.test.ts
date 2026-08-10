@@ -21,12 +21,18 @@ describe("extension manifest", () => {
     expect(manifest.host_permissions).toEqual([
       "https://chatgpt.com/*",
       "https://claude.ai/*",
+      "https://gemini.google.com/*",
+      "https://www.perplexity.ai/*",
+      "https://perplexity.ai/*",
       "https://generativelanguage.googleapis.com/*",
     ]);
     expect(manifest.host_permissions).not.toContain("<all_urls>");
     expect(manifest.content_scripts[0].matches).toEqual([
       "https://chatgpt.com/*",
       "https://claude.ai/*",
+      "https://gemini.google.com/*",
+      "https://www.perplexity.ai/*",
+      "https://perplexity.ai/*",
     ]);
   });
 

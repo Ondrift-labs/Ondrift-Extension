@@ -1,4 +1,4 @@
-export type SiteId = "chatgpt" | "claude";
+export type SiteId = "chatgpt" | "claude" | "gemini" | "perplexity";
 export type ProviderId = "gemini" | "openai" | "claude";
 
 export interface UsageMetadata {

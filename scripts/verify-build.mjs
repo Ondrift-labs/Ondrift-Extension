@@ -19,16 +19,22 @@ invariant(
   JSON.stringify(manifest.host_permissions) === JSON.stringify([
     "https://chatgpt.com/*",
     "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://perplexity.ai/*",
     "https://generativelanguage.googleapis.com/*",
   ]),
-  "host access must be limited to ChatGPT, Claude, and the Gemini API",
+  "host access must be limited to supported AI sites and the Gemini API",
 );
 invariant(
   JSON.stringify(manifest.content_scripts?.[0]?.matches) === JSON.stringify([
     "https://chatgpt.com/*",
     "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://perplexity.ai/*",
   ]),
-  "content script access must be limited to ChatGPT and Claude",
+  "content script access must be limited to supported AI sites",
 );
 invariant(manifest.action?.default_popup === "popup.html", "popup entry is missing");
 invariant(manifest.options_ui?.page === "options.html", "options entry is missing");

@@ -1,7 +1,7 @@
 # Ondrift Free MVP privacy notice
 
-Ondrift processes the prompt text that a user chooses to rewrite on ChatGPT or
-Claude. The text is sent directly from the extension service worker to Google's
+Ondrift processes the prompt text that a user chooses to rewrite on ChatGPT,
+Claude, Gemini, or Perplexity. The text is sent directly from the extension service worker to Google's
 Gemini API using the API key supplied by that user. Ondrift does not operate an
 intermediary server and does not receive the key or prompt text.
 

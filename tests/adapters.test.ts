@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatGptAdapter } from "../src/adapters/chatgpt.adapter";
 import { ClaudeAdapter } from "../src/adapters/claude.adapter";
+import { GeminiAdapter } from "../src/adapters/gemini.adapter";
+import { PerplexityAdapter } from "../src/adapters/perplexity.adapter";
 import { AdapterRegistry } from "../src/core/adapter-registry";
 
 describe("site adapter URL matching", () => {
@@ -9,13 +11,35 @@ describe("site adapter URL matching", () => {
     expect(new ChatGptAdapter().matches("https://chatgpt.com/c/abc")).toBe(true);
     expect(new ChatGptAdapter().matches("https://evil.example/?chatgpt.com")).toBe(false);
     expect(new ClaudeAdapter().matches("https://claude.ai/new")).toBe(true);
+    expect(new GeminiAdapter().matches("https://gemini.google.com/app/abc")).toBe(true);
+    expect(new GeminiAdapter().matches("https://google.com/?gemini.google.com")).toBe(false);
+    expect(new PerplexityAdapter().matches("https://www.perplexity.ai/search/abc")).toBe(true);
+    expect(new PerplexityAdapter().matches("https://perplexity.ai/")).toBe(true);
     expect(new ClaudeAdapter().matches("not-a-url")).toBe(false);
   });
 
   it("resolves the correct adapter through the registry", () => {
     const registry = new AdapterRegistry();
     expect(registry.resolve("https://claude.ai/chat/1")?.id).toBe("claude");
+    expect(registry.resolve("https://gemini.google.com/app")?.id).toBe("gemini");
+    expect(registry.resolve("https://www.perplexity.ai/")?.id).toBe("perplexity");
     expect(registry.resolve("https://example.com")).toBeNull();
+  });
+
+  it("reads and applies Gemini contenteditable prompts", () => {
+    document.body.innerHTML = '<rich-textarea><div class="ql-editor" contenteditable="true" role="textbox">draft</div></rich-textarea>';
+    const adapter = new GeminiAdapter();
+    expect(adapter.getPromptText()).toBe("draft");
+    adapter.setPromptText("improved");
+    expect(adapter.getPromptText()).toBe("improved");
+  });
+
+  it("reads and applies Perplexity textarea prompts", () => {
+    document.body.innerHTML = '<textarea placeholder="Ask anything">draft</textarea>';
+    const adapter = new PerplexityAdapter();
+    expect(adapter.getPromptText()).toBe("draft");
+    adapter.setPromptText("improved");
+    expect(adapter.getPromptText()).toBe("improved");
   });
 
   it("reads and applies textarea values through native input semantics", () => {
