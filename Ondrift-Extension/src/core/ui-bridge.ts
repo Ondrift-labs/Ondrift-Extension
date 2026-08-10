@@ -43,6 +43,10 @@ function validationFailure(error: unknown): ApiKeyValidationResult {
       ? "invalid_key"
       : error.code === "network"
         ? "network"
+        : error.code === "request_rejected"
+          ? "request"
+          : error.code === "model_unavailable" || error.code === "service_unavailable"
+            ? "unavailable"
         : "unknown";
   return { ok: false, reason };
 }

@@ -24,6 +24,9 @@ export type ProviderErrorCode =
   | "invalid_key"
   | "quota_exceeded"
   | "network"
+  | "request_rejected"
+  | "model_unavailable"
+  | "service_unavailable"
   | "invalid_response"
   | "not_configured"
   | "unknown";
