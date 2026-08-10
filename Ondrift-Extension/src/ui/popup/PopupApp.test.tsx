@@ -26,6 +26,12 @@ function createBridge(overrides: Partial<UiBridge> = {}): UiBridge {
 }
 
 describe('PopupApp', () => {
+  it('renders the Ondrift image logo in the popup header', () => {
+    const { container } = render(<PopupApp bridge={createBridge()} />);
+
+    expect(container.querySelector<HTMLImageElement>('.popup-brand-logo')?.getAttribute('src')).toBe('/icons/ondrift-32.png');
+  });
+
   it('labels rolling usage accurately and exposes chart values to assistive technology', async () => {
     render(<PopupApp bridge={createBridge()} />);
 

@@ -42,6 +42,15 @@ describe("extension manifest", () => {
     );
   });
 
+  it("exposes only the Ondrift logo to supported web apps", () => {
+    expect(manifest.web_accessible_resources).toEqual([
+      {
+        resources: ["icons/ondrift-32.png"],
+        matches: manifest.content_scripts[0].matches,
+      },
+    ]);
+  });
+
   it("uses the Ondrift artwork for extension and toolbar icons", () => {
     expect(manifest.icons).toEqual({
       16: "icons/ondrift-16.png",

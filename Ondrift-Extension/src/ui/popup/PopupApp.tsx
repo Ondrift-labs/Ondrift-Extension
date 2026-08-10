@@ -51,7 +51,7 @@ export function PopupApp({ bridge }: { bridge: UiBridge }) {
   const usage = useMemo(() => summarizeUsage(history), [history]);
 
   return <main className="popup-shell">
-    <header className="popup-header"><div className="popup-brand"><span className="brand-mark">O</span><span>Ondrift</span></div><button className="icon-button" aria-label={copy.headerAria.openSettings} onClick={() => bridge.openOptions()}><Icon name="settings" /></button></header>
+    <header className="popup-header"><div className="popup-brand"><img className="popup-brand-logo" src="/icons/ondrift-32.png" alt="" /><span>Ondrift</span></div><button className="icon-button" aria-label={copy.headerAria.openSettings} onClick={() => bridge.openOptions()}><Icon name="settings" /></button></header>
     {!settings?.apiKeyConfigured && state !== 'loading' && <button className="setup-banner" onClick={() => bridge.openOptions()}><Icon name="key" /><span><strong>{copy.setupBanner.title}</strong>{copy.setupBanner.body}</span><Icon name="chevron" /></button>}
     {state === 'loading' && <div className="popup-state" role="status"><span className="loader" />{copy.loading}</div>}
     {state === 'error' && <div className="popup-state"><p><strong>{copy.error.title}</strong><br />{copy.error.body}</p><button className="ui-button ui-button--secondary" onClick={load}>{copy.error.retryCta}</button></div>}
