@@ -42,6 +42,7 @@ button, a, input, select { outline: none; }
 .ui-input, .ui-select { width: 100%; min-height: 40px; border: 1px solid var(--line-strong); border-radius: 7px; padding: 8px 11px; color: var(--ink); background: var(--paper); }
 .ui-input::placeholder { color: var(--faint); }
 .ui-status { display: flex; align-items: flex-start; gap: 8px; border-left: 3px solid currentColor; padding: 9px 11px; font-size: 12px; line-height: 1.45; }
+.ui-status svg { width: 16px; height: 16px; flex: 0 0 16px; margin-top: 1px; }
 .ui-status--error { color: var(--danger); background: var(--danger-soft); }
 .ui-status--warning { color: var(--warning); background: var(--warning-soft); }
 .ui-status--success { color: var(--accent); background: var(--accent-soft); }
