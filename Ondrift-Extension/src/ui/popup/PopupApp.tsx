@@ -6,6 +6,12 @@ import '../shared/ui.css';
 import './popup.css';
 
 type LoadState = 'loading' | 'ready' | 'error';
+const SERVICE_NAMES: Record<HistoryItem['service'], string> = {
+  chatgpt: 'ChatGPT',
+  claude: 'Claude',
+  gemini: 'Gemini',
+  perplexity: 'Perplexity',
+};
 
 function ScoreTrend({ scores }: { scores: Array<{ date: string; score: number }> }) {
   if (scores.length < 2) return <div className="trend-empty">A score trend appears after two days of rewrites.</div>;
@@ -55,7 +61,7 @@ export function PopupApp({ bridge }: { bridge: UiBridge }) {
         {history.length > 0 && visible.length === 0 && <div className="empty-state empty-state--compact"><strong>No matching prompts</strong><p>Try a different word or service name.</p></div>}
         <div className="history-list">
           {visible.slice(0, 12).map((item) => <article className="history-item" key={item.id}>
-            <div className="history-meta"><span className={`service-dot service-dot--${item.service}`} />{item.service === 'chatgpt' ? 'ChatGPT' : 'Claude'}<span>·</span><time dateTime={new Date(item.createdAt).toISOString()}>{formatRelativeTime(item.createdAt)}</time><span className="score-badge">{item.score}</span></div>
+            <div className="history-meta"><span className={`service-dot service-dot--${item.service}`} />{SERVICE_NAMES[item.service]}<span>·</span><time dateTime={new Date(item.createdAt).toISOString()}>{formatRelativeTime(item.createdAt)}</time><span className="score-badge">{item.score}</span></div>
             <p>{item.improvedText || item.originalText}</p>
             <div className="history-actions">{item.applied && <span className="applied-label"><Icon name="check" />Applied</span>}<span className="history-spacer" />{item.sourceUrl && <button aria-label="Open conversation" onClick={() => bridge.openExternal(item.sourceUrl!)}><Icon name="external" /></button>}<button aria-label="Delete from local history" onClick={async () => { await bridge.deleteHistory(item.id); setHistory((current) => current.filter(({ id }) => id !== item.id)); }}><Icon name="trash" /></button></div>
           </article>)}

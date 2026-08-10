@@ -5,7 +5,7 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   provider: "gemini",
   apiKeys: {},
   persona: "general",
-  enabledSites: { chatgpt: true, claude: true },
+  enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true },
   onboardingComplete: false,
   saveHistory: true,
   consentGranted: false,

@@ -7,11 +7,14 @@ export const manifest = {
   version: "0.1.0",
   minimum_chrome_version: "116",
   description:
-    "Rewrite and score prompts on ChatGPT and Claude with your own Gemini API key.",
+    "Rewrite and score prompts on ChatGPT, Claude, Gemini, and Perplexity with your own Gemini API key.",
   permissions: ["storage"],
   host_permissions: [
     "https://chatgpt.com/*",
     "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://perplexity.ai/*",
     "https://generativelanguage.googleapis.com/*"
   ],
   action: {
@@ -28,7 +31,13 @@ export const manifest = {
   },
   content_scripts: [
     {
-      matches: ["https://chatgpt.com/*", "https://claude.ai/*"],
+      matches: [
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://www.perplexity.ai/*",
+        "https://perplexity.ai/*"
+      ],
       js: ["src/content.ts"],
       run_at: "document_idle"
     }

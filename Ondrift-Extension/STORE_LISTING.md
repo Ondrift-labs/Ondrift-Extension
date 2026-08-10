@@ -13,6 +13,11 @@ lets the user apply the improved text.
   control, and applies a rewrite only after user confirmation.
 - `https://claude.ai/*`: detects the Claude prompt editor, displays the Ondrift
   control, and applies a rewrite only after user confirmation.
+- `https://gemini.google.com/*`: detects the Gemini prompt editor, displays the
+  Ondrift control, and applies a rewrite only after user confirmation.
+- `https://www.perplexity.ai/*` and `https://perplexity.ai/*`: detect the
+  Perplexity prompt editor, display the Ondrift control, and apply a rewrite only
+  after user confirmation.
 - `https://generativelanguage.googleapis.com/*`: allows the extension service
   worker to call Gemini directly with the user's own API key.
 

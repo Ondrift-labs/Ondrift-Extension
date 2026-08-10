@@ -1,5 +1,5 @@
 export type ProviderId = 'gemini' | 'openai' | 'claude';
-export type SiteId = 'chatgpt' | 'claude';
+export type SiteId = 'chatgpt' | 'claude' | 'gemini' | 'perplexity';
 export type PersonaId = 'general' | 'developer' | 'writer' | 'student' | 'translator';
 
 export interface UiSettings {
@@ -54,7 +54,7 @@ export const DEFAULT_SETTINGS: UiSettings = {
   provider: 'gemini',
   apiKeyConfigured: false,
   persona: 'general',
-  siteAccess: { chatgpt: true, claude: true },
+  siteAccess: { chatgpt: true, claude: true, gemini: true, perplexity: true },
   saveHistory: true,
   consentGranted: false,
 };
