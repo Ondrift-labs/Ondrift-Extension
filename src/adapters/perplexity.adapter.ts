@@ -1,5 +1,5 @@
 import type { SiteAdapter } from "./site-adapter";
-import { firstVisible, installSubmitListener, readEditable, writeEditable } from "./site-adapter";
+import { firstVisible, installSubmitListener, readEditable, writeEditable, writeEditableThroughPaste } from "./site-adapter";
 
 const INPUT_SELECTORS = [
   "div[contenteditable='true'][role='textbox']",
@@ -27,6 +27,7 @@ export class PerplexityAdapter implements SiteAdapter {
   setPromptText(text: string): void {
     const input = this.getInputElement();
     if (!input) throw new Error("Perplexity prompt input is not available.");
+    if (writeEditableThroughPaste(input, text)) return;
     writeEditable(input, text);
   }
   getConversationTitle(): string | null {

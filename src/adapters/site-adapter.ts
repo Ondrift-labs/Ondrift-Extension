@@ -52,6 +52,32 @@ export function writeEditable(element: HTMLElement, text: string): void {
   element.dispatchEvent(new Event("change", { bubbles: true }));
 }
 
+export function writeEditableThroughPaste(element: HTMLElement, text: string): boolean {
+  if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) return false;
+
+  element.focus();
+  const selection = window.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(element);
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+
+  const transfer = typeof DataTransfer === "undefined"
+    ? { getData: (type: string) => type === "text/plain" ? text : "" }
+    : new DataTransfer();
+  if ("setData" in transfer) transfer.setData("text/plain", text);
+  const pasteEvent = typeof ClipboardEvent === "undefined"
+    ? new Event("paste", { bubbles: true, cancelable: true })
+    : new ClipboardEvent("paste", { bubbles: true, cancelable: true, clipboardData: transfer as DataTransfer });
+  if ((pasteEvent as ClipboardEvent).clipboardData !== transfer) {
+    Object.defineProperty(pasteEvent, "clipboardData", { configurable: true, value: transfer });
+  }
+  const accepted = element.dispatchEvent(pasteEvent);
+  selection?.removeAllRanges();
+
+  return !accepted || readEditable(element) === text.trim();
+}
+
 export function firstVisible(selectors: readonly string[]): HTMLElement | null {
   const layoutAvailable = document.documentElement.getBoundingClientRect().width > 0;
   for (const selector of selectors) {
