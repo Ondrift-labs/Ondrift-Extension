@@ -40,11 +40,17 @@ export function writeEditable(element: HTMLElement, text: string): void {
 }
 
 export function firstVisible(selectors: readonly string[]): HTMLElement | null {
+  const layoutAvailable = document.documentElement.getBoundingClientRect().width > 0;
   for (const selector of selectors) {
     const candidates = document.querySelectorAll<HTMLElement>(selector);
     for (const candidate of candidates) {
       const style = getComputedStyle(candidate);
-      if (!candidate.hidden && style.display !== "none" && style.visibility !== "hidden") return candidate;
+      const hiddenFromUser = candidate.hidden
+        || candidate.getAttribute("aria-hidden") === "true"
+        || style.display === "none"
+        || style.visibility === "hidden"
+        || (layoutAvailable && candidate.getClientRects().length === 0);
+      if (!hiddenFromUser) return candidate;
     }
   }
   return null;

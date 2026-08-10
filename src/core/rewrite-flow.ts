@@ -19,10 +19,19 @@ export class RewriteSession {
     return this.result;
   }
 
-  apply(): void {
+  async apply(): Promise<void> {
     if (!this.result) throw new Error("No rewrite is ready to apply.");
-    this.adapter.setPromptText(this.result.improvedText);
-    this.applied = true;
+    const expected = this.result.improvedText.trim();
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      this.adapter.setPromptText(this.result.improvedText);
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+      if (this.adapter.getPromptText() === expected) {
+        this.applied = true;
+        return;
+      }
+    }
+    this.applied = false;
+    throw new Error("The site did not accept the rewritten prompt. Click Apply again or paste the suggestion manually.");
   }
 
   startHistoryCapture(): () => void {

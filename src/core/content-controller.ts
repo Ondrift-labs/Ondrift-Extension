@@ -65,9 +65,9 @@ export class ContentController {
     }
   }
 
-  apply(): void {
+  async apply(): Promise<void> {
     if (!this.session) throw new Error("Ondrift does not support this page.");
-    this.session.apply();
+    await this.session.apply();
     this.setState({ status: "idle" });
   }
 
