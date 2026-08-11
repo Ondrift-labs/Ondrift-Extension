@@ -19,7 +19,11 @@ const widget = createInlineWidget({
   onRewrite: () => { void runRewrite(); },
   onRetry: () => { void runRewrite(); },
   onApply: () => { void applyRewrite(); },
-  onOpenSettings: () => { void sendRuntimeMessage<void>({ type: "open_options" }); },
+  // A tab left open across an extension reload/update keeps running this stale content
+  // script; the background port is gone, so this rejects with "Extension context
+  // invalidated" -- swallow it rather than leaving an uncaught rejection in the console.
+  // There's nothing else to do from here: the tab itself needs a manual reload to reconnect.
+  onOpenSettings: () => { void sendRuntimeMessage<void>({ type: "open_options" }).catch(() => undefined); },
 });
 widget.element.style.display = "block";
 widget.element.style.marginTop = "8px";
