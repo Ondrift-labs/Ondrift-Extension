@@ -139,9 +139,12 @@ export class GeminiProvider implements LLMProvider {
       `END ${delimiter}`,
     ].join("\n");
 
+    // Try the user's chosen model first (e.g. a cheaper, higher-quota tier); fall back to
+    // the built-in list if it's rejected outright or its own quota is exhausted.
+    const modelsToTry = request.model?.trim() ? [request.model.trim(), ...this.models] : this.models;
     let response: Response | undefined;
     let lastError: ProviderError | undefined;
-    for (const model of this.models) {
+    for (const model of modelsToTry) {
       for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
         try {
           response = await this.fetcher(INTERACTIONS_URL, {
@@ -179,15 +182,20 @@ export class GeminiProvider implements LLMProvider {
         }
         if (response.ok) break;
         lastError = classifyHttpError(response.status, await readApiError(response));
-        if (lastError.code === "model_unavailable") break;
-        if ((lastError.code === "service_unavailable" || lastError.code === "quota_exceeded") && attempt < MAX_ATTEMPTS - 1) {
+        // A different model has its own quota bucket, so an exhausted quota is worth
+        // moving on for rather than retrying the same model — unlike a transient
+        // service outage, it is unlikely to clear up within a few hundred milliseconds.
+        if (lastError.code === "model_unavailable" || lastError.code === "quota_exceeded") break;
+        if (lastError.code === "service_unavailable" && attempt < MAX_ATTEMPTS - 1) {
           await this.sleep(250 * (2 ** attempt));
           continue;
         }
         throw lastError;
       }
       if (response?.ok) break;
-      if (lastError?.code !== "model_unavailable") throw lastError ?? new ProviderError("unknown", "Gemini request failed.");
+      if (lastError?.code !== "model_unavailable" && lastError?.code !== "quota_exceeded") {
+        throw lastError ?? new ProviderError("unknown", "Gemini request failed.");
+      }
     }
     if (!response?.ok) {
       throw lastError ?? new ProviderError("model_unavailable", "No compatible Gemini model is available for this project.");
@@ -203,7 +211,7 @@ export class GeminiProvider implements LLMProvider {
     return { ...result, usageMetadata: usageMetadata(payload) };
   }
 
-  async validateKey(apiKey: string): Promise<void> {
-    await this.rewrite({ prompt: "Rewrite this as a concise request: test", service: "chatgpt" }, apiKey);
+  async validateKey(apiKey: string, model?: string): Promise<void> {
+    await this.rewrite({ prompt: "Rewrite this as a concise request: test", service: "chatgpt", model }, apiKey);
   }
 }

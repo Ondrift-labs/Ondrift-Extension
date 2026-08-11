@@ -26,6 +26,7 @@ function toUiSettings(settings: ExtensionSettings): UiSettings {
     provider: settings.provider,
     apiKeyConfigured: Boolean(settings.apiKeys[settings.provider]?.trim()),
     apiKeyStatus: settings.apiKeyStatus ? mapProviderErrorCodeToReason(settings.apiKeyStatus) : undefined,
+    model: settings.apiModels[settings.provider],
     persona: (settings.persona || "general") as PersonaId,
     language: settings.language || "en",
     siteAccess: settings.enabledSites,
@@ -71,13 +72,14 @@ export const uiBridge: UiBridge = {
     }
     return toUiSettings(await sendRuntimeMessage<ExtensionSettings>({ type: "settings_set", payload: runtimePatch }));
   },
-  async validateApiKey(provider, apiKey) {
+  async validateApiKey(provider, apiKey, model) {
     try {
-      await sendRuntimeMessage<void>({ type: "validate_api_key", payload: { provider, apiKey } });
-      await sendRuntimeMessage<ExtensionSettings>({
-        type: "settings_set",
-        payload: { provider, apiKeys: { [provider]: apiKey } as Partial<Record<ProviderId, string>> },
-      });
+      // Leaving apiKey blank re-verifies the already-saved key against a new model, so
+      // changing just the model doesn't force re-pasting the secret.
+      await sendRuntimeMessage<void>({ type: "validate_api_key", payload: { provider, apiKey: apiKey || undefined, model } });
+      const patch: Partial<ExtensionSettings> = { provider, apiModels: { [provider]: model } as Partial<Record<ProviderId, string>> };
+      if (apiKey) patch.apiKeys = { [provider]: apiKey } as Partial<Record<ProviderId, string>>;
+      await sendRuntimeMessage<ExtensionSettings>({ type: "settings_set", payload: patch });
       return { ok: true };
     } catch (error) {
       return validationFailure(error);

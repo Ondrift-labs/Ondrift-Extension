@@ -12,6 +12,7 @@ describe("SettingsStore", () => {
     await expect(new SettingsStore(new MemoryStorage()).get()).resolves.toEqual({
       provider: "gemini",
       apiKeys: {},
+      apiModels: {},
       persona: "general",
       language: "en",
       enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true },

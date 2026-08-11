@@ -52,7 +52,10 @@ export async function handleRuntimeRequest(
         const apiKey = settings.apiKeys[settings.provider]?.trim();
         if (!apiKey) throw new ProviderError("not_configured", "Add an API key in Ondrift settings.");
         try {
-          const result = await dependencies.provider(settings.provider).rewrite({ ...message.payload, language: settings.language }, apiKey);
+          const result = await dependencies.provider(settings.provider).rewrite(
+            { ...message.payload, language: settings.language, model: settings.apiModels[settings.provider] },
+            apiKey,
+          );
           await recordApiKeyStatus(dependencies.settings, null);
           return { ok: true, data: result };
         } catch (error) {
@@ -60,15 +63,21 @@ export async function handleRuntimeRequest(
           throw error;
         }
       }
-      case "validate_api_key":
+      case "validate_api_key": {
+        // The Options page leaves apiKey out when the user only changed the model, so
+        // re-verifying doesn't force them to re-paste an already-saved secret.
+        const settings = await dependencies.settings.get();
+        const apiKey = message.payload.apiKey?.trim() || settings.apiKeys[message.payload.provider]?.trim();
+        if (!apiKey) throw new ProviderError("not_configured", "Add an API key in Ondrift settings.");
         try {
-          await dependencies.provider(message.payload.provider).validateKey(message.payload.apiKey);
+          await dependencies.provider(message.payload.provider).validateKey(apiKey, message.payload.model);
           await recordApiKeyStatus(dependencies.settings, null);
           return { ok: true, data: undefined };
         } catch (error) {
           await recordApiKeyStatus(dependencies.settings, error);
           throw error;
         }
+      }
       case "settings_get":
         return { ok: true, data: await dependencies.settings.get() };
       case "settings_set":
