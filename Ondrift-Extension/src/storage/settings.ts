@@ -1,6 +1,7 @@
 import type { ExtensionSettings } from "../shared/types";
 
-const STORAGE_KEY = "ondrift.settings";
+export const SETTINGS_STORAGE_KEY = "ondrift.settings";
+const STORAGE_KEY = SETTINGS_STORAGE_KEY;
 export const DEFAULT_SETTINGS: ExtensionSettings = {
   provider: "gemini",
   apiKeys: {},
