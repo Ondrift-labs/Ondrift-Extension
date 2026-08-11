@@ -103,6 +103,9 @@ export interface OptionsCopy {
     apiKeyHelp: string;
     getKeyCta: string;
     keySuccess: string;
+    modelLabel: string;
+    modelPlaceholder: string;
+    modelHelp: string;
     validation: ApiKeyValidationCopy;
   };
   persona: {
@@ -268,6 +271,9 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyHelp: 'chrome.storage.local에만 저장되며 동기화 저장소는 사용하지 않습니다.',
         getKeyCta: '키 발급받기',
         keySuccess: '키가 확인되어 사용할 준비가 되었습니다.',
+        modelLabel: '모델',
+        modelPlaceholder: '비워두면 Ondrift 기본 모델 사용',
+        modelHelp: '할당량이 부족하면 더 저렴하거나 한도가 넉넉한 Gemini 모델 이름을 입력하세요. 이 모델을 사용할 수 없으면 Ondrift가 기본 모델로 다시 시도합니다.',
         validation: {
           invalid_key: 'Gemini가 이 키를 거부했습니다. 전체 키가 복사되었고 API 액세스 권한이 있는지 확인하세요.',
           quota: '이 키는 유효하지만 현재 할당량을 모두 사용했습니다.',
@@ -447,6 +453,9 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyHelp: 'Stored with chrome.storage.local, never sync storage.',
         getKeyCta: 'Get a key',
         keySuccess: 'Key verified and ready to use.',
+        modelLabel: 'Model',
+        modelPlaceholder: 'Leave blank to use Ondrift’s default model',
+        modelHelp: 'If you’re running short on quota, enter a cheaper or higher-limit Gemini model name. Ondrift falls back to its default model if this one is unavailable.',
         validation: {
           invalid_key: 'Gemini rejected this key. Check that it was copied completely and has API access.',
           quota: 'This key is valid, but its quota is currently exhausted.',
@@ -626,6 +635,9 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyHelp: 'chrome.storage.local にのみ保存され、同期ストレージは使用しません。',
         getKeyCta: 'キーを取得',
         keySuccess: 'キーを確認しました。利用できます。',
+        modelLabel: 'モデル',
+        modelPlaceholder: '空欄の場合は Ondrift の既定モデルを使用',
+        modelHelp: '割り当てが不足している場合は、より安価または上限の高い Gemini モデル名を入力してください。このモデルが利用できない場合、Ondrift は既定モデルで再試行します。',
         validation: {
           invalid_key: 'Gemini がこのキーを拒否しました。キー全体がコピーされているか、API アクセス権があるか確認してください。',
           quota: 'このキーは有効ですが、現在割り当てを使い切っています。',

@@ -60,6 +60,24 @@ describe('OptionsApp localization', () => {
     expect(await screen.findByText('This key is valid, but its quota is currently exhausted.')).toBeInTheDocument();
   });
 
+  it('prefills the saved model and lets it be re-verified without re-entering the API key', async () => {
+    const validateApiKey = vi.fn(async () => ({ ok: true }));
+    const bridge = createBridge({
+      getSettings: async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: true, model: 'gemini-3.5-flash-lite' }),
+      validateApiKey,
+    });
+    render(<OptionsApp bridge={bridge} />);
+
+    const modelInput = await screen.findByLabelText('Model');
+    expect(modelInput).toHaveValue('gemini-3.5-flash-lite');
+
+    await userEvent.clear(modelInput);
+    await userEvent.type(modelInput, 'gemini-3.6-pro');
+    await userEvent.click(screen.getByRole('button', { name: 'Verify & save' }));
+
+    expect(validateApiKey).toHaveBeenCalledWith('gemini', '', 'gemini-3.6-pro');
+  });
+
   it('localizes API key validation errors distinctly from the onboarding wording', async () => {
     const bridge = createBridge({ validateApiKey: async () => ({ ok: false, reason: 'invalid_key' }) });
     render(<OptionsApp bridge={bridge} />);

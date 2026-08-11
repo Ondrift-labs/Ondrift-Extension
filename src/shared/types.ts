@@ -20,6 +20,8 @@ export interface RewriteRequest {
   persona?: string;
   service: SiteId;
   language?: LanguageId;
+  /** User-chosen model override (e.g. a cheaper, higher-quota tier). Falls back to the provider's defaults when unset. */
+  model?: string;
 }
 
 export type ProviderErrorCode =
@@ -42,6 +44,8 @@ export interface SerializedProviderError {
 export interface ExtensionSettings {
   provider: ProviderId;
   apiKeys: Partial<Record<ProviderId, string>>;
+  /** User-chosen model override per provider, e.g. a cheaper/higher-quota tier. */
+  apiModels: Partial<Record<ProviderId, string>>;
   persona: string;
   language: LanguageId;
   enabledSites: Record<SiteId, boolean>;
@@ -87,7 +91,7 @@ export interface HistoryAggregates {
 
 export type RuntimeRequest =
   | { type: "rewrite"; payload: RewriteRequest }
-  | { type: "validate_api_key"; payload: { provider: ProviderId; apiKey: string } }
+  | { type: "validate_api_key"; payload: { provider: ProviderId; apiKey?: string; model?: string } }
   | { type: "settings_get" }
   | { type: "settings_set"; payload: Partial<ExtensionSettings> }
   | { type: "history_add"; payload: HistoryEntry }

@@ -15,12 +15,14 @@ function ToggleRow({ title, detail, checked, onChange }: { title: string; detail
 export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   const [settings, setSettings] = useState<UiSettings>(DEFAULT_SETTINGS);
   const [apiKey, setApiKey] = useState('');
+  const [model, setModel] = useState('');
   const [validation, setValidation] = useState<'idle' | 'checking' | 'valid' | ApiKeyValidationResult['reason']>('idle');
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [confirmClear, setConfirmClear] = useState(false);
   useEffect(() => {
     bridge.getSettings().then((next) => {
       setSettings(next);
+      setModel(next.model ?? '');
       // Seed the banner from the last real use of the key (a rewrite or a prior verify) so
       // e.g. an exhausted quota shows up as soon as it happens, not only after re-verifying.
       if (next.apiKeyStatus) setValidation(next.apiKeyStatus);
@@ -41,9 +43,10 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   async function verify() {
     setValidation('checking');
     try {
-      const result = await bridge.validateApiKey(settings.provider, apiKey.trim());
+      const trimmedModel = model.trim();
+      const result = await bridge.validateApiKey(settings.provider, apiKey.trim(), trimmedModel || undefined);
       setValidation(result.ok ? 'valid' : result.reason ?? 'unknown');
-      if (result.ok) setSettings((current) => ({ ...current, apiKeyConfigured: true }));
+      if (result.ok) setSettings((current) => ({ ...current, apiKeyConfigured: true, model: trimmedModel || undefined }));
     } catch { setValidation('network'); }
   }
 
@@ -55,7 +58,8 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
       <section id="provider"><div className="section-title"><span>01</span><div><h2>{copy.provider.sectionTitle}</h2><p>{copy.provider.sectionLead}</p></div></div>
         <div className="settings-card">
           <label className="ui-field"><span className="ui-label">{copy.provider.providerLabel}</span><select className="ui-select" aria-label={copy.provider.providerLabel} value={settings.provider} onChange={(event) => update('provider', event.target.value as ProviderId)}><option value="gemini">{copy.provider.providerGemini}</option><option value="openai" disabled>{copy.provider.providerOpenAi}</option><option value="claude" disabled>{copy.provider.providerClaude}</option></select></label>
-          <div className="ui-field"><label className="ui-label" htmlFor="settings-key">{copy.provider.apiKeyLabel}</label><div className="settings-key-row"><input id="settings-key" className="ui-input" type="password" autoComplete="off" value={apiKey} onChange={(event) => { setApiKey(event.target.value); setValidation('idle'); }} placeholder={settings.apiKeyConfigured ? copy.provider.apiKeyPlaceholderSaved : copy.provider.apiKeyPlaceholderEmpty} /><button className="ui-button ui-button--secondary" disabled={!apiKey.trim() || validation === 'checking'} onClick={verify}>{validation === 'checking' ? common.checking : copy.provider.verifyCta}</button></div><p className="ui-help">{copy.provider.apiKeyHelp} <button className="text-button" onClick={() => bridge.openExternal(AI_STUDIO_API_KEY_URL)}>{copy.provider.getKeyCta} <Icon name="external" /></button></p></div>
+          <div className="ui-field"><label className="ui-label" htmlFor="settings-key">{copy.provider.apiKeyLabel}</label><div className="settings-key-row"><input id="settings-key" className="ui-input" type="password" autoComplete="off" value={apiKey} onChange={(event) => { setApiKey(event.target.value); setValidation('idle'); }} placeholder={settings.apiKeyConfigured ? copy.provider.apiKeyPlaceholderSaved : copy.provider.apiKeyPlaceholderEmpty} /><button className="ui-button ui-button--secondary" disabled={(!apiKey.trim() && !settings.apiKeyConfigured) || validation === 'checking'} onClick={verify}>{validation === 'checking' ? common.checking : copy.provider.verifyCta}</button></div><p className="ui-help">{copy.provider.apiKeyHelp} <button className="text-button" onClick={() => bridge.openExternal(AI_STUDIO_API_KEY_URL)}>{copy.provider.getKeyCta} <Icon name="external" /></button></p></div>
+          <div className="ui-field"><label className="ui-label" htmlFor="settings-model">{copy.provider.modelLabel}</label><input id="settings-model" className="ui-input" type="text" autoComplete="off" value={model} onChange={(event) => { setModel(event.target.value); setValidation('idle'); }} placeholder={copy.provider.modelPlaceholder} /><span className="ui-help">{copy.provider.modelHelp}</span></div>
           {validation === 'valid' && <div className="ui-status ui-status--success"><Icon name="check" />{copy.provider.keySuccess}</div>}
           {validation && !['idle', 'checking', 'valid'].includes(validation) && <div className="ui-status ui-status--error">{copy.provider.validation[validation as keyof typeof copy.provider.validation]}</div>}
         </div>

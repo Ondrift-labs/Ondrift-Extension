@@ -112,6 +112,37 @@ describe("GeminiProvider", () => {
     expect(JSON.parse(String(fetcher.mock.calls[1][1]?.body)).model).toBe("gemini-3.5-flash-lite");
   });
 
+  it("tries the user's chosen model before the built-in defaults", async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({
+      steps: [{ type: "model_output", content: [{ type: "text", text: '{"improvedText":"Cheap model worked","score":80,"rationale":"Cheaper"}' }] }],
+    }), { status: 200 }));
+    const provider = new GeminiProvider(fetcher as typeof fetch, ["gemini-3.6-flash", "gemini-3.5-flash-lite"]);
+
+    await expect(provider.rewrite({ prompt: "test", service: "chatgpt", model: "gemini-3.5-flash-lite" }, "key"))
+      .resolves.toMatchObject({ improvedText: "Cheap model worked" });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(String(fetcher.mock.calls[0][1]?.body)).model).toBe("gemini-3.5-flash-lite");
+  });
+
+  it("moves on to the next model on an exhausted quota instead of retrying the same one", async () => {
+    const fetcher = vi.fn(async (_url: string, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body));
+      if (body.model === "gemini-3.6-flash") {
+        return new Response(JSON.stringify({ error: { message: "quota exceeded" } }), { status: 429 });
+      }
+      return new Response(JSON.stringify({
+        steps: [{ type: "model_output", content: [{ type: "text", text: '{"improvedText":"Second bucket","score":84,"rationale":"Own quota"}' }] }],
+      }), { status: 200 });
+    });
+    const sleep = vi.fn(async () => undefined);
+    const provider = new GeminiProvider(fetcher as typeof fetch, ["gemini-3.6-flash", "gemini-3.5-flash-lite"], sleep);
+
+    await expect(provider.rewrite({ prompt: "test", service: "chatgpt" }, "key"))
+      .resolves.toMatchObject({ improvedText: "Second bucket" });
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(sleep).not.toHaveBeenCalled();
+  });
+
   it("retries temporary service failures before succeeding", async () => {
     const fetcher = vi.fn()
       .mockResolvedValueOnce(new Response("{}", { status: 503 }))

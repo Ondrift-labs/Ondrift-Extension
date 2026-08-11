@@ -5,6 +5,7 @@ const STORAGE_KEY = SETTINGS_STORAGE_KEY;
 export const DEFAULT_SETTINGS: ExtensionSettings = {
   provider: "gemini",
   apiKeys: {},
+  apiModels: {},
   persona: "general",
   language: "en",
   enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true },
@@ -35,6 +36,7 @@ export class SettingsStore {
       ...DEFAULT_SETTINGS,
       ...stored,
       apiKeys: { ...DEFAULT_SETTINGS.apiKeys, ...stored?.apiKeys },
+      apiModels: { ...DEFAULT_SETTINGS.apiModels, ...stored?.apiModels },
       enabledSites: { ...DEFAULT_SETTINGS.enabledSites, ...stored?.enabledSites },
       language: language === "ko" || language === "en" || language === "ja" ? language : DEFAULT_SETTINGS.language,
     };
@@ -46,6 +48,7 @@ export class SettingsStore {
       ...current,
       ...patch,
       apiKeys: { ...current.apiKeys, ...patch.apiKeys },
+      apiModels: { ...current.apiModels, ...patch.apiModels },
       enabledSites: { ...current.enabledSites, ...patch.enabledSites },
     };
     await (this.area ?? localArea()).set({ [STORAGE_KEY]: next });

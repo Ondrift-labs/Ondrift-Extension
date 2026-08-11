@@ -10,6 +10,8 @@ export interface UiSettings {
    * problem like an exhausted quota shows up as soon as it happens, not just after the
    * user re-verifies the key by hand. Absent when the last use succeeded. */
   apiKeyStatus?: ApiKeyValidationResult['reason'];
+  /** User-chosen model override for the active provider (e.g. a cheaper, higher-quota tier). Empty/absent uses Ondrift's default. */
+  model?: string;
   persona: PersonaId;
   language: LanguageId;
   siteAccess: Record<SiteId, boolean>;
@@ -48,7 +50,7 @@ export interface UsageSummary {
 export interface UiBridge {
   getSettings(): Promise<UiSettings>;
   saveSettings(patch: Partial<UiSettings>): Promise<UiSettings>;
-  validateApiKey(provider: ProviderId, apiKey: string): Promise<ApiKeyValidationResult>;
+  validateApiKey(provider: ProviderId, apiKey: string, model?: string): Promise<ApiKeyValidationResult>;
   openExternal(url: string): Promise<void> | void;
   getHistory(): Promise<HistoryItem[]>;
   deleteHistory(id: string): Promise<void>;
