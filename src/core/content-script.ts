@@ -6,6 +6,8 @@ import { sendRuntimeMessage } from "./rewrite-client";
 import { adapterRegistry } from "./adapter-registry";
 import { findComposerAnchor } from "../adapters/site-adapter";
 import { placeFloatingWidget, type FloatingWidgetPlacement } from "./floating-widget-position";
+import { isLanguageId } from "../ui/shared/i18n";
+import { SETTINGS_STORAGE_KEY } from "../storage/settings";
 
 let currentInput: HTMLElement | null = null;
 let removeInputListener: (() => void) | undefined;
@@ -121,7 +123,15 @@ async function boot(): Promise<void> {
 
 void boot();
 
+function onStorageChanged(changes: Record<string, chrome.storage.StorageChange>, areaName: string): void {
+  if (areaName !== "local") return;
+  const next = changes[SETTINGS_STORAGE_KEY]?.newValue as Partial<ExtensionSettings> | undefined;
+  if (next && isLanguageId(next.language)) widget.setLanguage(next.language);
+}
+chrome.storage.onChanged.addListener(onStorageChanged);
+
 window.addEventListener("pagehide", () => {
+  chrome.storage.onChanged.removeListener(onStorageChanged);
   removeInputListener?.();
   floatingPlacement?.destroy();
   widget.destroy();
