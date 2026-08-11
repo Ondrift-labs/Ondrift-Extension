@@ -69,3 +69,4 @@ export const DEFAULT_SETTINGS: UiSettings = {
 };
 
 export const AI_STUDIO_API_KEY_URL = 'https://aistudio.google.com/apikey';
+export const GITHUB_REPO_URL = 'https://github.com/Ondrift-labs/Ondrift-Extension';

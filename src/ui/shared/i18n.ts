@@ -86,7 +86,7 @@ export interface OnboardingCopy {
 
 export interface OptionsCopy {
   sidebar: {
-    nav: { provider: string; persona: string; sites: string; privacy: string };
+    nav: { provider: string; persona: string; sites: string; privacy: string; support: string };
     version: string;
   };
   header: { eyebrow: string; title: string; lead: string };
@@ -137,6 +137,11 @@ export interface OptionsCopy {
     cancelCta: string;
     deleteAllCta: string;
     clearHistoryCta: string;
+  };
+  support: {
+    sectionTitle: string;
+    sectionLead: string;
+    starCta: string;
   };
   saveBar: { saved: string; error: string; idle: string; saveCta: string };
 }
@@ -257,7 +262,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     },
     options: {
       sidebar: {
-        nav: { provider: '제공자', persona: '다시 쓰기 스타일', sites: '사이트', privacy: '개인정보' },
+        nav: { provider: '제공자', persona: '다시 쓰기 스타일', sites: '사이트', privacy: '개인정보', support: '응원하기' },
         version: '버전 0.1 · 무료 MVP',
       },
       header: { eyebrow: '확장 프로그램 환경설정', title: '설정', lead: 'Ondrift가 어떻게 다시 쓰고 브라우저에 무엇을 남길지 선택하세요.' },
@@ -331,6 +336,11 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         cancelCta: '취소',
         deleteAllCta: '모두 삭제',
         clearHistoryCta: '기록 지우기',
+      },
+      support: {
+        sectionTitle: '응원하기',
+        sectionLead: 'Ondrift는 개인이 무료로 만들고 있는 확장 프로그램입니다. GitHub에 스타를 눌러 응원해 주세요.',
+        starCta: 'GitHub에서 스타 누르기',
       },
       saveBar: {
         saved: '변경 사항이 로컬에 저장되었습니다.',
@@ -447,7 +457,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     },
     options: {
       sidebar: {
-        nav: { provider: 'Provider', persona: 'Rewrite style', sites: 'Sites', privacy: 'Privacy' },
+        nav: { provider: 'Provider', persona: 'Rewrite style', sites: 'Sites', privacy: 'Privacy', support: 'Support' },
         version: 'Version 0.1 · Free MVP',
       },
       header: { eyebrow: 'Extension preferences', title: 'Settings', lead: 'Choose how Ondrift rewrites and what stays in your browser.' },
@@ -521,6 +531,11 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         cancelCta: 'Cancel',
         deleteAllCta: 'Delete all',
         clearHistoryCta: 'Clear history',
+      },
+      support: {
+        sectionTitle: 'Support Ondrift',
+        sectionLead: 'Ondrift is built and maintained by one person, for free. Starring it on GitHub helps others find it.',
+        starCta: 'Star on GitHub',
       },
       saveBar: {
         saved: 'Changes saved locally.',
@@ -637,7 +652,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     },
     options: {
       sidebar: {
-        nav: { provider: 'プロバイダー', persona: 'リライトスタイル', sites: 'サイト', privacy: 'プライバシー' },
+        nav: { provider: 'プロバイダー', persona: 'リライトスタイル', sites: 'サイト', privacy: 'プライバシー', support: '応援する' },
         version: 'バージョン 0.1 · 無料 MVP',
       },
       header: { eyebrow: '拡張機能の環境設定', title: '設定', lead: 'Ondrift のリライト方法とブラウザに残すデータを選択してください。' },
@@ -711,6 +726,11 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         cancelCta: 'キャンセル',
         deleteAllCta: 'すべて削除',
         clearHistoryCta: '履歴を消去',
+      },
+      support: {
+        sectionTitle: '応援する',
+        sectionLead: 'Ondrift は個人が無料で開発している拡張機能です。GitHub でスターを付けて応援してください。',
+        starCta: 'GitHub でスターを付ける',
       },
       saveBar: {
         saved: '変更内容はローカルに保存されました。',
