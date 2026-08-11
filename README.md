@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/logo.png" alt="Ondrift logo" width="96" height="96" />
+</p>
+
 # Ondrift Chrome Extension
 
 English | [한국어](docs/README.ko.md)
