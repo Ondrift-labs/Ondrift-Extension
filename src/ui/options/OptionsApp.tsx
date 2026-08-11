@@ -18,7 +18,14 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   const [validation, setValidation] = useState<'idle' | 'checking' | 'valid' | ApiKeyValidationResult['reason']>('idle');
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [confirmClear, setConfirmClear] = useState(false);
-  useEffect(() => { bridge.getSettings().then(setSettings).catch(() => setSaveState('error')); }, [bridge]);
+  useEffect(() => {
+    bridge.getSettings().then((next) => {
+      setSettings(next);
+      // Seed the banner from the last real use of the key (a rewrite or a prior verify) so
+      // e.g. an exhausted quota shows up as soon as it happens, not only after re-verifying.
+      if (next.apiKeyStatus) setValidation(next.apiKeyStatus);
+    }).catch(() => setSaveState('error'));
+  }, [bridge]);
   const uiCopy = getUiCopy(settings.language);
   const copy = uiCopy.options;
   const common = uiCopy.common;

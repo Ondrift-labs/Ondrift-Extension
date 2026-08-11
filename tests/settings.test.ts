@@ -18,6 +18,7 @@ describe("SettingsStore", () => {
       onboardingComplete: false,
       saveHistory: true,
       consentGranted: false,
+      apiKeyStatus: null,
     });
   });
 

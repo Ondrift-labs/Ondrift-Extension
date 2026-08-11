@@ -1,8 +1,28 @@
-import type { RuntimeRequest, RuntimeResponse } from "../shared/types";
+import type { ProviderErrorCode, RuntimeRequest, RuntimeResponse } from "../shared/types";
 import { getProvider } from "../providers/registry";
 import { ProviderError, serializeProviderError } from "../providers/errors";
 import { settingsStore, type SettingsStore } from "../storage/settings";
 import { historyStore, type HistoryStore } from "../storage/history";
+
+/**
+ * Codes that reflect the active API key's own health, as opposed to something unrelated
+ * to the key (e.g. a malformed rewrite response, or the site being disabled). Persisting
+ * these lets the Options page show e.g. a quota warning as soon as normal usage hits it,
+ * instead of only after the user re-verifies the key by hand.
+ */
+const API_KEY_HEALTH_CODES: ReadonlySet<ProviderErrorCode> = new Set([
+  "invalid_key",
+  "quota_exceeded",
+  "network",
+  "request_rejected",
+  "model_unavailable",
+  "service_unavailable",
+]);
+
+async function recordApiKeyStatus(settings: SettingsStore, error: unknown): Promise<void> {
+  const code = error instanceof ProviderError && API_KEY_HEALTH_CODES.has(error.code) ? error.code : null;
+  await settings.update({ apiKeyStatus: code });
+}
 
 export interface MessageHandlerDependencies {
   settings: SettingsStore;
@@ -31,11 +51,24 @@ export async function handleRuntimeRequest(
         }
         const apiKey = settings.apiKeys[settings.provider]?.trim();
         if (!apiKey) throw new ProviderError("not_configured", "Add an API key in Ondrift settings.");
-        return { ok: true, data: await dependencies.provider(settings.provider).rewrite({ ...message.payload, language: settings.language }, apiKey) };
+        try {
+          const result = await dependencies.provider(settings.provider).rewrite({ ...message.payload, language: settings.language }, apiKey);
+          await recordApiKeyStatus(dependencies.settings, null);
+          return { ok: true, data: result };
+        } catch (error) {
+          await recordApiKeyStatus(dependencies.settings, error);
+          throw error;
+        }
       }
       case "validate_api_key":
-        await dependencies.provider(message.payload.provider).validateKey(message.payload.apiKey);
-        return { ok: true, data: undefined };
+        try {
+          await dependencies.provider(message.payload.provider).validateKey(message.payload.apiKey);
+          await recordApiKeyStatus(dependencies.settings, null);
+          return { ok: true, data: undefined };
+        } catch (error) {
+          await recordApiKeyStatus(dependencies.settings, error);
+          throw error;
+        }
       case "settings_get":
         return { ok: true, data: await dependencies.settings.get() };
       case "settings_set":

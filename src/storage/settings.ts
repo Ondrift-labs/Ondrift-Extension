@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   onboardingComplete: false,
   saveHistory: true,
   consentGranted: false,
+  apiKeyStatus: null,
 };
 
 export interface LocalStorageArea {

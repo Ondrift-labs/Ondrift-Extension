@@ -6,6 +6,10 @@ export type LanguageId = 'ko' | 'en' | 'ja';
 export interface UiSettings {
   provider: ProviderId;
   apiKeyConfigured: boolean;
+  /** Set from the most recent real use of the key (a rewrite or an explicit verify), so a
+   * problem like an exhausted quota shows up as soon as it happens, not just after the
+   * user re-verifies the key by hand. Absent when the last use succeeded. */
+  apiKeyStatus?: ApiKeyValidationResult['reason'];
   persona: PersonaId;
   language: LanguageId;
   siteAccess: Record<SiteId, boolean>;

@@ -53,6 +53,13 @@ describe('OptionsApp localization', () => {
     expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({ language: 'ko' }));
   });
 
+  it('shows a quota warning from real usage on load, without a manual re-verify', async () => {
+    const bridge = createBridge({ getSettings: async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: true, apiKeyStatus: 'quota' }) });
+    render(<OptionsApp bridge={bridge} />);
+
+    expect(await screen.findByText('This key is valid, but its quota is currently exhausted.')).toBeInTheDocument();
+  });
+
   it('localizes API key validation errors distinctly from the onboarding wording', async () => {
     const bridge = createBridge({ validateApiKey: async () => ({ ok: false, reason: 'invalid_key' }) });
     render(<OptionsApp bridge={bridge} />);
