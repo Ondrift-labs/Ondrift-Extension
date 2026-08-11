@@ -70,6 +70,13 @@ export const uiBridge: UiBridge = {
       runtimePatch.consentGranted = patch.consentGranted;
       runtimePatch.onboardingComplete = patch.consentGranted;
     }
+    // `model` is stored per-provider. The Options page always saves its full settings
+    // snapshot rather than a sparse patch, so `patch.provider` is present whenever `model`
+    // is meaningfully part of this save -- including switching it back to "Default", which
+    // must still write through as `undefined` to clear a previously saved override.
+    if (patch.provider !== undefined) {
+      runtimePatch.apiModels = { [patch.provider]: patch.model } as Partial<Record<ProviderId, string>>;
+    }
     return toUiSettings(await sendRuntimeMessage<ExtensionSettings>({ type: "settings_set", payload: runtimePatch }));
   },
   async validateApiKey(provider, apiKey, model) {
