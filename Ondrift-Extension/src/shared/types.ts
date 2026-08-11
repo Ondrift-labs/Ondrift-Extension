@@ -48,6 +48,12 @@ export interface ExtensionSettings {
   onboardingComplete: boolean;
   saveHistory: boolean;
   consentGranted: boolean;
+  /**
+   * Provider error code from the most recent use of the active API key (a rewrite or an
+   * explicit verify), so the Options page can show e.g. a quota warning as soon as it
+   * happens instead of only after the user re-verifies the key. Null once a use succeeds.
+   */
+  apiKeyStatus: ProviderErrorCode | null;
 }
 
 export interface HistoryEntry {

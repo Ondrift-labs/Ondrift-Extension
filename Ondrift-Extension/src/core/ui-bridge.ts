@@ -5,14 +5,27 @@ import type {
   UiBridge,
   UiSettings,
 } from "../ui/shared/contracts";
-import type { ExtensionSettings, HistoryEntry, ProviderId } from "../shared/types";
+import type { ExtensionSettings, HistoryEntry, ProviderErrorCode, ProviderId } from "../shared/types";
 import { ProviderError } from "../providers/errors";
 import { sendRuntimeMessage } from "./rewrite-client";
+
+function mapProviderErrorCodeToReason(code: ProviderErrorCode): NonNullable<ApiKeyValidationResult["reason"]> {
+  switch (code) {
+    case "quota_exceeded": return "quota";
+    case "invalid_key": return "invalid_key";
+    case "network": return "network";
+    case "request_rejected": return "request";
+    case "model_unavailable":
+    case "service_unavailable": return "unavailable";
+    default: return "unknown";
+  }
+}
 
 function toUiSettings(settings: ExtensionSettings): UiSettings {
   return {
     provider: settings.provider,
     apiKeyConfigured: Boolean(settings.apiKeys[settings.provider]?.trim()),
+    apiKeyStatus: settings.apiKeyStatus ? mapProviderErrorCodeToReason(settings.apiKeyStatus) : undefined,
     persona: (settings.persona || "general") as PersonaId,
     language: settings.language || "en",
     siteAccess: settings.enabledSites,
@@ -38,18 +51,7 @@ function toHistoryItem(entry: HistoryEntry): HistoryItem {
 
 function validationFailure(error: unknown): ApiKeyValidationResult {
   if (!(error instanceof ProviderError)) return { ok: false, reason: "unknown" };
-  const reason = error.code === "quota_exceeded"
-    ? "quota"
-    : error.code === "invalid_key"
-      ? "invalid_key"
-      : error.code === "network"
-        ? "network"
-        : error.code === "request_rejected"
-          ? "request"
-          : error.code === "model_unavailable" || error.code === "service_unavailable"
-            ? "unavailable"
-        : "unknown";
-  return { ok: false, reason };
+  return { ok: false, reason: mapProviderErrorCodeToReason(error.code) };
 }
 
 export const uiBridge: UiBridge = {

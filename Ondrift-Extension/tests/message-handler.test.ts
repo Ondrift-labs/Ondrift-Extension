@@ -78,6 +78,36 @@ describe("handleRuntimeRequest", () => {
     expect(deps.history.add).not.toHaveBeenCalled();
   });
 
+  it("persists a quota error from real usage so Options can show it without a manual re-verify", async () => {
+    const deps = dependencies({
+      provider: vi.fn(() => ({ id: "gemini" as const, rewrite: vi.fn(async () => { throw new ProviderError("quota_exceeded", "Quota reset tomorrow", true); }), validateKey: vi.fn() })),
+    });
+    await handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "claude" } }, deps);
+    expect(deps.settings.update).toHaveBeenCalledWith({ apiKeyStatus: "quota_exceeded" });
+  });
+
+  it("clears a persisted key error once a rewrite succeeds again", async () => {
+    const deps = dependencies();
+    await handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "chatgpt" } }, deps);
+    expect(deps.settings.update).toHaveBeenCalledWith({ apiKeyStatus: null });
+  });
+
+  it("persists an explicit key verification failure the same way a real rewrite would", async () => {
+    const deps = dependencies({
+      provider: vi.fn(() => ({ id: "gemini" as const, rewrite: vi.fn(), validateKey: vi.fn(async () => { throw new ProviderError("invalid_key", "Key rejected"); }) })),
+    });
+    await handleRuntimeRequest({ type: "validate_api_key", payload: { provider: "gemini", apiKey: "bad" } }, deps);
+    expect(deps.settings.update).toHaveBeenCalledWith({ apiKeyStatus: "invalid_key" });
+  });
+
+  it("does not persist a key status for errors unrelated to the key's own health", async () => {
+    const deps = dependencies({
+      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: { gemini: "key" }, enabledSites: { chatgpt: false, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: true })), update: vi.fn(async (patch: unknown) => patch) } as never,
+    });
+    await handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "chatgpt" } }, deps);
+    expect(deps.settings.update).not.toHaveBeenCalled();
+  });
+
   it("does not treat completed onboarding as history consent", async () => {
     const deps = dependencies({
       settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: {}, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: false })) } as never,
