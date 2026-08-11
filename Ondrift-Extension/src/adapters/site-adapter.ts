@@ -20,6 +20,15 @@ export function readEditable(element: HTMLElement | null): string {
   return (element.innerText || element.textContent || "").trim();
 }
 
+/**
+ * Collapses whitespace so apply-verification isn't tripped up by formatting artifacts
+ * (contenteditable elements reflow paragraph breaks into varying runs of newlines) rather
+ * than an actual mismatch in content.
+ */
+export function normalizeWhitespace(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
+}
+
 export function writeEditable(element: HTMLElement, text: string): void {
   element.focus();
   if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) {
