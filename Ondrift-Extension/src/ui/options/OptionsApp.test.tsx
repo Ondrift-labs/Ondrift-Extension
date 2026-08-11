@@ -112,6 +112,14 @@ describe('OptionsApp localization', () => {
     expect(screen.getByLabelText('Other (enter manually)')).toHaveValue('gemini-experimental');
   });
 
+  it('opens the GitHub repo when the "Star on GitHub" button is clicked', async () => {
+    const openExternal = vi.fn();
+    render(<OptionsApp bridge={createBridge({ openExternal })} />);
+    await userEvent.click(await screen.findByRole('button', { name: /Star on GitHub/ }));
+
+    expect(openExternal).toHaveBeenCalledWith('https://github.com/Ondrift-labs/Ondrift-Extension');
+  });
+
   it('localizes API key validation errors distinctly from the onboarding wording', async () => {
     const bridge = createBridge({ validateApiKey: async () => ({ ok: false, reason: 'invalid_key' }) });
     render(<OptionsApp bridge={bridge} />);

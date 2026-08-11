@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, type ApiKeyValidationResult, type LanguageId, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
+import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, GITHUB_REPO_URL, type ApiKeyValidationResult, type LanguageId, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
 import { getUiCopy, LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '../shared/i18n';
 import { GEMINI_MODEL_CHOICES, type GeminiModelId } from '../../shared/models';
 import { Icon } from '../shared/Icon';
@@ -68,7 +68,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   }
 
   return <main className="options-shell">
-    <aside className="options-sidebar"><div className="options-brand"><img className="brand-logo" src="/icons/ondrift-32.png" alt="" /><span>Ondrift</span></div><nav aria-label={copy.header.title}><a href="#provider">{copy.sidebar.nav.provider}</a><a href="#persona">{copy.sidebar.nav.persona}</a><a href="#sites">{copy.sidebar.nav.sites}</a><a href="#privacy">{copy.sidebar.nav.privacy}</a></nav><p>{copy.sidebar.version}</p></aside>
+    <aside className="options-sidebar"><div className="options-brand"><img className="brand-logo" src="/icons/ondrift-32.png" alt="" /><span>Ondrift</span></div><nav aria-label={copy.header.title}><a href="#provider">{copy.sidebar.nav.provider}</a><a href="#persona">{copy.sidebar.nav.persona}</a><a href="#sites">{copy.sidebar.nav.sites}</a><a href="#privacy">{copy.sidebar.nav.privacy}</a><a href="#support">{copy.sidebar.nav.support}</a></nav><p>{copy.sidebar.version}</p></aside>
     <div className="options-content">
       <header><p className="ui-eyebrow">{copy.header.eyebrow}</p><h1>{copy.header.title}</h1><p>{copy.header.lead}</p></header>
 
@@ -93,6 +93,10 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
 
       <section id="privacy"><div className="section-title"><span>04</span><div><h2>{copy.privacy.sectionTitle}</h2><p>{copy.privacy.sectionLead}</p></div></div>
         <div className="settings-card settings-card--rows"><ToggleRow title={copy.privacy.historyToggleTitle} detail={copy.privacy.historyToggleDetail} checked={settings.saveHistory} onChange={(value) => update('saveHistory', value)} /><div className="privacy-row"><div><strong>{copy.privacy.responsesTitle}</strong><p>{copy.privacy.responsesDetail}</p></div><span className="locked-label">{copy.privacy.alwaysOn}</span></div><div className="privacy-row"><div><strong>{copy.privacy.deleteTitle}</strong><p>{copy.privacy.deleteDetail}</p></div>{confirmClear ? <span className="clear-actions"><button className="ui-button ui-button--quiet" onClick={() => setConfirmClear(false)}>{copy.privacy.cancelCta}</button><button className="ui-button danger-button" onClick={async () => { await bridge.clearHistory(); setConfirmClear(false); }}>{copy.privacy.deleteAllCta}</button></span> : <button className="ui-button ui-button--secondary" onClick={() => setConfirmClear(true)}>{copy.privacy.clearHistoryCta}</button>}</div></div>
+      </section>
+
+      <section id="support"><div className="section-title"><span>05</span><div><h2>{copy.support.sectionTitle}</h2><p>{copy.support.sectionLead}</p></div></div>
+        <div className="settings-card"><button className="ui-button ui-button--secondary" onClick={() => bridge.openExternal(GITHUB_REPO_URL)}>{copy.support.starCta} <Icon name="external" /></button></div>
       </section>
 
       <div className="save-bar"><span aria-live="polite">{saveState === 'saved' ? copy.saveBar.saved : saveState === 'error' ? copy.saveBar.error : copy.saveBar.idle}</span><button className="ui-button ui-button--primary" disabled={saveState === 'saving'} onClick={save}>{saveState === 'saving' ? common.saving : copy.saveBar.saveCta}</button></div>
