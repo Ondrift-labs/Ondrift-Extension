@@ -1,9 +1,10 @@
 import type { LLMProvider } from "./provider";
 import { ProviderError } from "./errors";
 import type { RewriteRequest, RewriteResult, UsageMetadata } from "../shared/types";
+import { GEMINI_MODELS } from "../shared/models";
 
 const INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
-const DEFAULT_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite"] as const;
+const DEFAULT_MODELS = GEMINI_MODELS;
 const MAX_ATTEMPTS = 3;
 
 interface GeminiResponse {

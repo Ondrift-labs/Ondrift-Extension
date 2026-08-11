@@ -68,14 +68,13 @@ describe('OptionsApp localization', () => {
     });
     render(<OptionsApp bridge={bridge} />);
 
-    const modelInput = await screen.findByLabelText('Model');
-    expect(modelInput).toHaveValue('gemini-3.5-flash-lite');
+    const modelSelect = await screen.findByLabelText('Model');
+    expect(modelSelect).toHaveValue('gemini-3.5-flash-lite');
 
-    await userEvent.clear(modelInput);
-    await userEvent.type(modelInput, 'gemini-3.6-pro');
+    await userEvent.selectOptions(modelSelect, 'gemini-3.6-flash');
     await userEvent.click(screen.getByRole('button', { name: 'Verify & save' }));
 
-    expect(validateApiKey).toHaveBeenCalledWith('gemini', '', 'gemini-3.6-pro');
+    expect(validateApiKey).toHaveBeenCalledWith('gemini', '', 'gemini-3.6-flash');
   });
 
   it('localizes API key validation errors distinctly from the onboarding wording', async () => {

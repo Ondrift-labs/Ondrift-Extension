@@ -1,4 +1,5 @@
 import type { LanguageId, PersonaId, SiteId } from './contracts';
+import type { GeminiModelId } from '../../shared/models';
 
 /** BCP-47 locale tags used for Intl formatting (dates, numbers, relative time). */
 export const LOCALE_TAGS: Record<LanguageId, string> = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' };
@@ -104,8 +105,9 @@ export interface OptionsCopy {
     getKeyCta: string;
     keySuccess: string;
     modelLabel: string;
-    modelPlaceholder: string;
     modelHelp: string;
+    modelAutoLabel: string;
+    modelOptionLabels: Record<GeminiModelId, string>;
     validation: ApiKeyValidationCopy;
   };
   persona: {
@@ -272,8 +274,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         getKeyCta: '키 발급받기',
         keySuccess: '키가 확인되어 사용할 준비가 되었습니다.',
         modelLabel: '모델',
-        modelPlaceholder: '비워두면 Ondrift 기본 모델 사용',
-        modelHelp: '할당량이 부족하면 더 저렴하거나 한도가 넉넉한 Gemini 모델 이름을 입력하세요. 이 모델을 사용할 수 없으면 Ondrift가 기본 모델로 다시 시도합니다.',
+        modelHelp: '할당량이 부족하면 더 저렴하거나 한도가 넉넉한 모델을 선택하세요. 선택한 모델을 사용할 수 없으면 Ondrift가 기본 모델로 다시 시도합니다.',
+        modelAutoLabel: '기본값 (자동 전환)',
+        modelOptionLabels: {
+          'gemini-3.6-flash': 'Gemini 3.6 Flash · 기본, 더 강력함',
+          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · 더 저렴하고 할당량이 넉넉함',
+        },
         validation: {
           invalid_key: 'Gemini가 이 키를 거부했습니다. 전체 키가 복사되었고 API 액세스 권한이 있는지 확인하세요.',
           quota: '이 키는 유효하지만 현재 할당량을 모두 사용했습니다.',
@@ -454,8 +460,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         getKeyCta: 'Get a key',
         keySuccess: 'Key verified and ready to use.',
         modelLabel: 'Model',
-        modelPlaceholder: 'Leave blank to use Ondrift’s default model',
-        modelHelp: 'If you’re running short on quota, enter a cheaper or higher-limit Gemini model name. Ondrift falls back to its default model if this one is unavailable.',
+        modelHelp: 'If you’re running short on quota, choose a cheaper or higher-limit model. Ondrift falls back to its default model if the one you pick is unavailable.',
+        modelAutoLabel: 'Default (automatic fallback)',
+        modelOptionLabels: {
+          'gemini-3.6-flash': 'Gemini 3.6 Flash · default, more capable',
+          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · cheaper, higher quota',
+        },
         validation: {
           invalid_key: 'Gemini rejected this key. Check that it was copied completely and has API access.',
           quota: 'This key is valid, but its quota is currently exhausted.',
@@ -636,8 +646,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         getKeyCta: 'キーを取得',
         keySuccess: 'キーを確認しました。利用できます。',
         modelLabel: 'モデル',
-        modelPlaceholder: '空欄の場合は Ondrift の既定モデルを使用',
-        modelHelp: '割り当てが不足している場合は、より安価または上限の高い Gemini モデル名を入力してください。このモデルが利用できない場合、Ondrift は既定モデルで再試行します。',
+        modelHelp: '割り当てが不足している場合は、より安価または上限の高いモデルを選択してください。選択したモデルが利用できない場合、Ondrift は既定モデルで再試行します。',
+        modelAutoLabel: '既定値(自動フォールバック)',
+        modelOptionLabels: {
+          'gemini-3.6-flash': 'Gemini 3.6 Flash · 既定、より高性能',
+          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · より安価で割り当てが多い',
+        },
         validation: {
           invalid_key: 'Gemini がこのキーを拒否しました。キー全体がコピーされているか、API アクセス権があるか確認してください。',
           quota: 'このキーは有効ですが、現在割り当てを使い切っています。',
