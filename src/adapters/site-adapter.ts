@@ -21,12 +21,18 @@ export function readEditable(element: HTMLElement | null): string {
 }
 
 /**
- * Collapses whitespace so apply-verification isn't tripped up by formatting artifacts
- * (contenteditable elements reflow paragraph breaks into varying runs of newlines) rather
- * than an actual mismatch in content.
+ * Collapses whitespace and strips invisible formatting characters so apply-verification
+ * isn't tripped up by editor artifacts rather than an actual mismatch in content.
+ * Contenteditable elements reflow paragraph breaks into varying runs of newlines, and
+ * rich-text editors built on frameworks like Lexical (e.g. Perplexity's composer) insert
+ * zero-width space/joiner characters at line boundaries to keep the DOM navigable — none
+ * of which `\s` matches, so they survive a plain whitespace collapse.
  */
 export function normalizeWhitespace(text: string): string {
-  return text.replace(/\s+/g, " ").trim();
+  return text
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 export function writeEditable(element: HTMLElement, text: string): void {
