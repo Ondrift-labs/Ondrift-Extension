@@ -77,6 +77,17 @@ describe('OptionsApp localization', () => {
     expect(validateApiKey).toHaveBeenCalledWith('gemini', '', 'gemini-3.6-flash');
   });
 
+  it('persists a model change through the main "Save changes" button, without requiring Verify & save', async () => {
+    const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
+    const bridge = createBridge({ saveSettings });
+    render(<OptionsApp bridge={bridge} />);
+
+    await userEvent.selectOptions(await screen.findByLabelText('Model'), 'gemini-3.6-flash-lite');
+    await userEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({ model: 'gemini-3.6-flash-lite' }));
+  });
+
   it('lets a custom model be typed in through the "Other" option', async () => {
     const validateApiKey = vi.fn(async () => ({ ok: true }));
     const bridge = createBridge({ validateApiKey });

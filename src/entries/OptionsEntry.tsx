@@ -15,6 +15,26 @@ function OptionsEntry() {
     uiBridge.getSettings().then(setSettings).catch(() => setFailed(true));
   }, []);
 
+  useEffect(() => {
+    // chrome.runtime.openOptionsPage() (e.g. the inline widget's gear icon) reuses an
+    // already-open options tab instead of opening a fresh one. If that tab was left open
+    // mid-onboarding, it would otherwise keep showing whatever onboarding step it was on
+    // forever, even after onboarding was actually finished in that same tab -- refetch
+    // settings whenever the tab regains focus so it re-decides Onboarding vs. Options.
+    function refresh() {
+      uiBridge.getSettings().then(setSettings).catch(() => undefined);
+    }
+    function onVisibilityChange() {
+      if (document.visibilityState === "visible") refresh();
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("focus", refresh);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
+
   const browserLanguage = normalizeLanguage(globalThis.navigator?.language);
   const common = getUiCopy(settings?.language ?? browserLanguage).common;
 
