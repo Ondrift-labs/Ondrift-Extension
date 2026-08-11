@@ -77,6 +77,30 @@ describe('OptionsApp localization', () => {
     expect(validateApiKey).toHaveBeenCalledWith('gemini', '', 'gemini-3.6-flash');
   });
 
+  it('lets a custom model be typed in through the "Other" option', async () => {
+    const validateApiKey = vi.fn(async () => ({ ok: true }));
+    const bridge = createBridge({ validateApiKey });
+    render(<OptionsApp bridge={bridge} />);
+    await userEvent.type(screen.getByLabelText('API key'), 'a-key');
+
+    await userEvent.selectOptions(await screen.findByLabelText('Model'), 'Other (enter manually)');
+    await userEvent.type(screen.getByLabelText('Other (enter manually)'), 'gemini-experimental');
+    await userEvent.click(screen.getByRole('button', { name: 'Verify & save' }));
+
+    expect(validateApiKey).toHaveBeenCalledWith('gemini', 'a-key', 'gemini-experimental');
+  });
+
+  it('shows the custom input already filled in when a previously saved model is not in the known list', async () => {
+    const bridge = createBridge({
+      getSettings: async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: true, model: 'gemini-experimental' }),
+    });
+    render(<OptionsApp bridge={bridge} />);
+
+    const modelSelect = await screen.findByLabelText('Model');
+    expect(modelSelect).toHaveValue('__custom__');
+    expect(screen.getByLabelText('Other (enter manually)')).toHaveValue('gemini-experimental');
+  });
+
   it('localizes API key validation errors distinctly from the onboarding wording', async () => {
     const bridge = createBridge({ validateApiKey: async () => ({ ok: false, reason: 'invalid_key' }) });
     render(<OptionsApp bridge={bridge} />);
