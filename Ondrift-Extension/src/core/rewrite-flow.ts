@@ -23,7 +23,7 @@ export class RewriteSession {
     if (!this.result) throw new Error("No rewrite is ready to apply.");
     const expected = normalizeWhitespace(this.result.improvedText);
     for (let attempt = 0; attempt < 2; attempt += 1) {
-      this.adapter.setPromptText(this.result.improvedText);
+      await this.adapter.setPromptText(this.result.improvedText);
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
       if (normalizeWhitespace(this.adapter.getPromptText()) === expected) {
         this.applied = true;

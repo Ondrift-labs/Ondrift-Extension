@@ -48,25 +48,25 @@ describe("site adapter URL matching", () => {
     expect(adapter.getPromptText()).toBe("improved");
   });
 
-  it("reads and applies Perplexity textarea prompts", () => {
+  it("reads and applies Perplexity textarea prompts", async () => {
     document.body.innerHTML = '<textarea placeholder="Ask anything">draft</textarea>';
     const adapter = new PerplexityAdapter();
     expect(adapter.getPromptText()).toBe("draft");
-    adapter.setPromptText("improved");
+    await adapter.setPromptText("improved");
     expect(adapter.getPromptText()).toBe("improved");
   });
 
-  it("prefers Perplexity's real editor over an aria-hidden helper input", () => {
+  it("prefers Perplexity's real editor over an aria-hidden helper input", async () => {
     document.body.innerHTML = '<textarea aria-hidden="true" placeholder="Ask anything">hidden</textarea><div contenteditable="true" role="textbox">visible</div>';
     const adapter = new PerplexityAdapter();
 
     expect(adapter.getPromptText()).toBe("visible");
-    adapter.setPromptText("improved");
+    await adapter.setPromptText("improved");
     expect(document.querySelector("textarea")?.value).toBe("hidden");
     expect(adapter.getPromptText()).toBe("improved");
   });
 
-  it("updates Perplexity's controlled editor state before submit", () => {
+  it("updates Perplexity's controlled editor state before submit", async () => {
     document.body.innerHTML = '<div contenteditable="true" role="textbox">draft</div><button aria-label="Submit"></button>';
     const editor = document.querySelector<HTMLElement>("[contenteditable]")!;
     let controlledValue = "draft";
@@ -79,12 +79,33 @@ describe("site adapter URL matching", () => {
     document.querySelector("button")!.addEventListener("click", () => { submittedValue = controlledValue; });
 
     const adapter = new PerplexityAdapter();
-    adapter.setPromptText("improved");
+    await adapter.setPromptText("improved");
     document.querySelector<HTMLButtonElement>("button")!.click();
 
     expect(adapter.getPromptText()).toBe("improved");
     expect(submittedValue).toBe("improved");
     expect(document.execCommand).not.toHaveBeenCalled();
+  });
+
+  it("replaces rather than appends when the editor's selection sync lags a tick, as Lexical's does", async () => {
+    document.body.innerHTML = '<div contenteditable="true" role="textbox" data-lexical-editor="true">original prompt</div>';
+    const editor = document.querySelector<HTMLElement>("[contenteditable]")!;
+    // Stands in for Lexical: it only trusts the live DOM selection once its own
+    // (asynchronous) selection sync has had a tick to run. Until then it falls back to
+    // its last-known cursor position (end of the existing text), which is what produces
+    // the append-instead-of-replace bug this test guards against.
+    let selectionSynced = false;
+    setTimeout(() => { selectionSynced = true; }, 0);
+    editor.addEventListener("paste", (event) => {
+      event.preventDefault();
+      const pasted = (event as ClipboardEvent).clipboardData?.getData("text/plain") ?? "";
+      editor.textContent = selectionSynced ? pasted : editor.textContent + pasted;
+    });
+
+    const adapter = new PerplexityAdapter();
+    await adapter.setPromptText("improved prompt");
+
+    expect(adapter.getPromptText()).toBe("improved prompt");
   });
 
   it("lets a controlled contenteditable own a cancelled beforeinput without a second insertion", () => {

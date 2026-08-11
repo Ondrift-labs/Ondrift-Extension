@@ -8,7 +8,7 @@ export interface SiteAdapter {
   getInputElement(): HTMLElement | null;
   getComposerAnchor?(input: HTMLElement): HTMLElement | null;
   getPromptText(): string;
-  setPromptText(text: string): void;
+  setPromptText(text: string): void | Promise<void>;
   getConversationTitle(): string | null;
   getConversationUrl(): string;
   onSubmit(callback: SubmitListener): () => void;
@@ -35,6 +35,15 @@ export function normalizeWhitespace(text: string): string {
     .trim();
 }
 
+/** Selects an element's full contents, mirroring what a user does before typing over a selection. */
+export function selectAllContents(element: HTMLElement): void {
+  const selection = window.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(element);
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+}
+
 export function writeEditable(element: HTMLElement, text: string): void {
   element.focus();
   if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) {
@@ -43,10 +52,7 @@ export function writeEditable(element: HTMLElement, text: string): void {
     setter?.call(element, text);
   } else {
     const selection = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(element);
-    selection?.removeAllRanges();
-    selection?.addRange(range);
+    selectAllContents(element);
     const beforeInputAccepted = element.dispatchEvent(new InputEvent("beforeinput", {
       bubbles: true,
       cancelable: true,
@@ -73,10 +79,7 @@ export function writeEditableThroughPaste(element: HTMLElement, text: string): b
 
   element.focus();
   const selection = window.getSelection();
-  const range = document.createRange();
-  range.selectNodeContents(element);
-  selection?.removeAllRanges();
-  selection?.addRange(range);
+  selectAllContents(element);
 
   const transfer = typeof DataTransfer === "undefined"
     ? { getData: (type: string) => type === "text/plain" ? text : "" }
