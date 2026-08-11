@@ -1,4 +1,4 @@
-import type { SiteAdapter } from "../adapters/site-adapter";
+import { normalizeWhitespace, type SiteAdapter } from "../adapters/site-adapter";
 import type { HistoryEntry, RewriteResult } from "../shared/types";
 import { rewritePrompt, sendRuntimeMessage } from "./rewrite-client";
 
@@ -21,11 +21,11 @@ export class RewriteSession {
 
   async apply(): Promise<void> {
     if (!this.result) throw new Error("No rewrite is ready to apply.");
-    const expected = this.result.improvedText.trim();
+    const expected = normalizeWhitespace(this.result.improvedText);
     for (let attempt = 0; attempt < 2; attempt += 1) {
       this.adapter.setPromptText(this.result.improvedText);
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
-      if (this.adapter.getPromptText() === expected) {
+      if (normalizeWhitespace(this.adapter.getPromptText()) === expected) {
         this.applied = true;
         return;
       }
@@ -44,7 +44,7 @@ export class RewriteSession {
         improvedText: this.result?.improvedText,
         score: this.result?.score,
         rationale: this.result?.rationale,
-        applied: this.applied && submittedText === this.result?.improvedText,
+        applied: this.applied && this.result !== undefined && normalizeWhitespace(submittedText) === normalizeWhitespace(this.result.improvedText),
         createdAt: Date.now(),
         usageMetadata: this.result?.usageMetadata,
       };

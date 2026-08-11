@@ -31,6 +31,23 @@ describe("RewriteSession apply", () => {
     expect(prompt).toBe("improved prompt");
   });
 
+  it("accepts a readback whose line breaks were reflowed by a contenteditable editor", async () => {
+    let prompt = "original prompt";
+    vi.stubGlobal("chrome", { runtime: { sendMessage: vi.fn(async () => ({
+      ok: true,
+      data: { improvedText: "1. **Step one**:\n   - detail\n\n2. **Step two**:\n   - detail", score: 90, rationale: "clearer" },
+    })) } });
+    // A contenteditable readback frequently normalizes blank-line paragraph breaks into a
+    // different run of newlines/spaces than what was written, even though the visible content matches.
+    const session = new RewriteSession(adapter(
+      (text) => { prompt = text.replace(/\n\n/g, "\n").replace(/ {3}/g, " "); },
+      () => prompt,
+    ));
+
+    await session.rewrite();
+    await expect(session.apply()).resolves.toBeUndefined();
+  });
+
   it("rejects a false apply when a controlled editor restores its old value", async () => {
     const prompt = "original prompt";
     const setPromptText = vi.fn();
