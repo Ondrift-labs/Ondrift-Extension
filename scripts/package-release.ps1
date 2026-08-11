@@ -22,7 +22,27 @@ if (Test-Path -LiteralPath $archivePath) {
   Remove-Item -LiteralPath $archivePath -Force
 }
 
-Compress-Archive -Path (Join-Path $distPath "*") -DestinationPath $archivePath -CompressionLevel Optimal
+# Compress-Archive writes zip entries with backslash path separators on
+# Windows PowerShell 5.1, which violates the ZIP spec (entries must use "/").
+# Tools that follow the spec strictly (macOS Archive Utility, Linux unzip)
+# then treat e.g. "assets\foo.js" as a single literal filename instead of a
+# folder, so the extracted extension is missing manifest.json at the top
+# level. Build the archive directly with System.IO.Compression instead, and
+# force forward slashes for every entry name.
+Add-Type -AssemblyName System.IO.Compression
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+$zip = [System.IO.Compression.ZipFile]::Open($archivePath, [System.IO.Compression.ZipArchiveMode]::Create)
+try {
+  Get-ChildItem -LiteralPath $distPath -Recurse -File | ForEach-Object {
+    $relativePath = $_.FullName.Substring($distPath.Length + 1).Replace("\", "/")
+    [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+      $zip, $_.FullName, $relativePath, [System.IO.Compression.CompressionLevel]::Optimal
+    ) | Out-Null
+  }
+} finally {
+  $zip.Dispose()
+}
 
 $archive = Get-Item -LiteralPath $archivePath
 Write-Host "Created $($archive.FullName) ($($archive.Length) bytes)"
