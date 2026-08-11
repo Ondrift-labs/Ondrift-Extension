@@ -277,8 +277,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         modelHelp: '할당량이 부족하면 더 저렴하거나 한도가 넉넉한 모델을 선택하세요. 선택한 모델을 사용할 수 없으면 Ondrift가 기본 모델로 다시 시도합니다.',
         modelAutoLabel: '기본값 (자동 전환)',
         modelOptionLabels: {
-          'gemini-3.6-flash': 'Gemini 3.6 Flash · 기본, 더 강력함',
-          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · 더 저렴하고 할당량이 넉넉함',
+          'gemini-3.6-pro': 'Gemini 3.6 Pro · 가장 강력함, 가장 비쌈',
+          'gemini-3.6-flash': 'Gemini 3.6 Flash · 기본, 균형잡힘',
+          'gemini-3.6-flash-lite': 'Gemini 3.6 Flash-Lite · 더 저렴함',
+          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · 가장 저렴하고 할당량이 넉넉함',
         },
         validation: {
           invalid_key: 'Gemini가 이 키를 거부했습니다. 전체 키가 복사되었고 API 액세스 권한이 있는지 확인하세요.',
@@ -463,8 +465,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         modelHelp: 'If you’re running short on quota, choose a cheaper or higher-limit model. Ondrift falls back to its default model if the one you pick is unavailable.',
         modelAutoLabel: 'Default (automatic fallback)',
         modelOptionLabels: {
-          'gemini-3.6-flash': 'Gemini 3.6 Flash · default, more capable',
-          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · cheaper, higher quota',
+          'gemini-3.6-pro': 'Gemini 3.6 Pro · most capable, priciest',
+          'gemini-3.6-flash': 'Gemini 3.6 Flash · default, balanced',
+          'gemini-3.6-flash-lite': 'Gemini 3.6 Flash-Lite · cheaper',
+          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · cheapest, highest quota',
         },
         validation: {
           invalid_key: 'Gemini rejected this key. Check that it was copied completely and has API access.',
@@ -649,8 +653,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         modelHelp: '割り当てが不足している場合は、より安価または上限の高いモデルを選択してください。選択したモデルが利用できない場合、Ondrift は既定モデルで再試行します。',
         modelAutoLabel: '既定値(自動フォールバック)',
         modelOptionLabels: {
-          'gemini-3.6-flash': 'Gemini 3.6 Flash · 既定、より高性能',
-          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · より安価で割り当てが多い',
+          'gemini-3.6-pro': 'Gemini 3.6 Pro · 最も高性能、最も高価',
+          'gemini-3.6-flash': 'Gemini 3.6 Flash · 既定、バランス型',
+          'gemini-3.6-flash-lite': 'Gemini 3.6 Flash-Lite · より安価',
+          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · 最も安価で割り当てが多い',
         },
         validation: {
           invalid_key: 'Gemini がこのキーを拒否しました。キー全体がコピーされているか、API アクセス権があるか確認してください。',
