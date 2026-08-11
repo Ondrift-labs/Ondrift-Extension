@@ -108,6 +108,8 @@ export interface OptionsCopy {
     modelHelp: string;
     modelAutoLabel: string;
     modelOptionLabels: Record<GeminiModelId, string>;
+    modelCustomLabel: string;
+    modelCustomPlaceholder: string;
     validation: ApiKeyValidationCopy;
   };
   persona: {
@@ -282,6 +284,8 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           'gemini-3.6-flash-lite': 'Gemini 3.6 Flash-Lite · 더 저렴함',
           'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · 가장 저렴하고 할당량이 넉넉함',
         },
+        modelCustomLabel: '기타 (직접 입력)',
+        modelCustomPlaceholder: 'Gemini 모델 이름 입력, 예: gemini-3.6-flash',
         validation: {
           invalid_key: 'Gemini가 이 키를 거부했습니다. 전체 키가 복사되었고 API 액세스 권한이 있는지 확인하세요.',
           quota: '이 키는 유효하지만 현재 할당량을 모두 사용했습니다.',
@@ -470,6 +474,8 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           'gemini-3.6-flash-lite': 'Gemini 3.6 Flash-Lite · cheaper',
           'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · cheapest, highest quota',
         },
+        modelCustomLabel: 'Other (enter manually)',
+        modelCustomPlaceholder: 'Enter a Gemini model name, e.g. gemini-3.6-flash',
         validation: {
           invalid_key: 'Gemini rejected this key. Check that it was copied completely and has API access.',
           quota: 'This key is valid, but its quota is currently exhausted.',
@@ -658,6 +664,8 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           'gemini-3.6-flash-lite': 'Gemini 3.6 Flash-Lite · より安価',
           'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · 最も安価で割り当てが多い',
         },
+        modelCustomLabel: 'その他(直接入力)',
+        modelCustomPlaceholder: 'Gemini モデル名を入力、例: gemini-3.6-flash',
         validation: {
           invalid_key: 'Gemini がこのキーを拒否しました。キー全体がコピーされているか、API アクセス権があるか確認してください。',
           quota: 'このキーは有効ですが、現在割り当てを使い切っています。',
