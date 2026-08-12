@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, GITHUB_REPO_URL, type ApiKeyValidationResult, type LanguageId, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
 import { getUiCopy, LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '../shared/i18n';
 import { GEMINI_MODEL_CHOICES, type GeminiModelId } from '../../shared/models';
@@ -37,6 +37,12 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   const [validation, setValidation] = useState<'idle' | 'checking' | 'valid' | ApiKeyValidationResult['reason']>('idle');
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [confirmClear, setConfirmClear] = useState(false);
+  const autosaveTimer = useRef<number | null>(null);
+  const saveRequest = useRef(0);
+  const settingsRef = useRef(settings);
+  const savedSettingsRef = useRef(savedSettings);
+  settingsRef.current = settings;
+  savedSettingsRef.current = savedSettings;
   useEffect(() => {
     bridge.getSettings().then((next) => {
       setSettings(next);
@@ -73,13 +79,62 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
     return () => window.removeEventListener('beforeunload', confirmUnsavedChanges);
   }, [hasUnsavedChanges]);
 
+  useEffect(() => {
+    if (saveState !== 'saved') return;
+    const timer = window.setTimeout(() => setSaveState('idle'), 2800);
+    return () => window.clearTimeout(timer);
+  }, [saveState]);
+
   function update<K extends keyof UiSettings>(key: K, value: UiSettings[K]) { setSettings((current) => ({ ...current, [key]: value })); setSaveState('idle'); }
   function updateSite(site: SiteId, value: boolean) { update('siteAccess', { ...settings.siteAccess, [site]: value }); }
-  // Keeps the picked model in `settings` (not just local state) so it rides along with the
-  // main "Save changes" button too, instead of only ever being persisted through a
-  // successful "Verify & save".
+  // Keeps the picked model in `settings` (not just local state) so it is included in the
+  // same automatic save as the rest of the preferences.
   function applyModel(next: string) { setModel(next); update('model', next.trim() || undefined); }
-  async function save() { setSaveState('saving'); try { const saved = await bridge.saveSettings(settings); setSettings(saved); setSavedSettings(saved); setSaveState('saved'); } catch { setSaveState('error'); } }
+  const save = useCallback(async (snapshot: UiSettings) => {
+    const requestId = ++saveRequest.current;
+    setSaveState('saving');
+    try {
+      const saved = await bridge.saveSettings(snapshot);
+      if (requestId !== saveRequest.current) return;
+      setSavedSettings(saved);
+      setSettings((current) => editableSettingsMatch(current, snapshot) ? saved : current);
+      setSaveState('saved');
+    } catch {
+      if (requestId !== saveRequest.current) return;
+      setSaveState('error');
+    }
+  }, [bridge]);
+
+  useEffect(() => {
+    if (savedSettings === null || editableSettingsMatch(settings, savedSettings)) return;
+    const snapshot = settings;
+    const timer = window.setTimeout(() => {
+      autosaveTimer.current = null;
+      void save(snapshot);
+    }, 700);
+    autosaveTimer.current = timer;
+    return () => {
+      window.clearTimeout(timer);
+      if (autosaveTimer.current === timer) autosaveTimer.current = null;
+    };
+  }, [save, savedSettings, settings]);
+
+  useEffect(() => {
+    const saveBeforeTabSwitch = () => {
+      if (document.visibilityState !== 'hidden') return;
+      const current = settingsRef.current;
+      const saved = savedSettingsRef.current;
+      if (saved === null || editableSettingsMatch(current, saved)) return;
+      if (autosaveTimer.current !== null) {
+        window.clearTimeout(autosaveTimer.current);
+        autosaveTimer.current = null;
+      }
+      void save(current);
+    };
+    document.addEventListener('visibilitychange', saveBeforeTabSwitch);
+    return () => document.removeEventListener('visibilitychange', saveBeforeTabSwitch);
+  }, [save]);
+
   async function verify() {
     setValidation('checking');
     try {
@@ -90,6 +145,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
         const savedModel = trimmedModel || undefined;
         setSettings((current) => ({ ...current, apiKeyConfigured: true, model: savedModel }));
         setSavedSettings((current) => current && ({ ...current, provider: settings.provider, apiKeyConfigured: true, model: savedModel }));
+        setSaveState('saved');
       }
     } catch { setValidation('network'); }
   }
@@ -126,7 +182,12 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
         <div className="settings-card"><button className="ui-button ui-button--secondary" onClick={() => bridge.openExternal(GITHUB_REPO_URL)}>{copy.support.starCta} <Icon name="external" /></button></div>
       </section>
 
-      <div className="save-bar"><span aria-live="polite">{saveState === 'saved' ? copy.saveBar.saved : saveState === 'error' ? copy.saveBar.error : copy.saveBar.idle}</span><button className="ui-button ui-button--primary" disabled={saveState === 'saving'} onClick={save}>{saveState === 'saving' ? common.saving : copy.saveBar.saveCta}</button></div>
+      <div className="autosave-note"><Icon name="check" /><span>{copy.saveBar.idle}</span></div>
     </div>
+    {saveState !== 'idle' && <div className={`autosave-toast autosave-toast--${saveState}`} role={saveState === 'error' ? 'alert' : 'status'} aria-live={saveState === 'error' ? 'assertive' : 'polite'}>
+      <span className="autosave-toast__icon"><Icon name={saveState === 'error' ? 'close' : 'check'} /></span>
+      <div><strong>{saveState === 'saving' ? copy.saveBar.saving : saveState === 'saved' ? copy.saveBar.savedTitle : copy.saveBar.errorTitle}</strong><p>{saveState === 'saving' ? copy.saveBar.savingDetail : saveState === 'saved' ? copy.saveBar.saved : copy.saveBar.error}</p></div>
+      {saveState === 'error' && <button className="ui-button ui-button--quiet" onClick={() => void save(settings)}>{copy.saveBar.retryCta}</button>}
+    </div>}
   </main>;
 }

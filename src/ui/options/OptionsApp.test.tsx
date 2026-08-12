@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, type UiBridge } from '../shared/contracts';
@@ -43,14 +43,14 @@ describe('OptionsApp localization', () => {
     expect(saveSettings).not.toHaveBeenCalled();
   });
 
-  it('persists the language only once "Save changes" is clicked', async () => {
+  it('automatically persists a language change and shows a localized toast', async () => {
     const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
     render(<OptionsApp bridge={createBridge({ saveSettings })} />);
     await screen.findByRole('heading', { name: 'Settings' });
     await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Language' }), '한국어');
-    await userEvent.click(await screen.findByRole('button', { name: '변경 사항 저장' }));
 
-    expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({ language: 'ko' }));
+    await waitFor(() => expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({ language: 'ko' })));
+    expect(await screen.findByRole('status')).toHaveTextContent('자동 저장 완료');
   });
 
   it('warns before leaving only while editable settings have unsaved changes', async () => {
@@ -66,7 +66,7 @@ describe('OptionsApp localization', () => {
     window.dispatchEvent(dirtyEvent);
     expect(dirtyEvent.defaultPrevented).toBe(true);
 
-    await userEvent.click(screen.getByRole('button', { name: '변경 사항 저장' }));
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('자동 저장 완료'));
     const savedEvent = new Event('beforeunload', { cancelable: true });
     window.dispatchEvent(savedEvent);
     expect(savedEvent.defaultPrevented).toBe(false);
@@ -106,15 +106,50 @@ describe('OptionsApp localization', () => {
     expect(validateApiKey).toHaveBeenCalledWith('gemini', '', 'gemini-3.6-flash');
   });
 
-  it('persists a model change through the main "Save changes" button, without requiring Verify & save', async () => {
+  it('automatically persists a model change without requiring Verify & save', async () => {
     const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
     const bridge = createBridge({ saveSettings });
     render(<OptionsApp bridge={bridge} />);
 
     await userEvent.selectOptions(await screen.findByLabelText('Model'), 'gemini-3.6-flash-lite');
-    await userEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
-    expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({ model: 'gemini-3.6-flash-lite' }));
+    await waitFor(() => expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({ model: 'gemini-3.6-flash-lite' })));
+  });
+
+  it('does not auto-save an unverified API key', async () => {
+    const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
+    render(<OptionsApp bridge={createBridge({ saveSettings })} />);
+
+    await userEvent.type(await screen.findByLabelText('API key'), 'unverified-key');
+    await new Promise((resolve) => window.setTimeout(resolve, 800));
+
+    expect(saveSettings).not.toHaveBeenCalled();
+  });
+
+  it('flushes a pending settings change as soon as the tab becomes hidden', async () => {
+    const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
+    render(<OptionsApp bridge={createBridge({ saveSettings })} />);
+    await userEvent.selectOptions(await screen.findByLabelText('Model'), 'gemini-3.6-flash');
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
+
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    await waitFor(() => expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({ model: 'gemini-3.6-flash' })));
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
+  });
+
+  it('keeps an accessible error toast visible and retries a failed auto-save', async () => {
+    const saveSettings = vi.fn()
+      .mockRejectedValueOnce(new Error('storage unavailable'))
+      .mockImplementation(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
+    render(<OptionsApp bridge={createBridge({ saveSettings })} />);
+
+    await userEvent.selectOptions(await screen.findByLabelText('Language'), '日本語');
+    expect(await screen.findByRole('alert')).toHaveTextContent('自動保存に失敗しました');
+    await userEvent.click(screen.getByRole('button', { name: '再試行' }));
+
+    await waitFor(() => expect(saveSettings).toHaveBeenCalledTimes(2));
+    expect(await screen.findByRole('status')).toHaveTextContent('自動保存しました');
   });
 
   it('lets a custom model be typed in through the "Other" option', async () => {

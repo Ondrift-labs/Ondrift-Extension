@@ -143,7 +143,7 @@ export interface OptionsCopy {
     sectionLead: string;
     starCta: string;
   };
-  saveBar: { saved: string; error: string; idle: string; saveCta: string };
+  saveBar: { saving: string; savingDetail: string; savedTitle: string; saved: string; errorTitle: string; error: string; idle: string; retryCta: string };
 }
 
 export interface PopupCopy {
@@ -347,10 +347,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         starCta: 'GitHub에서 스타 누르기',
       },
       saveBar: {
+        saving: '자동 저장 중',
+        savingDetail: '변경 사항을 이 브라우저에 저장하고 있습니다.',
+        savedTitle: '자동 저장 완료',
         saved: '변경 사항이 로컬에 저장되었습니다.',
+        errorTitle: '자동 저장 실패',
         error: '변경 사항을 저장하지 못했습니다.',
-        idle: '설정은 이 기기에만 저장됩니다.',
-        saveCta: '변경 사항 저장',
+        idle: '변경 사항은 이 기기에 자동으로 저장됩니다.',
+        retryCta: '다시 시도',
       },
     },
     popup: {
@@ -546,10 +550,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         starCta: 'Star on GitHub',
       },
       saveBar: {
+        saving: 'Saving automatically',
+        savingDetail: 'Saving your changes in this browser.',
+        savedTitle: 'Changes saved',
         saved: 'Changes saved locally.',
+        errorTitle: 'Auto-save failed',
         error: 'Could not save changes.',
-        idle: 'Settings stay on this device.',
-        saveCta: 'Save changes',
+        idle: 'Changes are saved automatically on this device.',
+        retryCta: 'Try again',
       },
     },
     popup: {
@@ -745,10 +753,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         starCta: 'GitHub でスターを付ける',
       },
       saveBar: {
+        saving: '自動保存中',
+        savingDetail: '変更内容をこのブラウザに保存しています。',
+        savedTitle: '自動保存しました',
         saved: '変更内容はローカルに保存されました。',
+        errorTitle: '自動保存に失敗しました',
         error: '変更内容を保存できませんでした。',
-        idle: '設定はこの端末にのみ保存されます。',
-        saveCta: '変更を保存',
+        idle: '変更内容はこの端末に自動保存されます。',
+        retryCta: '再試行',
       },
     },
     popup: {
@@ -944,10 +956,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         starCta: '在 GitHub 上加星',
       },
       saveBar: {
+        saving: '正在自动保存',
+        savingDetail: '正在将更改保存到此浏览器。',
+        savedTitle: '已自动保存',
         saved: '更改已保存在本地。',
+        errorTitle: '自动保存失败',
         error: '无法保存更改。',
-        idle: '设置只保留在这台设备上。',
-        saveCta: '保存更改',
+        idle: '更改会自动保存在此设备上。',
+        retryCta: '重试',
       },
     },
     popup: {
