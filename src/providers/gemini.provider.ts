@@ -128,7 +128,7 @@ export class GeminiProvider implements LLMProvider {
   async rewrite(request: RewriteRequest, apiKey: string): Promise<RewriteResult> {
     if (!apiKey.trim()) throw new ProviderError("not_configured", "Add a Gemini API key in Ondrift settings.");
 
-    const outputLanguage = request.language === "ko" ? "Korean" : request.language === "ja" ? "Japanese" : "English";
+    const outputLanguage = request.language === "ko" ? "Korean" : request.language === "ja" ? "Japanese" : request.language === "zh" ? "Simplified Chinese" : "English";
     const delimiter = `ONDRIFT_USER_PROMPT_${crypto.randomUUID()}`;
     const systemInstruction = [
       "You improve prompts for another AI system.",

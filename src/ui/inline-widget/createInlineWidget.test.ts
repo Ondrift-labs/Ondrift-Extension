@@ -76,7 +76,7 @@ describe('createInlineWidget', () => {
     expect(root.querySelector('style')?.textContent).toContain(':host([hidden])');
   });
 
-  it('switches the inline interface between Korean, English, and Japanese', () => {
+  it('switches the inline interface between Korean, English, Japanese, and Simplified Chinese', () => {
     const widget = createInlineWidget(handlers());
 
     widget.setLanguage('ko');
@@ -85,6 +85,8 @@ describe('createInlineWidget', () => {
     expect(widget.element.shadowRoot?.textContent).toContain('改善して採点');
     widget.setLanguage('en');
     expect(widget.element.shadowRoot?.textContent).toContain('Rewrite & score');
+    widget.setLanguage('zh');
+    expect(widget.element.shadowRoot?.textContent).toContain('优化并评分');
   });
 
   it('offers a one-click page reload when the extension context is disconnected', () => {

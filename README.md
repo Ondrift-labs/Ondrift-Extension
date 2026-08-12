@@ -11,7 +11,7 @@ prompts before they are sent on ChatGPT, Claude, Gemini, and Perplexity. Gemini
 is called directly from the extension service worker with an API key supplied
 by the user. The Free MVP has no Ondrift backend, account, or cloud sync.
 
-The settings interface and inline widget support Korean, English, and Japanese.
+The settings interface and inline widget support Korean, English, Japanese, and Simplified Chinese.
 The selected language is also used for rewritten prompts and rationales.
 
 ## Install from a GitHub ZIP

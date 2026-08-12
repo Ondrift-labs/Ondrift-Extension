@@ -5,6 +5,7 @@ const RELATIVE_TIME_UNITS: Record<LanguageId, { justNow: string; minutes: (n: nu
   ko: { justNow: '방금 전', minutes: (n) => `${n}분 전`, hours: (n) => `${n}시간 전`, days: (n) => `${n}일 전` },
   en: { justNow: 'Just now', minutes: (n) => `${n}m ago`, hours: (n) => `${n}h ago`, days: (n) => `${n}d ago` },
   ja: { justNow: 'たった今', minutes: (n) => `${n}分前`, hours: (n) => `${n}時間前`, days: (n) => `${n}日前` },
+  zh: { justNow: '刚刚', minutes: (n) => `${n}分钟前`, hours: (n) => `${n}小时前`, days: (n) => `${n}天前` },
 };
 
 export function formatRelativeTime(timestamp: number, now = Date.now(), language: LanguageId = 'en'): string {

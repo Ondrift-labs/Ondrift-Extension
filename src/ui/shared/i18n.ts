@@ -2,12 +2,12 @@ import type { LanguageId, PersonaId, SiteId } from './contracts';
 import type { GeminiModelId } from '../../shared/models';
 
 /** BCP-47 locale tags used for Intl formatting (dates, numbers, relative time). */
-export const LOCALE_TAGS: Record<LanguageId, string> = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' };
+export const LOCALE_TAGS: Record<LanguageId, string> = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN' };
 
 /** Each language's own name for itself, shown identically regardless of the active UI language. */
-export const LANGUAGE_NAMES: Record<LanguageId, string> = { ko: '한국어', en: 'English', ja: '日本語' };
+export const LANGUAGE_NAMES: Record<LanguageId, string> = { ko: '한국어', en: 'English', ja: '日本語', zh: '简体中文' };
 
-export const SUPPORTED_LANGUAGES: readonly LanguageId[] = ['ko', 'en', 'ja'];
+export const SUPPORTED_LANGUAGES: readonly LanguageId[] = ['ko', 'en', 'ja', 'zh'];
 
 export function isLanguageId(value: unknown): value is LanguageId {
   return typeof value === 'string' && (SUPPORTED_LANGUAGES as readonly string[]).includes(value);
@@ -788,6 +788,205 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         deleteAria: 'ローカル履歴から削除',
       },
       footer: { storedLabel: 'この端末に保存', settingsCta: 'プライバシーと設定' },
+    },
+  },
+  zh: {
+    common: {
+      brandHomeAria: 'Ondrift 主页',
+      back: '返回',
+      checking: '正在检查…',
+      saving: '正在保存…',
+      languageLabel: '语言',
+      settingsLoading: '正在加载 Ondrift 设置…',
+      settingsLoadErrorTitle: '无法加载 Ondrift 设置',
+      settingsLoadErrorBody: '请重新加载此页面。你的本地设置和历史记录没有被更改。',
+    },
+    onboarding: {
+      stepCount: (step, total) => `第 ${step} 步，共 ${total} 步`,
+      languageSelectorAria: '选择界面语言',
+      intro: {
+        eyebrow: '发送前，让提示词更清晰',
+        title: '为每一次对话带来更好的指令。',
+        lead: 'Ondrift 会出现在 ChatGPT、Claude、Gemini 和 Perplexity 的输入框旁。它会为草稿评分，说明缺少什么，并提供可一键应用的改写版本。',
+        promises: [
+          { title: '就在你常用的地方使用', body: '在支持的 AI 网站中使用同一套专注的工作流。' },
+          { title: '你的密钥，只留在浏览器里', body: '你的 Gemini API 密钥只保存在扩展的本地存储中。' },
+          { title: '没有开发者服务器', body: '提示词会直接发送到 Gemini，历史记录只保留在这台设备上。' },
+        ],
+        cta: '设置 Gemini',
+      },
+      key: {
+        eyebrow: '连接 Gemini',
+        title: '用三个简单步骤获取密钥。',
+        step1Title: '打开 Google AI Studio',
+        step1Body: '使用你的 Google 账号登录。Gemini 的用量限制由 Google 管理。',
+        step1Cta: '打开 AI Studio',
+        step2Title: '创建 API 密钥',
+        step2Body: '选择“Create API key”，选择一个项目，然后复制生成的值。',
+        step3Label: '粘贴到这里并验证',
+        step3Placeholder: 'AIza…',
+        verifyCta: '验证密钥',
+        step3Help: '验证会发送一次很小的测试请求。你的密钥不会发送给 Ondrift。',
+        keySuccess: '密钥已验证。接下来可以设置隐私选项。',
+        validation: {
+          invalid_key: '此密钥未被接受。请从 Google AI Studio 复制完整密钥后重试。',
+          quota: '密钥有效，但当前配额已用完。请检查项目配额，或明天再试。',
+          network: 'Chrome 无法连接到 Gemini。请检查浏览器、VPN 或防火墙访问权限后重试。',
+          request: 'Gemini 拒绝了验证请求。请重新加载 Ondrift 后重试。',
+          unavailable: '此项目暂时无法使用 Gemini。Ondrift 也尝试了兼容的备用模型。',
+          unknown: '无法验证此密钥。没有保存任何内容，请重试。',
+        },
+        continueCta: '继续',
+      },
+      privacy: {
+        eyebrow: '隐私选择',
+        title: '默认本地保存，选择清晰明确。',
+        routeAria: '你的数据如何流动',
+        routePrompt: { title: '你的提示词', detail: '支持的 AI 网站' },
+        routeApi: { title: 'Gemini API', detail: '使用你的密钥' },
+        routeHistory: { title: '本地历史记录', detail: '仅限此浏览器' },
+        notes: [
+          { lead: 'Ondrift 会读取:', rest: ' 你要求改写的文本、支持的网站、评分，以及你是否应用了建议。' },
+          { lead: 'Ondrift 不会收集:', rest: ' AI 回复内容、浏览历史，或不支持网站上的数据。' },
+          { lead: '控制权始终在你手中。', rest: ' 你可以随时在设置中关闭网站、停止保存历史记录，或删除本地记录。' },
+        ],
+        consentLabel: '我了解提示词文本的处理方式，并同意在支持的网站上启用 Ondrift。',
+        enableCta: '启用 Ondrift',
+      },
+      complete: {
+        eyebrow: '设置完成',
+        title: '你可以开始写了。',
+        body: '打开 ChatGPT、Claude、Gemini 或 Perplexity 并开始输入提示词。当有可改进的内容时，Ondrift 会出现在输入框旁。',
+        cta: '打开 ChatGPT',
+      },
+      footer: '私密、本地保存、可随时撤回。无需 Ondrift 账号。',
+    },
+    options: {
+      sidebar: {
+        nav: { provider: '服务提供方', persona: '改写风格', sites: '网站', privacy: '隐私', support: '支持' },
+        version: '版本 0.1 · 免费 MVP',
+      },
+      header: { eyebrow: '扩展偏好设置', title: '设置', lead: '选择 Ondrift 如何改写，以及哪些内容保留在你的浏览器中。' },
+      provider: {
+        sectionTitle: '服务提供方与 API 密钥',
+        sectionLead: '改写请求会从扩展直接发送到你选择的服务提供方。',
+        providerLabel: '服务提供方',
+        providerGemini: 'Google Gemini · 推荐',
+        providerOpenAi: 'OpenAI · 即将支持',
+        providerClaude: 'Anthropic Claude · 即将支持',
+        apiKeyLabel: 'API 密钥',
+        apiKeyPlaceholderSaved: '密钥已保存 · 输入新密钥以替换',
+        apiKeyPlaceholderEmpty: '粘贴你的 Gemini API 密钥',
+        verifyCta: '验证并保存',
+        apiKeyHelp: '仅保存在 chrome.storage.local 中，不使用同步存储。',
+        getKeyCta: '获取密钥',
+        keySuccess: '密钥已验证，可以使用。',
+        modelLabel: '模型',
+        modelHelp: '如果配额不足，请选择更便宜或限制更宽松的模型。如果所选模型不可用，Ondrift 会回退到默认模型。',
+        modelAutoLabel: '默认值（自动回退）',
+        modelOptionLabels: {
+          'gemini-3.6-pro': 'Gemini 3.6 Pro · 能力最强，价格最高',
+          'gemini-3.6-flash': 'Gemini 3.6 Flash · 默认，均衡',
+          'gemini-3.6-flash-lite': 'Gemini 3.6 Flash-Lite · 更便宜',
+          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · 最便宜，配额最高',
+        },
+        modelCustomLabel: '其他（手动输入）',
+        modelCustomPlaceholder: '输入 Gemini 模型名称，例如 gemini-3.6-flash',
+        validation: {
+          invalid_key: 'Gemini 拒绝了此密钥。请确认已完整复制密钥，并且具有 API 访问权限。',
+          quota: '此密钥有效，但当前配额已用完。',
+          network: 'Chrome 无法连接到 Gemini。请检查浏览器、VPN 或防火墙访问权限。',
+          request: 'Gemini 拒绝了验证请求。请重新加载 Ondrift 后重试。',
+          unavailable: '此项目暂时无法使用 Gemini，包括备用模型。',
+          unknown: '无法验证此密钥。',
+        },
+      },
+      persona: {
+        sectionTitle: '改写风格',
+        sectionLead: '所选预设会引导 Ondrift 重点优化的方向。每个结果你都可以继续编辑。',
+        languageLabel: '语言',
+        languageHelp: '控制 Ondrift 行内界面以及改写后提示词的语言。',
+        personas: {
+          general: { name: '均衡', description: '明确意图、背景、限制条件和输出格式。' },
+          developer: { name: '开发者', description: '补充技术假设、边界情况和验收标准。' },
+          writer: { name: '写作者', description: '打磨受众、语气、结构和编辑目标。' },
+          student: { name: '学生', description: '要求循序渐进的解释，并检查理解程度。' },
+          translator: { name: '译者', description: '在保留含义的同时指定地区、语气和正式程度。' },
+        },
+      },
+      sites: {
+        sectionTitle: '支持的网站',
+        sectionLead: 'Ondrift 只会在你明确启用的网站上读取提示词文本。',
+        sites: {
+          chatgpt: { title: 'ChatGPT', detail: '在 chatgpt.com 上显示改写小组件。' },
+          claude: { title: 'Claude', detail: '在 claude.ai 上显示改写小组件。' },
+          gemini: { title: 'Gemini', detail: '在 gemini.google.com 上显示改写小组件。' },
+          perplexity: { title: 'Perplexity', detail: '在 perplexity.ai 上显示改写小组件。' },
+        },
+      },
+      privacy: {
+        sectionTitle: '隐私与本地数据',
+        sectionLead: '此版本不使用云账号、同步功能或开发者运营的服务器。',
+        historyToggleTitle: '保存本地提示词历史',
+        historyToggleDetail: '在此浏览器中保存原始提示词、改写后提示词、评分、网站和时间戳。',
+        responsesTitle: '不会保存 AI 回复',
+        responsesDetail: 'Ondrift 只处理你选择改写的提示词和本地改写元数据。',
+        alwaysOn: '始终开启',
+        deleteTitle: '删除本地历史记录',
+        deleteDetail: '删除此浏览器中保存的所有提示词和使用统计。',
+        cancelCta: '取消',
+        deleteAllCta: '全部删除',
+        clearHistoryCta: '清除历史记录',
+      },
+      support: {
+        sectionTitle: '支持 Ondrift',
+        sectionLead: 'Ondrift 由个人免费构建和维护。在 GitHub 上加星可以帮助更多人发现它。',
+        starCta: '在 GitHub 上加星',
+      },
+      saveBar: {
+        saved: '更改已保存在本地。',
+        error: '无法保存更改。',
+        idle: '设置只保留在这台设备上。',
+        saveCta: '保存更改',
+      },
+    },
+    popup: {
+      headerAria: { openSettings: '打开设置' },
+      setupBanner: { title: '完成设置', body: '添加 Gemini API 密钥即可开始改写。' },
+      loading: '正在加载你的本地历史记录…',
+      error: { title: '历史记录不可用。', body: '你的数据仍保存在本地，且没有被更改。', retryCta: '重试' },
+      usage: {
+        ariaLabel: '最近 7 天使用情况',
+        last7Days: '最近 7 天',
+        rewrites: '次改写',
+        avgScore: '改进后平均',
+        noBaseline: '暂无基准',
+        pointLift: (delta) => `${delta >= 0 ? '+' : ''}${delta} 分提升`,
+        applied: '已应用',
+        tokensLabel: (count) => `${count} 个 token`,
+      },
+      trend: {
+        emptyMessage: '累计两天以上的改写后，会显示评分趋势。',
+        ariaLabel: (summary) => `最近 7 天改进后提示词平均分。${summary}`,
+      },
+      history: {
+        eyebrow: '本地历史记录',
+        title: '最近的提示词',
+        searchSrLabel: '搜索提示词',
+        searchPlaceholder: '搜索提示词文本',
+        emptyTitle: '你的第一次改写会显示在这里。',
+        emptyBody: '历史记录保存在此浏览器中，方便随时搜索和回看。',
+        noMatchTitle: '没有匹配的提示词',
+        noMatchBody: '试试其他词或服务名称。',
+        appliedLabel: '已应用',
+        copyImprovedAria: '复制改进后的提示词',
+        copiedImprovedAria: '已复制改进后的提示词',
+        copyFailedMessage: '无法复制提示词。',
+        scoreChangeAria: (original, improved, delta) => `原始分数 ${original}，改进后 ${improved}，${Math.abs(delta)} 分${delta >= 0 ? '提高' : '降低'}`,
+        openConversationAria: '打开对话',
+        deleteAria: '从本地历史记录中删除',
+      },
+      footer: { storedLabel: '保存在这台设备上', settingsCta: '隐私与设置' },
     },
   },
 };

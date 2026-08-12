@@ -13,8 +13,8 @@ function collectStrings(value: unknown, path: string, out: Array<[string, unknow
 }
 
 describe('uiCopy', () => {
-  it('provides Korean, English, and Japanese translations with the same shape', () => {
-    expect(SUPPORTED_LANGUAGES).toEqual(['ko', 'en', 'ja']);
+  it('provides Korean, English, Japanese, and Simplified Chinese translations with the same shape', () => {
+    expect(SUPPORTED_LANGUAGES).toEqual(['ko', 'en', 'ja', 'zh']);
     const shapes = SUPPORTED_LANGUAGES.map((language) => {
       const paths: Array<[string, unknown]> = [];
       collectStrings(uiCopy[language], language, paths);
@@ -22,6 +22,7 @@ describe('uiCopy', () => {
     });
     expect(shapes[1]).toEqual(shapes[0]);
     expect(shapes[2]).toEqual(shapes[0]);
+    expect(shapes[3]).toEqual(shapes[0]);
   });
 
   it('never leaves an empty or unresolved string anywhere in a translation table', () => {
@@ -50,18 +51,20 @@ describe('uiCopy', () => {
   it('validates language ids with the isLanguageId guard', () => {
     expect(isLanguageId('ko')).toBe(true);
     expect(isLanguageId('ja')).toBe(true);
+    expect(isLanguageId('zh')).toBe(true);
     expect(isLanguageId('fr')).toBe(false);
     expect(isLanguageId(undefined)).toBe(false);
   });
 
   it('shows each language using its own native name, regardless of active language', () => {
-    expect(LANGUAGE_NAMES).toEqual({ ko: '한국어', en: 'English', ja: '日本語' });
+    expect(LANGUAGE_NAMES).toEqual({ ko: '한국어', en: 'English', ja: '日本語', zh: '简体中文' });
   });
 
   it('formats parameterized copy per language without leaking placeholder syntax', () => {
     expect(uiCopy.en.onboarding.stepCount(2, 3)).toBe('Step 2 of 3');
     expect(uiCopy.ko.onboarding.stepCount(2, 3)).toContain('2');
     expect(uiCopy.ja.onboarding.stepCount(2, 3)).toContain('2');
+    expect(uiCopy.zh.onboarding.stepCount(2, 3)).toContain('2');
     for (const language of SUPPORTED_LANGUAGES) {
       expect(uiCopy[language].onboarding.stepCount(2, 3)).not.toMatch(/\{|\}/);
       expect(uiCopy[language].popup.usage.pointLift(5)).toContain('5');

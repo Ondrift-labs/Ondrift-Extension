@@ -63,4 +63,12 @@ export const inlineMessages: Record<LanguageId, InlineMessages> = {
     missingKeyDetail: "設定は約1分で完了し、キーはこのブラウザにのみ保存されます。", quotaDetail: "現在の利用上限に達しています。リセット後に再試行してください。", networkDetail: "Chrome から Gemini に接続できません。ブラウザ、VPN、ファイアウォールを確認してください。", invalidKeyDetail: "Ondrift 設定でキーを確認または交換してください。", requestDetail: "Gemini がリクエストを拒否しました。Ondrift を再読み込みして再試行してください。", unavailableDetail: "Gemini と互換フォールバックモデルは現在利用できません。", unknownDetail: "プロンプトは変更されていません。もう一度お試しください。", openSettings: "設定を開く",
     reconnectTitle: "Ondrift を再接続してください", reconnectDetail: "拡張機能が更新されたか、接続が切れました。入力内容を確認してから、このページを再読み込みしてください。", reloadPage: "ページを再読み込み",
   },
+  zh: {
+    ariaLabel: "Ondrift 提示词改写", settings: "打开 Ondrift 设置", dismiss: "关闭 Ondrift",
+    shortPrompt: "再补充一点细节，改写会更有用。", ready: "已准备好评估清晰度、背景和限制条件。", rewrite: "优化并评分", loading: "正在分析意图、背景和有用的限制条件…",
+    score: "评分", scoreChangeAria: (original, improved, delta) => `原始分数 ${original}，改进后分数 ${improved}，${Math.abs(delta)} 分${delta >= 0 ? "提高" : "降低"}`, strong: "清晰且具体", foundation: "基础方向清晰", needsDirection: "还需要更明确", points: "分", suggested: "改进后的提示词", retry: "重试", apply: "应用到提示词", applied: "已应用。发送前你还可以继续编辑。",
+    connectKey: "请先连接 API 密钥", quotaTitle: "Gemini 配额已用完", networkTitle: "连接中断", invalidKeyTitle: "API 密钥需要检查", requestTitle: "请求被拒绝", unavailableTitle: "Gemini 不可用", rewriteUnavailable: "无法改写",
+    missingKeyDetail: "设置大约需要一分钟，密钥只会保存在此浏览器中。", quotaDetail: "当前服务提供方的额度已用完。重置后请重试。", networkDetail: "Chrome 无法连接到 Gemini。请检查浏览器、VPN 或防火墙访问权限。", invalidKeyDetail: "请在 Ondrift 设置中验证或替换密钥。", requestDetail: "Gemini 拒绝了请求。请重新加载 Ondrift 后重试。", unavailableDetail: "Gemini 和兼容的备用模型当前都不可用。", unknownDetail: "你的提示词没有被更改。请重试。", openSettings: "打开设置",
+    reconnectTitle: "重新连接 Ondrift", reconnectDetail: "扩展已更新或连接已断开。请检查你的草稿，然后重新加载此页面以重新连接。", reloadPage: "重新加载页面",
+  },
 };

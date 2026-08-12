@@ -58,6 +58,20 @@ describe("GeminiProvider", () => {
       .resolves.toMatchObject({ improvedText: "개선" });
   });
 
+  it("requests Simplified Chinese rewrites when Chinese is selected", async () => {
+    const fetcher = vi.fn(async (_url: string, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body));
+      expect(body.system_instruction).toContain("Write improvedText and rationale in Simplified Chinese");
+      return new Response(JSON.stringify({
+        steps: [{ type: "model_output", content: [{ type: "text", text: '{"improvedText":"改进后的提示词","originalScore":50,"improvedScore":90,"rationale":"更清晰"}' }] }],
+      }), { status: 200 });
+    });
+    const provider = new GeminiProvider(fetcher as typeof fetch);
+
+    await expect(provider.rewrite({ prompt: "测试", service: "chatgpt", language: "zh" }, "key"))
+      .resolves.toMatchObject({ improvedText: "改进后的提示词" });
+  });
+
   it.each([
     [401, "invalid_key", false],
     [400, "request_rejected", false],
