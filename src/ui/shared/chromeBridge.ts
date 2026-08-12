@@ -36,7 +36,7 @@ function mapHistory(entry: HistoryEntry): HistoryItem {
     id: String(entry.id),
     service: entry.service,
     originalText: entry.originalText,
-    improvedText: entry.improvedText ?? entry.originalText,
+    improvedText: entry.improvedText,
     score: entry.score ?? 0,
     applied: entry.applied,
     createdAt: entry.createdAt,

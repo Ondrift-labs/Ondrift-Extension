@@ -1,11 +1,12 @@
 import type { SVGProps } from 'react';
 
-export type IconName = 'arrow' | 'check' | 'chevron' | 'external' | 'history' | 'key' | 'search' | 'settings' | 'spark' | 'trash';
+export type IconName = 'arrow' | 'check' | 'chevron' | 'copy' | 'external' | 'history' | 'key' | 'search' | 'settings' | 'spark' | 'trash';
 
 const paths: Record<IconName, JSX.Element> = {
   arrow: <path d="m5 12 14 0m-5-5 5 5-5 5" />,
   check: <path d="m5 12 4 4L19 6" />,
   chevron: <path d="m9 18 6-6-6-6" />,
+  copy: <><rect x="8" y="8" width="11" height="11" rx="1.5" /><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8" /></>,
   external: <path d="M14 5h5v5m0-5-9 9m7-2v7H5V7h7" />,
   history: <path d="M3 12a9 9 0 1 0 3-6.7L3 8m0-5v5h5m4-1v5l3 2" />,
   key: <path d="M15.5 7.5a4 4 0 1 1-2.7 6.8L9 18H6v-3H3v-3l5.7-5.7a4 4 0 0 1 6.8 1.2Z" />,

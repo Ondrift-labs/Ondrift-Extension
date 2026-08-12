@@ -45,6 +45,7 @@ body { width: 380px; }
 .history-actions { display: flex; align-items: center; min-height: 23px; }
 .history-actions button { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 4px; color: var(--faint); background: transparent; cursor: pointer; }
 .history-actions button:hover { color: var(--ink); background: var(--canvas); }
+.history-actions button.is-copied { color: var(--accent); background: var(--accent-soft); }
 .history-actions svg { width: 13px; }
 .history-spacer { flex: 1; }
 .applied-label { display: inline-flex; align-items: center; gap: 4px; color: var(--accent); font-size: 10px; font-weight: 650; }

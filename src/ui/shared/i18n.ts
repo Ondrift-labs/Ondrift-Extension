@@ -175,6 +175,9 @@ export interface PopupCopy {
     noMatchTitle: string;
     noMatchBody: string;
     appliedLabel: string;
+    copyImprovedAria: string;
+    copiedImprovedAria: string;
+    copyFailedMessage: string;
     openConversationAria: string;
     deleteAria: string;
   };
@@ -378,6 +381,9 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         noMatchTitle: '일치하는 프롬프트가 없습니다',
         noMatchBody: '다른 단어나 서비스 이름으로 검색해 보세요.',
         appliedLabel: '적용됨',
+        copyImprovedAria: '개선된 프롬프트 복사',
+        copiedImprovedAria: '개선된 프롬프트가 복사됨',
+        copyFailedMessage: '프롬프트를 복사하지 못했습니다.',
         openConversationAria: '대화 열기',
         deleteAria: '로컬 기록에서 삭제',
       },
@@ -573,6 +579,9 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         noMatchTitle: 'No matching prompts',
         noMatchBody: 'Try a different word or service name.',
         appliedLabel: 'Applied',
+        copyImprovedAria: 'Copy improved prompt',
+        copiedImprovedAria: 'Improved prompt copied',
+        copyFailedMessage: 'Could not copy the prompt.',
         openConversationAria: 'Open conversation',
         deleteAria: 'Delete from local history',
       },
@@ -768,6 +777,9 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         noMatchTitle: '一致するプロンプトがありません',
         noMatchBody: '別の単語やサービス名で試してください。',
         appliedLabel: '適用済み',
+        copyImprovedAria: '改善後のプロンプトをコピー',
+        copiedImprovedAria: '改善後のプロンプトをコピーしました',
+        copyFailedMessage: 'プロンプトをコピーできませんでした。',
         openConversationAria: '会話を開く',
         deleteAria: 'ローカル履歴から削除',
       },

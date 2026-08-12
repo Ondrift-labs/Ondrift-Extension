@@ -1,4 +1,5 @@
 import { cleanup, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, type HistoryItem, type UiBridge } from '../shared/contracts';
 import { PopupApp } from './PopupApp';
@@ -56,5 +57,19 @@ describe('PopupApp', () => {
 
     expect(await screen.findByText('最初のリライトがここに表示されます。')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('プロンプトのテキストを検索')).toBeInTheDocument();
+  });
+
+  it('copies only the prompt improved by Ondrift', async () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    const plainHistory: HistoryItem = { id: '3', service: 'chatgpt', originalText: 'Not rewritten', score: 0, applied: false, createdAt: now + 1 };
+    render(<PopupApp bridge={createBridge({ getHistory: async () => [...history, plainHistory] })} />);
+
+    const copyButtons = await screen.findAllByRole('button', { name: 'Copy improved prompt' });
+    expect(copyButtons).toHaveLength(2);
+    await userEvent.click(copyButtons[0]);
+
+    expect(writeText).toHaveBeenCalledWith('Second improved');
+    expect(screen.getByRole('status')).toHaveTextContent('Improved prompt copied');
   });
 });

@@ -29,6 +29,7 @@ export function PopupApp({ bridge }: { bridge: UiBridge }) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [settings, setSettings] = useState<UiSettings | null>(null);
   const [query, setQuery] = useState('');
+  const [copyFeedback, setCopyFeedback] = useState<{ id: string; message: string } | null>(null);
   const language = settings?.language ?? DEFAULT_SETTINGS.language;
   const copy = getUiCopy(language).popup;
 
@@ -36,6 +37,11 @@ export function PopupApp({ bridge }: { bridge: UiBridge }) {
     document.documentElement.lang = language;
     document.title = 'Ondrift';
   }, [language]);
+  useEffect(() => {
+    if (!copyFeedback) return;
+    const timeout = window.setTimeout(() => setCopyFeedback(null), 1800);
+    return () => window.clearTimeout(timeout);
+  }, [copyFeedback]);
 
   async function load() {
     setState('loading');
@@ -49,6 +55,16 @@ export function PopupApp({ bridge }: { bridge: UiBridge }) {
   useEffect(() => { void load(); }, []);
   const visible = useMemo(() => filterHistory(history, query), [history, query]);
   const usage = useMemo(() => summarizeUsage(history), [history]);
+
+  async function copyImprovedPrompt(item: HistoryItem) {
+    if (!item.improvedText) return;
+    try {
+      await navigator.clipboard.writeText(item.improvedText);
+      setCopyFeedback({ id: item.id, message: copy.history.copiedImprovedAria });
+    } catch {
+      setCopyFeedback({ id: item.id, message: copy.history.copyFailedMessage });
+    }
+  }
 
   return <main className="popup-shell">
     <header className="popup-header"><div className="popup-brand"><img className="popup-brand-logo" src="/icons/ondrift-32.png" alt="" /><span>Ondrift</span></div><button className="icon-button" aria-label={copy.headerAria.openSettings} onClick={() => bridge.openOptions()}><Icon name="settings" /></button></header>
@@ -71,10 +87,11 @@ export function PopupApp({ bridge }: { bridge: UiBridge }) {
           {visible.slice(0, 12).map((item) => <article className="history-item" key={item.id}>
             <div className="history-meta"><span className={`service-dot service-dot--${item.service}`} />{SERVICE_NAMES[item.service]}<span>·</span><time dateTime={new Date(item.createdAt).toISOString()}>{formatRelativeTime(item.createdAt, undefined, language)}</time><span className="score-badge">{item.score}</span></div>
             <p>{item.improvedText || item.originalText}</p>
-            <div className="history-actions">{item.applied && <span className="applied-label"><Icon name="check" />{copy.history.appliedLabel}</span>}<span className="history-spacer" />{item.sourceUrl && <button aria-label={copy.history.openConversationAria} onClick={() => bridge.openExternal(item.sourceUrl!)}><Icon name="external" /></button>}<button aria-label={copy.history.deleteAria} onClick={async () => { await bridge.deleteHistory(item.id); setHistory((current) => current.filter(({ id }) => id !== item.id)); }}><Icon name="trash" /></button></div>
+            <div className="history-actions">{item.applied && <span className="applied-label"><Icon name="check" />{copy.history.appliedLabel}</span>}<span className="history-spacer" />{item.improvedText && <button className={copyFeedback?.id === item.id && copyFeedback.message === copy.history.copiedImprovedAria ? 'is-copied' : undefined} aria-label={copyFeedback?.id === item.id ? copyFeedback.message : copy.history.copyImprovedAria} title={copyFeedback?.id === item.id ? copyFeedback.message : copy.history.copyImprovedAria} onClick={() => void copyImprovedPrompt(item)}><Icon name={copyFeedback?.id === item.id && copyFeedback.message === copy.history.copiedImprovedAria ? 'check' : 'copy'} /></button>}{item.sourceUrl && <button aria-label={copy.history.openConversationAria} onClick={() => bridge.openExternal(item.sourceUrl!)}><Icon name="external" /></button>}<button aria-label={copy.history.deleteAria} onClick={async () => { await bridge.deleteHistory(item.id); setHistory((current) => current.filter(({ id }) => id !== item.id)); }}><Icon name="trash" /></button></div>
           </article>)}
         </div>
       </section>
+      <span className="sr-only" role="status">{copyFeedback?.message}</span>
     </>}
     <footer><span><i className="privacy-dot" />{copy.footer.storedLabel}</span><button onClick={() => bridge.openOptions()}>{copy.footer.settingsCta}</button></footer>
   </main>;

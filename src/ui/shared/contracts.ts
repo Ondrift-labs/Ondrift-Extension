@@ -28,7 +28,7 @@ export interface HistoryItem {
   id: string;
   service: SiteId;
   originalText: string;
-  improvedText: string;
+  improvedText?: string;
   score: number;
   previousScore?: number;
   applied: boolean;
