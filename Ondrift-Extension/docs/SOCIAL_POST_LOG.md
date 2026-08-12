@@ -9,4 +9,3 @@ Record every published Ondrift social/community post here. Use ISO 8601 timestam
 
 | Target | Working topic | Status | Notes |
 | --- | --- | --- | --- |
-| Reddit / r/SideProject | Local-first prompt rewrite extension; ask about BYOK and score/rationale | Rules check required | Use a natural builder voice and one prompt-writing joke. |
