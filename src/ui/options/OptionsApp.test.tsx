@@ -53,6 +53,35 @@ describe('OptionsApp localization', () => {
     expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({ language: 'ko' }));
   });
 
+  it('warns before leaving only while editable settings have unsaved changes', async () => {
+    render(<OptionsApp bridge={createBridge()} />);
+    const languageSelect = await screen.findByRole('combobox', { name: 'Language' });
+
+    const unchangedEvent = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(unchangedEvent);
+    expect(unchangedEvent.defaultPrevented).toBe(false);
+
+    await userEvent.selectOptions(languageSelect, '한국어');
+    const dirtyEvent = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(dirtyEvent);
+    expect(dirtyEvent.defaultPrevented).toBe(true);
+
+    await userEvent.click(screen.getByRole('button', { name: '변경 사항 저장' }));
+    const savedEvent = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(savedEvent);
+    expect(savedEvent.defaultPrevented).toBe(false);
+  });
+
+  it('warns when an API key has been entered but not verified', async () => {
+    render(<OptionsApp bridge={createBridge()} />);
+    await userEvent.type(await screen.findByLabelText('API key'), 'unverified-key');
+
+    const dirtyEvent = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(dirtyEvent);
+
+    expect(dirtyEvent.defaultPrevented).toBe(true);
+  });
+
   it('shows a quota warning from real usage on load, without a manual re-verify', async () => {
     const bridge = createBridge({ getSettings: async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: true, apiKeyStatus: 'quota' }) });
     render(<OptionsApp bridge={bridge} />);

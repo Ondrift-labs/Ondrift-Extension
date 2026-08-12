@@ -10,12 +10,22 @@ const PERSONA_IDS: readonly PersonaId[] = ['general', 'developer', 'writer', 'st
 const SITE_IDS: readonly SiteId[] = ['chatgpt', 'claude', 'gemini', 'perplexity'];
 const CUSTOM_MODEL_VALUE = '__custom__';
 
+function editableSettingsMatch(current: UiSettings, saved: UiSettings) {
+  return current.provider === saved.provider
+    && current.model === saved.model
+    && current.persona === saved.persona
+    && current.language === saved.language
+    && current.saveHistory === saved.saveHistory
+    && SITE_IDS.every((site) => current.siteAccess[site] === saved.siteAccess[site]);
+}
+
 function ToggleRow({ title, detail, checked, onChange }: { title: string; detail: string; checked: boolean; onChange(value: boolean): void }) {
   return <div className="toggle-row"><div><strong>{title}</strong><p>{detail}</p></div><label className="ui-switch"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} aria-label={title} /><span /></label></div>;
 }
 
 export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   const [settings, setSettings] = useState<UiSettings>(DEFAULT_SETTINGS);
+  const [savedSettings, setSavedSettings] = useState<UiSettings | null>(null);
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState('');
   const [customModel, setCustomModel] = useState('');
@@ -30,6 +40,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   useEffect(() => {
     bridge.getSettings().then((next) => {
       setSettings(next);
+      setSavedSettings(next);
       const savedModel = next.model ?? '';
       setModel(savedModel);
       const isCustom = savedModel !== '' && !GEMINI_MODEL_CHOICES.includes(savedModel as GeminiModelId);
@@ -44,11 +55,23 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   const uiCopy = getUiCopy(settings.language);
   const copy = uiCopy.options;
   const common = uiCopy.common;
+  const hasUnsavedChanges = savedSettings !== null
+    && (!editableSettingsMatch(settings, savedSettings) || (apiKey.trim().length > 0 && validation !== 'valid'));
 
   useEffect(() => {
     document.documentElement.lang = settings.language;
     document.title = `Ondrift — ${copy.header.title}`;
   }, [copy.header.title, settings.language]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    const confirmUnsavedChanges = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', confirmUnsavedChanges);
+    return () => window.removeEventListener('beforeunload', confirmUnsavedChanges);
+  }, [hasUnsavedChanges]);
 
   function update<K extends keyof UiSettings>(key: K, value: UiSettings[K]) { setSettings((current) => ({ ...current, [key]: value })); setSaveState('idle'); }
   function updateSite(site: SiteId, value: boolean) { update('siteAccess', { ...settings.siteAccess, [site]: value }); }
@@ -56,14 +79,18 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   // main "Save changes" button too, instead of only ever being persisted through a
   // successful "Verify & save".
   function applyModel(next: string) { setModel(next); update('model', next.trim() || undefined); }
-  async function save() { setSaveState('saving'); try { setSettings(await bridge.saveSettings(settings)); setSaveState('saved'); } catch { setSaveState('error'); } }
+  async function save() { setSaveState('saving'); try { const saved = await bridge.saveSettings(settings); setSettings(saved); setSavedSettings(saved); setSaveState('saved'); } catch { setSaveState('error'); } }
   async function verify() {
     setValidation('checking');
     try {
       const trimmedModel = model.trim();
       const result = await bridge.validateApiKey(settings.provider, apiKey.trim(), trimmedModel || undefined);
       setValidation(result.ok ? 'valid' : result.reason ?? 'unknown');
-      if (result.ok) setSettings((current) => ({ ...current, apiKeyConfigured: true, model: trimmedModel || undefined }));
+      if (result.ok) {
+        const savedModel = trimmedModel || undefined;
+        setSettings((current) => ({ ...current, apiKeyConfigured: true, model: savedModel }));
+        setSavedSettings((current) => current && ({ ...current, provider: settings.provider, apiKeyConfigured: true, model: savedModel }));
+      }
     } catch { setValidation('network'); }
   }
 
