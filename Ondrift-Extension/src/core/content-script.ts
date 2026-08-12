@@ -19,11 +19,8 @@ const widget = createInlineWidget({
   onRewrite: () => { void runRewrite(); },
   onRetry: () => { void runRewrite(); },
   onApply: () => { void applyRewrite(); },
-  // A tab left open across an extension reload/update keeps running this stale content
-  // script; the background port is gone, so this rejects with "Extension context
-  // invalidated" -- swallow it rather than leaving an uncaught rejection in the console.
-  // There's nothing else to do from here: the tab itself needs a manual reload to reconnect.
-  onOpenSettings: () => { void sendRuntimeMessage<void>({ type: "open_options" }).catch(() => undefined); },
+  onOpenSettings: () => { void openSettings(); },
+  onReloadPage: () => window.location.reload(),
 });
 widget.element.style.display = "block";
 widget.element.style.marginTop = "8px";
@@ -40,6 +37,18 @@ function promptLength(): number {
 function showReady(): void {
   widget.setState({ status: "ready", promptLength: promptLength() });
   floatingPlacement?.update();
+}
+
+async function openSettings(): Promise<void> {
+  try {
+    await sendRuntimeMessage<void>({ type: "open_options" });
+  } catch {
+    // A tab kept open across an extension reload/update continues to show its old
+    // widget, but Chrome invalidates that content script's extension context. The
+    // page must reload before it can talk to the extension again.
+    widget.setState({ status: "reload_required" });
+    floatingPlacement?.update();
+  }
 }
 
 async function applyRewrite(): Promise<void> {
@@ -132,10 +141,15 @@ function onStorageChanged(changes: Record<string, chrome.storage.StorageChange>,
   const next = changes[SETTINGS_STORAGE_KEY]?.newValue as Partial<ExtensionSettings> | undefined;
   if (next && isLanguageId(next.language)) widget.setLanguage(next.language);
 }
-chrome.storage.onChanged.addListener(onStorageChanged);
+// `chrome.storage` itself (not just individual calls into it) goes undefined once this
+// tab's extension context is invalidated -- e.g. the extension updates or reloads while
+// the tab stays open. Reading `.onChanged` off it then throws a plain TypeError, which
+// (unlike the rejections `sendRuntimeMessage` produces) isn't something a try/catch
+// around an awaited call can catch, so guard the property access itself instead.
+chrome.storage?.onChanged?.addListener(onStorageChanged);
 
 window.addEventListener("pagehide", () => {
-  chrome.storage.onChanged.removeListener(onStorageChanged);
+  chrome.storage?.onChanged?.removeListener(onStorageChanged);
   removeInputListener?.();
   floatingPlacement?.destroy();
   widget.destroy();

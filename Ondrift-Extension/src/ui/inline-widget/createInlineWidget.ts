@@ -76,13 +76,14 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
       body.querySelector('.od-applied span')!.textContent = messages.applied; return;
     }
     const isMissing = state.status === 'missing_key';
+    const needsReload = state.status === 'reload_required';
     const kind = state.status === 'error' ? state.kind : 'invalid_key';
-    const title = isMissing ? messages.connectKey : kind === 'quota' ? messages.quotaTitle : kind === 'network' ? messages.networkTitle : kind === 'invalid_key' ? messages.invalidKeyTitle : kind === 'request' ? messages.requestTitle : kind === 'unavailable' ? messages.unavailableTitle : messages.rewriteUnavailable;
-    const localizedDetail = isMissing ? messages.missingKeyDetail : kind === 'quota' ? messages.quotaDetail : kind === 'network' ? messages.networkDetail : kind === 'invalid_key' ? messages.invalidKeyDetail : kind === 'request' ? messages.requestDetail : kind === 'unavailable' ? messages.unavailableDetail : messages.unknownDetail;
+    const title = needsReload ? messages.reconnectTitle : isMissing ? messages.connectKey : kind === 'quota' ? messages.quotaTitle : kind === 'network' ? messages.networkTitle : kind === 'invalid_key' ? messages.invalidKeyTitle : kind === 'request' ? messages.requestTitle : kind === 'unavailable' ? messages.unavailableTitle : messages.rewriteUnavailable;
+    const localizedDetail = needsReload ? messages.reconnectDetail : isMissing ? messages.missingKeyDetail : kind === 'quota' ? messages.quotaDetail : kind === 'network' ? messages.networkDetail : kind === 'invalid_key' ? messages.invalidKeyDetail : kind === 'request' ? messages.requestDetail : kind === 'unavailable' ? messages.unavailableDetail : messages.unknownDetail;
     const detail = localizedDetail;
     const message = document.createElement('div'); message.className = 'od-message'; message.innerHTML = `<span class="od-message-icon">${isMissing ? icons.settings : icons.retry}</span><div><strong></strong><p></p><div class="od-actions"></div></div>`;
     message.querySelector('strong')!.textContent = title; message.querySelector('p')!.textContent = detail;
-    const action = isMissing || kind === 'invalid_key' ? button(messages.openSettings, 'od-button', handlers.onOpenSettings) : button(messages.retry, 'od-button', handlers.onRetry, icons.retry);
+    const action = needsReload ? button(messages.reloadPage, 'od-button', handlers.onReloadPage) : isMissing || kind === 'invalid_key' ? button(messages.openSettings, 'od-button', handlers.onOpenSettings) : button(messages.retry, 'od-button', handlers.onRetry, icons.retry);
     message.querySelector('.od-actions')!.append(action); body.append(message);
   }
 

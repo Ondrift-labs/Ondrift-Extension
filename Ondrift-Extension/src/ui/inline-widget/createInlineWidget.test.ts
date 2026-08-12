@@ -2,10 +2,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { createInlineWidget } from './createInlineWidget';
 
 describe('createInlineWidget', () => {
+  const handlers = () => ({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings: vi.fn(), onReloadPage: vi.fn() });
+
   it('emits rewrite and apply actions', () => {
     const onRewrite = vi.fn();
     const onApply = vi.fn();
-    const widget = createInlineWidget({ onRewrite, onApply, onRetry: vi.fn(), onOpenSettings: vi.fn() });
+    const widget = createInlineWidget({ ...handlers(), onRewrite, onApply });
     widget.setState({ status: 'ready', promptLength: 80 });
     widget.element.shadowRoot?.querySelector<HTMLButtonElement>('.od-button')?.click();
     expect(onRewrite).toHaveBeenCalledOnce();
@@ -18,7 +20,7 @@ describe('createInlineWidget', () => {
 
   it('disables rewriting until the prompt is long enough', () => {
     const onRewrite = vi.fn();
-    const widget = createInlineWidget({ onRewrite, onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings: vi.fn() });
+    const widget = createInlineWidget({ ...handlers(), onRewrite });
     widget.setState({ status: 'ready', promptLength: 11 });
     const rewrite = widget.element.shadowRoot?.querySelector<HTMLButtonElement>('.od-button');
 
@@ -28,7 +30,7 @@ describe('createInlineWidget', () => {
   });
 
   it('renders provider text as text, not executable markup', () => {
-    const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings: vi.fn() });
+    const widget = createInlineWidget(handlers());
     widget.setState({ status: 'result', score: 40, rationale: '<img src=x>', improvedText: '<script>bad()</script>' });
     expect(widget.element.shadowRoot?.querySelector('.od-preview')?.textContent).toBe('<script>bad()</script>');
     expect(widget.element.shadowRoot?.querySelector('script')).toBeNull();
@@ -37,7 +39,7 @@ describe('createInlineWidget', () => {
   });
 
   it('keeps runtime error details localized instead of exposing English internals', () => {
-    const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings: vi.fn() });
+    const widget = createInlineWidget(handlers());
     widget.setLanguage('ko');
     widget.setState({ status: 'error', kind: 'unknown', message: 'The site did not accept the rewritten prompt.' });
 
@@ -47,7 +49,7 @@ describe('createInlineWidget', () => {
 
   it('routes missing-key users to settings', () => {
     const onOpenSettings = vi.fn();
-    const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings });
+    const widget = createInlineWidget({ ...handlers(), onOpenSettings });
     widget.setState({ status: 'missing_key' });
     widget.element.shadowRoot?.querySelector<HTMLButtonElement>('.od-actions button')?.click();
     expect(onOpenSettings).toHaveBeenCalledOnce();
@@ -56,7 +58,7 @@ describe('createInlineWidget', () => {
   it('runs header settings and dismiss actions without submitting the host page', () => {
     const onOpenSettings = vi.fn();
     const onDismiss = vi.fn();
-    const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings, onDismiss });
+    const widget = createInlineWidget({ ...handlers(), onOpenSettings, onDismiss });
     const root = widget.element.shadowRoot;
     if (!root) throw new Error('Widget shadow root is missing.');
     const settings = root.querySelector<HTMLButtonElement>('[data-settings]');
@@ -73,7 +75,7 @@ describe('createInlineWidget', () => {
   });
 
   it('switches the inline interface between Korean, English, and Japanese', () => {
-    const widget = createInlineWidget({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings: vi.fn() });
+    const widget = createInlineWidget(handlers());
 
     widget.setLanguage('ko');
     expect(widget.element.shadowRoot?.textContent).toContain('개선 및 점수 확인');
@@ -81,5 +83,19 @@ describe('createInlineWidget', () => {
     expect(widget.element.shadowRoot?.textContent).toContain('改善して採点');
     widget.setLanguage('en');
     expect(widget.element.shadowRoot?.textContent).toContain('Rewrite & score');
+  });
+
+  it('offers a one-click page reload when the extension context is disconnected', () => {
+    const onReloadPage = vi.fn();
+    const widget = createInlineWidget({ ...handlers(), onReloadPage });
+
+    widget.setLanguage('en');
+    widget.setState({ status: 'reload_required' });
+    const action = widget.element.shadowRoot?.querySelector<HTMLButtonElement>('.od-actions button');
+
+    expect(widget.element.shadowRoot?.textContent).toContain('Reconnect Ondrift');
+    expect(action?.textContent).toContain('Reload page');
+    action?.click();
+    expect(onReloadPage).toHaveBeenCalledOnce();
   });
 });
