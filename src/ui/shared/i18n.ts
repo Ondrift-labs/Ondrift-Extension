@@ -178,6 +178,7 @@ export interface PopupCopy {
     copyImprovedAria: string;
     copiedImprovedAria: string;
     copyFailedMessage: string;
+    scoreChangeAria(original: number, improved: number, delta: number): string;
     openConversationAria: string;
     deleteAria: string;
   };
@@ -361,7 +362,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         ariaLabel: '최근 7일간 사용량',
         last7Days: '최근 7일',
         rewrites: '다시 쓰기',
-        avgScore: '평균 점수',
+        avgScore: '개선 후 평균',
         noBaseline: '아직 기준값 없음',
         pointLift: (delta) => `${delta >= 0 ? '+' : ''}${delta}점 변화`,
         applied: '적용됨',
@@ -369,7 +370,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       trend: {
         emptyMessage: '다시 쓰기가 이틀 이상 쌓이면 점수 추이가 표시됩니다.',
-        ariaLabel: (summary) => `최근 7일간 평균 프롬프트 점수. ${summary}`,
+        ariaLabel: (summary) => `최근 7일간 개선 후 평균 프롬프트 점수. ${summary}`,
       },
       history: {
         eyebrow: '로컬 기록',
@@ -384,6 +385,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         copyImprovedAria: '개선된 프롬프트 복사',
         copiedImprovedAria: '개선된 프롬프트가 복사됨',
         copyFailedMessage: '프롬프트를 복사하지 못했습니다.',
+        scoreChangeAria: (original, improved, delta) => `원본 ${original}점에서 개선 후 ${improved}점, ${delta >= 0 ? `${delta}점 상승` : `${Math.abs(delta)}점 하락`}`,
         openConversationAria: '대화 열기',
         deleteAria: '로컬 기록에서 삭제',
       },
@@ -559,7 +561,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         ariaLabel: 'Usage over the last 7 days',
         last7Days: 'Last 7 days',
         rewrites: 'rewrites',
-        avgScore: 'Avg. score',
+        avgScore: 'Avg. improved',
         noBaseline: 'No baseline yet',
         pointLift: (delta) => `${delta >= 0 ? '+' : ''}${delta} point lift`,
         applied: 'Applied',
@@ -567,7 +569,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       trend: {
         emptyMessage: 'A score trend appears after two days of rewrites.',
-        ariaLabel: (summary) => `Average prompt score over the last 7 days. ${summary}`,
+        ariaLabel: (summary) => `Average improved prompt score over the last 7 days. ${summary}`,
       },
       history: {
         eyebrow: 'Local history',
@@ -582,6 +584,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         copyImprovedAria: 'Copy improved prompt',
         copiedImprovedAria: 'Improved prompt copied',
         copyFailedMessage: 'Could not copy the prompt.',
+        scoreChangeAria: (original, improved, delta) => `Original score ${original}, improved score ${improved}, ${Math.abs(delta)} points ${delta >= 0 ? 'higher' : 'lower'}`,
         openConversationAria: 'Open conversation',
         deleteAria: 'Delete from local history',
       },
@@ -757,7 +760,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         ariaLabel: '過去7日間の利用状況',
         last7Days: '過去7日間',
         rewrites: 'リライト',
-        avgScore: '平均スコア',
+        avgScore: '改善後平均',
         noBaseline: '基準値なし',
         pointLift: (delta) => `${delta >= 0 ? '+' : ''}${delta}ポイント上昇`,
         applied: '適用済み',
@@ -765,7 +768,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       trend: {
         emptyMessage: 'リライトが2日分蓄積するとスコアの推移が表示されます。',
-        ariaLabel: (summary) => `過去7日間の平均プロンプトスコア。${summary}`,
+        ariaLabel: (summary) => `過去7日間の改善後平均プロンプトスコア。${summary}`,
       },
       history: {
         eyebrow: 'ローカル履歴',
@@ -780,6 +783,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         copyImprovedAria: '改善後のプロンプトをコピー',
         copiedImprovedAria: '改善後のプロンプトをコピーしました',
         copyFailedMessage: 'プロンプトをコピーできませんでした。',
+        scoreChangeAria: (original, improved, delta) => `元のスコア${original}から改善後${improved}、${Math.abs(delta)}ポイント${delta >= 0 ? '上昇' : '低下'}`,
         openConversationAria: '会話を開く',
         deleteAria: 'ローカル履歴から削除',
       },

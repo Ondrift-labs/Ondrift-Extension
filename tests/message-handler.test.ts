@@ -23,7 +23,7 @@ function dependencies(overrides: Partial<MessageHandlerDependencies> = {}): Mess
     } as never,
     provider: vi.fn(() => ({
       id: "gemini" as const,
-      rewrite: vi.fn(async () => ({ improvedText: "better", score: 90, rationale: "clear" })),
+      rewrite: vi.fn(async () => ({ improvedText: "better", previousScore: 50, score: 90, rationale: "clear" })),
       validateKey: vi.fn(async () => undefined),
     })),
     openOptions: vi.fn(async () => undefined),
@@ -35,7 +35,7 @@ describe("handleRuntimeRequest", () => {
   it("keeps provider execution in the background handler", async () => {
     const deps = dependencies();
     const result = await handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "chatgpt" } }, deps);
-    expect(result).toEqual({ ok: true, data: { improvedText: "better", score: 90, rationale: "clear" } });
+    expect(result).toEqual({ ok: true, data: { improvedText: "better", previousScore: 50, score: 90, rationale: "clear" } });
     expect(deps.provider).toHaveBeenCalledWith("gemini");
   });
 
@@ -110,7 +110,7 @@ describe("handleRuntimeRequest", () => {
   });
 
   it("passes the user's chosen model through to the provider on rewrite", async () => {
-    const rewrite = vi.fn(async () => ({ improvedText: "better", score: 90, rationale: "clear" }));
+    const rewrite = vi.fn(async () => ({ improvedText: "better", previousScore: 50, score: 90, rationale: "clear" }));
     const deps = dependencies({
       settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: { gemini: "key" }, apiModels: { gemini: "gemini-3.5-flash-lite" }, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: true })), update: vi.fn(async (patch: unknown) => patch) } as never,
       provider: vi.fn(() => ({ id: "gemini" as const, rewrite, validateKey: vi.fn() })),

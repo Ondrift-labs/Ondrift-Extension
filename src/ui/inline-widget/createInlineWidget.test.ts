@@ -13,6 +13,8 @@ describe('createInlineWidget', () => {
     expect(onRewrite).toHaveBeenCalledOnce();
 
     widget.setState({ status: 'result', score: 88, previousScore: 54, rationale: 'Adds constraints.', improvedText: 'Return three concise options.' });
+    expect(widget.element.shadowRoot?.textContent).toContain('54→88+34');
+    expect(widget.element.shadowRoot?.querySelector('.od-score-flow')).toHaveAttribute('aria-label', 'Original score 54, improved score 88, 34 points higher');
     const buttons = widget.element.shadowRoot?.querySelectorAll<HTMLButtonElement>('.od-actions .od-button');
     buttons?.[1]?.click();
     expect(onApply).toHaveBeenCalledWith('Return three concise options.');
@@ -31,7 +33,7 @@ describe('createInlineWidget', () => {
 
   it('renders provider text as text, not executable markup', () => {
     const widget = createInlineWidget(handlers());
-    widget.setState({ status: 'result', score: 40, rationale: '<img src=x>', improvedText: '<script>bad()</script>' });
+    widget.setState({ status: 'result', score: 40, previousScore: 20, rationale: '<img src=x>', improvedText: '<script>bad()</script>' });
     expect(widget.element.shadowRoot?.querySelector('.od-preview')?.textContent).toBe('<script>bad()</script>');
     expect(widget.element.shadowRoot?.querySelector('script')).toBeNull();
     expect(widget.element.shadowRoot?.querySelector('.od-preview img')).toBeNull();

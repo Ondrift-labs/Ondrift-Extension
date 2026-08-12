@@ -1,8 +1,8 @@
 export type InlineWidgetState =
   | { status: 'ready'; promptLength: number }
   | { status: 'loading' }
-  | { status: 'result'; score: number; previousScore?: number; rationale: string; improvedText: string }
-  | { status: 'applied'; score: number; improvedText: string }
+  | { status: 'result'; score: number; previousScore: number; rationale: string; improvedText: string }
+  | { status: 'applied'; score: number; previousScore: number; improvedText: string }
   | { status: 'missing_key' }
   | { status: 'reload_required' }
   | { status: 'error'; kind: 'quota' | 'network' | 'invalid_key' | 'request' | 'unavailable' | 'parse' | 'unknown'; message?: string };

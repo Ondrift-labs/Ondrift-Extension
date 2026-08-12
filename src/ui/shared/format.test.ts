@@ -6,6 +6,7 @@ const now = Date.UTC(2026, 7, 10, 12);
 const history: HistoryItem[] = [
   { id: '1', service: 'chatgpt', originalText: 'write release notes', improvedText: 'Draft concise release notes', score: 84, previousScore: 52, applied: true, createdAt: now - 60_000, inputTokens: 20, outputTokens: 30 },
   { id: '2', service: 'claude', originalText: 'plan migration', improvedText: 'Create a staged database migration plan', score: 72, previousScore: 60, applied: false, createdAt: now - 2 * 86_400_000, inputTokens: 10, outputTokens: 15 },
+  { id: 'unscored', service: 'gemini', originalText: 'plain submission', applied: false, createdAt: now - 30_000 },
   { id: 'old', service: 'chatgpt', originalText: 'old item', improvedText: 'old item', score: 30, applied: true, createdAt: now - 9 * 86_400_000 },
 ];
 
@@ -18,6 +19,14 @@ describe('popup view logic', () => {
       adoptionRate: 50,
       totalTokens: 75,
     });
+  });
+
+  it('excludes prompts that were never scored from rewrite metrics', () => {
+    const summary = summarizeUsage(history, now);
+
+    expect(summary.rewritesThisWeek).toBe(2);
+    expect(summary.averageScore).toBe(78);
+    expect(summary.adoptionRate).toBe(50);
   });
 
   it('searches prompt text and service names case-insensitively', () => {

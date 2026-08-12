@@ -8,8 +8,8 @@ afterEach(cleanup);
 
 const now = Date.now();
 const history: HistoryItem[] = [
-  { id: '1', service: 'chatgpt', originalText: 'First', improvedText: 'First improved', score: 72, applied: true, createdAt: now - 86_400_000 },
-  { id: '2', service: 'claude', originalText: 'Second', improvedText: 'Second improved', score: 84, applied: false, createdAt: now },
+  { id: '1', service: 'chatgpt', originalText: 'First', improvedText: 'First improved', previousScore: 40, score: 72, applied: true, createdAt: now - 86_400_000 },
+  { id: '2', service: 'claude', originalText: 'Second', improvedText: 'Second improved', previousScore: 60, score: 84, applied: false, createdAt: now },
 ];
 
 function createBridge(overrides: Partial<UiBridge> = {}): UiBridge {
@@ -38,7 +38,7 @@ describe('PopupApp', () => {
 
     expect(await screen.findByRole('region', { name: 'Usage over the last 7 days' })).toBeInTheDocument();
     expect(screen.getByText('Last 7 days')).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: /Average prompt score over the last 7 days.*72.*84/ })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /Average improved prompt score over the last 7 days.*72.*84/ })).toBeInTheDocument();
   });
 
   it('renders usage, history, and footer copy in Korean when that is the saved language', async () => {
@@ -49,7 +49,7 @@ describe('PopupApp', () => {
     expect(screen.getAllByText('적용됨').length).toBeGreaterThan(0);
     expect(screen.getByPlaceholderText('프롬프트 텍스트 검색')).toBeInTheDocument();
     expect(screen.getByText('개인정보 및 설정')).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: /최근 7일간 평균 프롬프트 점수.*72.*84/ })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /최근 7일간 개선 후 평균 프롬프트 점수.*72.*84/ })).toBeInTheDocument();
   });
 
   it('shows a localized empty state and search placeholder in Japanese with no history', async () => {
@@ -62,7 +62,7 @@ describe('PopupApp', () => {
   it('copies only the prompt improved by Ondrift', async () => {
     const writeText = vi.fn(async () => undefined);
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
-    const plainHistory: HistoryItem = { id: '3', service: 'chatgpt', originalText: 'Not rewritten', score: 0, applied: false, createdAt: now + 1 };
+    const plainHistory: HistoryItem = { id: '3', service: 'chatgpt', originalText: 'Not rewritten', applied: false, createdAt: now + 1 };
     render(<PopupApp bridge={createBridge({ getHistory: async () => [...history, plainHistory] })} />);
 
     const copyButtons = await screen.findAllByRole('button', { name: 'Copy improved prompt' });
@@ -71,5 +71,13 @@ describe('PopupApp', () => {
 
     expect(writeText).toHaveBeenCalledWith('Second improved');
     expect(screen.getByRole('status')).toHaveTextContent('Improved prompt copied');
+  });
+
+  it('shows original to improved score and omits a badge for unscored prompts', async () => {
+    const plainHistory: HistoryItem = { id: '3', service: 'chatgpt', originalText: 'Not rewritten', applied: false, createdAt: now + 1 };
+    render(<PopupApp bridge={createBridge({ getHistory: async () => [...history, plainHistory] })} />);
+
+    expect(await screen.findByLabelText('Original score 60, improved score 84, 24 points higher')).toHaveTextContent('60→84+24');
+    expect(document.querySelectorAll('.score-badge')).toHaveLength(2);
   });
 });

@@ -29,7 +29,7 @@ export interface HistoryItem {
   service: SiteId;
   originalText: string;
   improvedText?: string;
-  score: number;
+  score?: number;
   previousScore?: number;
   applied: boolean;
   createdAt: number;

@@ -10,6 +10,9 @@ export interface UsageMetadata {
 
 export interface RewriteResult {
   improvedText: string;
+  /** Score for the original user draft, evaluated with the same rubric as `score`. */
+  previousScore: number;
+  /** Score for the improved prompt. */
   score: number;
   rationale: string;
   usageMetadata?: UsageMetadata;
@@ -66,6 +69,7 @@ export interface HistoryEntry {
   sourceUrl: string;
   originalText: string;
   improvedText?: string;
+  previousScore?: number;
   score?: number;
   rationale?: string;
   applied: boolean;

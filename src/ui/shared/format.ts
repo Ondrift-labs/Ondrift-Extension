@@ -22,7 +22,7 @@ export function formatRelativeTime(timestamp: number, now = Date.now(), language
 export function summarizeUsage(items: HistoryItem[], now = Date.now()): UsageSummary {
   const weekStart = now - 7 * 24 * 60 * 60 * 1_000;
   const recent = items.filter((item) => item.createdAt >= weekStart);
-  const scored = recent.filter((item) => Number.isFinite(item.score));
+  const scored = recent.filter((item): item is HistoryItem & { score: number } => typeof item.score === 'number' && Number.isFinite(item.score));
   const averageScore = scored.length
     ? Math.round(scored.reduce((total, item) => total + item.score, 0) / scored.length)
     : null;
@@ -30,8 +30,8 @@ export function summarizeUsage(items: HistoryItem[], now = Date.now()): UsageSum
   const scoreDelta = deltas.length
     ? Math.round(deltas.reduce((total, item) => total + item.score - (item.previousScore ?? item.score), 0) / deltas.length)
     : null;
-  const adoptionRate = recent.length
-    ? Math.round((recent.filter((item) => item.applied).length / recent.length) * 100)
+  const adoptionRate = scored.length
+    ? Math.round((scored.filter((item) => item.applied).length / scored.length) * 100)
     : null;
   const grouped = new Map<string, number[]>();
   for (const item of scored) {
@@ -45,7 +45,7 @@ export function summarizeUsage(items: HistoryItem[], now = Date.now()): UsageSum
       score: Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length),
     }));
   return {
-    rewritesThisWeek: recent.length,
+    rewritesThisWeek: scored.length,
     averageScore,
     scoreDelta,
     adoptionRate,
