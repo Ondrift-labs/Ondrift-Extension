@@ -80,4 +80,19 @@ describe('OnboardingApp localization', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('That key was not accepted. Copy the full key from Google AI Studio and try again.');
   });
+
+  it('shows the AI Studio screenshots by default, but lets a developer hide them and bring them back', async () => {
+    render(<OnboardingApp bridge={createBridge()} />);
+    await userEvent.click(screen.getByRole('button', { name: /Set up Gemini/ }));
+
+    expect(screen.getByAltText('Google AI Studio’s API Keys screen, with the “Create API key” button in the top right.')).toBeInTheDocument();
+    expect(screen.getByAltText('The “Create a new key” dialog for choosing a project.')).toBeInTheDocument();
+    expect(screen.getByAltText('The generated API key listed on the API Keys screen.')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Developer? Hide the screenshots' }));
+    expect(screen.queryByAltText('Google AI Studio’s API Keys screen, with the “Create API key” button in the top right.')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Show the screenshots again' }));
+    expect(screen.getByAltText('Google AI Studio’s API Keys screen, with the “Create API key” button in the top right.')).toBeInTheDocument();
+  });
 });

@@ -51,15 +51,19 @@ export interface OnboardingCopy {
   key: {
     eyebrow: string;
     title: string;
+    guideToggleCta(showing: boolean): string;
     step1Title: string;
     step1Body: string;
     step1Cta: string;
+    step1ImageAlt: string;
     step2Title: string;
     step2Body: string;
+    step2ImageAlt: string;
     step3Label: string;
     step3Placeholder: string;
     verifyCta: string;
     step3Help: string;
+    step3ImageAlt: string;
     keySuccess: string;
     validation: ApiKeyValidationCopy;
     continueCta: string;
@@ -221,15 +225,19 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       key: {
         eyebrow: 'Gemini 연결',
         title: '세 단계로 키를 발급받으세요.',
+        guideToggleCta: (showing) => (showing ? '개발자인가요? 화면 캡처 숨기기' : '화면 캡처 다시 보기'),
         step1Title: 'Google AI Studio 열기',
         step1Body: 'Google 계정으로 로그인하세요. Gemini 사용량 한도는 Google이 관리합니다.',
         step1Cta: 'AI Studio 열기',
+        step1ImageAlt: 'Google AI Studio의 API 키 화면. 오른쪽 위에 "Create API key" 버튼이 보인다.',
         step2Title: 'API 키 만들기',
         step2Body: '“API 키 만들기”를 선택하고 프로젝트를 고른 다음 생성된 값을 복사하세요.',
+        step2ImageAlt: '프로젝트를 선택하는 "Create a new key" 대화상자.',
         step3Label: '여기에 붙여넣고 확인하세요',
         step3Placeholder: 'AIza…',
         verifyCta: '키 확인',
         step3Help: '확인 과정에서 작은 테스트 요청 한 건이 전송됩니다. 키는 Ondrift로 전송되지 않습니다.',
+        step3ImageAlt: '생성된 API 키가 목록에 표시된 화면.',
         keySuccess: '키가 확인되었습니다. 이제 개인정보 설정으로 이동하세요.',
         validation: {
           invalid_key: '이 키는 승인되지 않았습니다. Google AI Studio에서 전체 키를 복사해 다시 시도해 주세요.',
@@ -424,15 +432,19 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       key: {
         eyebrow: 'Connect Gemini',
         title: 'Get a key in three short steps.',
+        guideToggleCta: (showing) => (showing ? 'Developer? Hide the screenshots' : 'Show the screenshots again'),
         step1Title: 'Open Google AI Studio',
         step1Body: 'Sign in with your Google account. Gemini’s usage limits are managed by Google.',
         step1Cta: 'Open AI Studio',
+        step1ImageAlt: 'Google AI Studio’s API Keys screen, with the “Create API key” button in the top right.',
         step2Title: 'Create an API key',
         step2Body: 'Select “Create API key,” choose a project, then copy the generated value.',
+        step2ImageAlt: 'The “Create a new key” dialog for choosing a project.',
         step3Label: 'Paste and verify it here',
         step3Placeholder: 'AIza…',
         verifyCta: 'Verify key',
         step3Help: 'Verification makes one small test request. Your key is never sent to Ondrift.',
+        step3ImageAlt: 'The generated API key listed on the API Keys screen.',
         keySuccess: 'Key verified. You’re ready for the privacy choices.',
         validation: {
           invalid_key: 'That key was not accepted. Copy the full key from Google AI Studio and try again.',
@@ -627,15 +639,19 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       key: {
         eyebrow: 'Gemini と接続',
         title: '3つの短い手順でキーを取得しましょう。',
+        guideToggleCta: (showing) => (showing ? '開発者の方はこちら: 画面キャプチャを非表示' : '画面キャプチャを再表示'),
         step1Title: 'Google AI Studio を開く',
         step1Body: 'Google アカウントでサインインしてください。Gemini の利用制限は Google が管理します。',
         step1Cta: 'AI Studio を開く',
+        step1ImageAlt: 'Google AI Studio の API キー画面。右上に「Create API key」ボタンが表示されている。',
         step2Title: 'API キーを作成する',
         step2Body: '「Create API key」を選択し、プロジェクトを選んで生成された値をコピーしてください。',
+        step2ImageAlt: 'プロジェクトを選択する「Create a new key」ダイアログ。',
         step3Label: 'ここに貼り付けて確認',
         step3Placeholder: 'AIza…',
         verifyCta: 'キーを確認',
         step3Help: '確認のために小さなテストリクエストが1件送信されます。キーが Ondrift に送信されることはありません。',
+        step3ImageAlt: '生成された API キーが一覧に表示された画面。',
         keySuccess: 'キーを確認しました。次はプライバシーの選択です。',
         validation: {
           invalid_key: 'このキーは承認されませんでした。Google AI Studio からキー全体をコピーして再度お試しください。',
@@ -830,15 +846,19 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       key: {
         eyebrow: '连接 Gemini',
         title: '用三个简单步骤获取密钥。',
+        guideToggleCta: (showing) => (showing ? '是开发者?隐藏截图' : '重新显示截图'),
         step1Title: '打开 Google AI Studio',
         step1Body: '使用你的 Google 账号登录。Gemini 的用量限制由 Google 管理。',
         step1Cta: '打开 AI Studio',
+        step1ImageAlt: 'Google AI Studio 的 API 密钥页面,右上角显示"Create API key"按钮。',
         step2Title: '创建 API 密钥',
         step2Body: '选择“Create API key”，选择一个项目，然后复制生成的值。',
+        step2ImageAlt: '用于选择项目的"Create a new key"对话框。',
         step3Label: '粘贴到这里并验证',
         step3Placeholder: 'AIza…',
         verifyCta: '验证密钥',
         step3Help: '验证会发送一次很小的测试请求。你的密钥不会发送给 Ondrift。',
+        step3ImageAlt: '生成的 API 密钥显示在列表中的画面。',
         keySuccess: '密钥已验证。接下来可以设置隐私选项。',
         validation: {
           invalid_key: '此密钥未被接受。请从 Google AI Studio 复制完整密钥后重试。',
