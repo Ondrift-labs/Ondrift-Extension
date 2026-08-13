@@ -28,6 +28,15 @@ function localArea(): LocalStorageArea {
 export class SettingsStore {
   constructor(private readonly area?: LocalStorageArea) {}
 
+  // Every update() does a read-modify-write against the same full settings blob. Two calls
+  // that overlap (e.g. the Options page autosaving a model change while a background rewrite
+  // or "Verify & save" concurrently calls recordApiKeyStatus) would otherwise both read the
+  // same pre-write snapshot and the one whose set() lands last silently clobbers the other's
+  // change -- e.g. picking "Default" gets reverted back to the previously saved model. Chaining
+  // every update() through this queue makes each one wait for the previous write to finish
+  // before it reads, so no update's read can ever be stale relative to one already in flight.
+  private queue: Promise<unknown> = Promise.resolve();
+
   async get(): Promise<ExtensionSettings> {
     const result = await (this.area ?? localArea()).get(STORAGE_KEY);
     const stored = result[STORAGE_KEY] as Partial<ExtensionSettings> | undefined;
@@ -43,16 +52,26 @@ export class SettingsStore {
   }
 
   async update(patch: Partial<ExtensionSettings>): Promise<ExtensionSettings> {
-    const current = await this.get();
-    const next: ExtensionSettings = {
-      ...current,
-      ...patch,
-      apiKeys: { ...current.apiKeys, ...patch.apiKeys },
-      apiModels: { ...current.apiModels, ...patch.apiModels },
-      enabledSites: { ...current.enabledSites, ...patch.enabledSites },
+    const run = async (): Promise<ExtensionSettings> => {
+      const current = await this.get();
+      const next: ExtensionSettings = {
+        ...current,
+        ...patch,
+        apiKeys: { ...current.apiKeys, ...patch.apiKeys },
+        apiModels: { ...current.apiModels, ...patch.apiModels },
+        enabledSites: { ...current.enabledSites, ...patch.enabledSites },
+      };
+      await (this.area ?? localArea()).set({ [STORAGE_KEY]: next });
+      return next;
     };
-    await (this.area ?? localArea()).set({ [STORAGE_KEY]: next });
-    return next;
+    // Run after whatever's already queued, regardless of whether it resolved or rejected --
+    // and never let one update's failure poison the queue for updates queued after it.
+    const result = this.queue.then(run, run);
+    this.queue = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
   }
 
   async apiKey(provider?: ExtensionSettings["provider"]): Promise<string | undefined> {
