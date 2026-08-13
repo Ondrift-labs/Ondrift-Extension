@@ -5,7 +5,7 @@ export const inlineWidgetStyles = `
 button { font:inherit; }
 button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-shell { position:relative; width:min(430px,calc(100vw - 24px)); border:1px solid var(--od-line); border-radius:9px; color:var(--od-ink); background:var(--od-paper); box-shadow:0 12px 36px rgb(28 31 27 / 16%); overflow:hidden; }
-.od-shell--loading::before { content:""; position:absolute; inset:0; z-index:2; border-radius:inherit; padding:1.5px; background:conic-gradient(from 0deg, transparent 0%, var(--od-accent) 14%, transparent 32%); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; animation:od-border-travel 2.4s linear infinite; }
+.od-shell--loading::before { content:""; position:absolute; inset:0; z-index:2; border-radius:inherit; padding:1.5px; background:conic-gradient(from 0deg, transparent 0%, var(--od-accent) 32%, transparent 66%); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; animation:od-border-travel 3.2s linear infinite; }
 .od-header { min-height:42px; display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--od-line); }
 .od-logo { display:block; width:23px; height:23px; object-fit:contain; }
 .od-title { font-size:12px; font-weight:720; letter-spacing:-.01em; }
