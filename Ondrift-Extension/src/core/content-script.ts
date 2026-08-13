@@ -1,6 +1,6 @@
 import { contentController } from "./content-controller";
 import { createInlineWidget } from "../ui/inline-widget";
-import { ProviderError } from "../providers/errors";
+import { ProviderError, providerErrorReason } from "../providers/errors";
 import type { ExtensionSettings } from "../shared/types";
 import { sendRuntimeMessage } from "./rewrite-client";
 import { adapterRegistry } from "./adapter-registry";
@@ -88,7 +88,10 @@ async function runRewrite(): Promise<void> {
     const code = error instanceof ProviderError ? error.code : "unknown";
     widget.setState({
       status: "error",
-      kind: code === "quota_exceeded" ? "quota" : code === "network" ? "network" : code === "invalid_key" ? "invalid_key" : code === "request_rejected" ? "request" : code === "model_unavailable" || code === "service_unavailable" ? "unavailable" : code === "invalid_response" ? "parse" : "unknown",
+      // `invalid_response` has no equivalent in the shared reason set (it's specific to a
+      // rewrite call failing to parse, not an API-key validation outcome), so it's handled
+      // here on top of the shared mapping instead of being folded into it.
+      kind: code === "invalid_response" ? "parse" : providerErrorReason(code),
       message: error instanceof Error ? error.message : undefined,
     });
     floatingPlacement?.update();

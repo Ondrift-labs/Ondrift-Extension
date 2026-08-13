@@ -1,8 +1,14 @@
-import type { ProviderErrorCode, RuntimeRequest, RuntimeResponse } from "../shared/types";
+import type { ExtensionSettings, ProviderErrorCode, ProviderId, RuntimeRequest, RuntimeResponse } from "../shared/types";
 import { getProvider } from "../providers/registry";
 import { ProviderError, serializeProviderError } from "../providers/errors";
 import { settingsStore, type SettingsStore } from "../storage/settings";
 import { historyStore, type HistoryStore } from "../storage/history";
+
+const MISSING_API_KEY_MESSAGE = "Add an API key in Ondrift settings.";
+
+function apiKeyFor(settings: ExtensionSettings, provider: ProviderId): string | undefined {
+  return settings.apiKeys[provider]?.trim() || undefined;
+}
 
 /**
  * Codes that reflect the active API key's own health, as opposed to something unrelated
@@ -22,6 +28,18 @@ const API_KEY_HEALTH_CODES: ReadonlySet<ProviderErrorCode> = new Set([
 async function recordApiKeyStatus(settings: SettingsStore, error: unknown): Promise<void> {
   const code = error instanceof ProviderError && API_KEY_HEALTH_CODES.has(error.code) ? error.code : null;
   await settings.update({ apiKeyStatus: code });
+}
+
+/** Runs `action`, then records the API key's health based on whether it threw. Rethrows on failure. */
+async function withApiKeyStatusTracking<T>(settings: SettingsStore, action: () => Promise<T>): Promise<T> {
+  try {
+    const result = await action();
+    await recordApiKeyStatus(settings, null);
+    return result;
+  } catch (error) {
+    await recordApiKeyStatus(settings, error);
+    throw error;
+  }
 }
 
 export interface MessageHandlerDependencies {
@@ -49,34 +67,24 @@ export async function handleRuntimeRequest(
         if (!settings.enabledSites[message.payload.service]) {
           throw new ProviderError("not_configured", `Ondrift is disabled on ${message.payload.service}.`);
         }
-        const apiKey = settings.apiKeys[settings.provider]?.trim();
-        if (!apiKey) throw new ProviderError("not_configured", "Add an API key in Ondrift settings.");
-        try {
-          const result = await dependencies.provider(settings.provider).rewrite(
+        const apiKey = apiKeyFor(settings, settings.provider);
+        if (!apiKey) throw new ProviderError("not_configured", MISSING_API_KEY_MESSAGE);
+        const result = await withApiKeyStatusTracking(dependencies.settings, () =>
+          dependencies.provider(settings.provider).rewrite(
             { ...message.payload, language: settings.language, model: settings.apiModels[settings.provider] },
             apiKey,
-          );
-          await recordApiKeyStatus(dependencies.settings, null);
-          return { ok: true, data: result };
-        } catch (error) {
-          await recordApiKeyStatus(dependencies.settings, error);
-          throw error;
-        }
+          ));
+        return { ok: true, data: result };
       }
       case "validate_api_key": {
         // The Options page leaves apiKey out when the user only changed the model, so
         // re-verifying doesn't force them to re-paste an already-saved secret.
         const settings = await dependencies.settings.get();
-        const apiKey = message.payload.apiKey?.trim() || settings.apiKeys[message.payload.provider]?.trim();
-        if (!apiKey) throw new ProviderError("not_configured", "Add an API key in Ondrift settings.");
-        try {
-          await dependencies.provider(message.payload.provider).validateKey(apiKey, message.payload.model);
-          await recordApiKeyStatus(dependencies.settings, null);
-          return { ok: true, data: undefined };
-        } catch (error) {
-          await recordApiKeyStatus(dependencies.settings, error);
-          throw error;
-        }
+        const apiKey = message.payload.apiKey?.trim() || apiKeyFor(settings, message.payload.provider);
+        if (!apiKey) throw new ProviderError("not_configured", MISSING_API_KEY_MESSAGE);
+        await withApiKeyStatusTracking(dependencies.settings, () =>
+          dependencies.provider(message.payload.provider).validateKey(apiKey, message.payload.model));
+        return { ok: true, data: undefined };
       }
       case "settings_get":
         return { ok: true, data: await dependencies.settings.get() };
