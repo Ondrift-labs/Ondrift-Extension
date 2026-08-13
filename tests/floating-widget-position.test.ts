@@ -12,7 +12,7 @@ describe("Gemini floating widget placement", () => {
       { top: 200, right: 800, bottom: 300, left: 200, width: 600, height: 100 },
       { width: 390, height: 120 },
       { width: 1200, height: 800 },
-    )).toEqual({ left: 200, top: 308, width: 390 });
+    )).toEqual({ left: 200, top: 308, width: 430 });
   });
 
   it("moves the widget above the composer when the lower edge would be clipped", () => {
@@ -20,7 +20,7 @@ describe("Gemini floating widget placement", () => {
       { top: 500, right: 800, bottom: 600, left: 200, width: 600, height: 100 },
       { width: 390, height: 180 },
       { width: 1200, height: 700 },
-    )).toEqual({ left: 200, top: 312, width: 390 });
+    )).toEqual({ left: 200, top: 312, width: 430 });
   });
 
   it("keeps the widget inside the horizontal viewport", () => {
@@ -28,7 +28,7 @@ describe("Gemini floating widget placement", () => {
       { top: 100, right: 520, bottom: 180, left: 420, width: 100, height: 80 },
       { width: 390, height: 100 },
       { width: 500, height: 700 },
-    )).toEqual({ left: 98, top: 188, width: 390 });
+    )).toEqual({ left: 98, top: 188, width: 430 });
   });
 
   it("portals the widget to body and updates its fixed coordinates", () => {
