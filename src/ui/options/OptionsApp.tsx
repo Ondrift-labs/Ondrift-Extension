@@ -9,6 +9,12 @@ import './options.css';
 const PERSONA_IDS: readonly PersonaId[] = ['general', 'developer', 'writer', 'student', 'translator'];
 const SITE_IDS: readonly SiteId[] = ['chatgpt', 'claude', 'gemini', 'perplexity'];
 const CUSTOM_MODEL_VALUE = '__custom__';
+// Only free-text typing (the custom model field) needs this: it keeps a save from firing on
+// every keystroke. A select/radio/checkbox pick is already a complete, one-shot decision, so
+// it saves with no artificial delay -- otherwise picking a different model and refreshing (or
+// closing the tab) within the window loses the pick and silently falls back to whatever was
+// last actually persisted.
+const MODEL_TEXT_DEBOUNCE_MS = 700;
 
 function editableSettingsMatch(current: UiSettings, saved: UiSettings) {
   return current.provider === saved.provider
@@ -39,6 +45,9 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   const [confirmClear, setConfirmClear] = useState(false);
   const autosaveTimer = useRef<number | null>(null);
   const saveRequest = useRef(0);
+  // 0 = save as soon as the pending-change effect below sees it (the default, for discrete
+  // picks); set to MODEL_TEXT_DEBOUNCE_MS right before a keystroke-driven update.
+  const nextSaveDelayMs = useRef(0);
   const settingsRef = useRef(settings);
   const savedSettingsRef = useRef(savedSettings);
   settingsRef.current = settings;
@@ -85,11 +94,16 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
     return () => window.clearTimeout(timer);
   }, [saveState]);
 
-  function update<K extends keyof UiSettings>(key: K, value: UiSettings[K]) { setSettings((current) => ({ ...current, [key]: value })); setSaveState('idle'); }
+  function update<K extends keyof UiSettings>(key: K, value: UiSettings[K], opts: { debounce?: boolean } = {}) {
+    nextSaveDelayMs.current = opts.debounce ? MODEL_TEXT_DEBOUNCE_MS : 0;
+    setSettings((current) => ({ ...current, [key]: value }));
+    setSaveState('idle');
+  }
   function updateSite(site: SiteId, value: boolean) { update('siteAccess', { ...settings.siteAccess, [site]: value }); }
   // Keeps the picked model in `settings` (not just local state) so it is included in the
-  // same automatic save as the rest of the preferences.
-  function applyModel(next: string) { setModel(next); update('model', next.trim() || undefined); }
+  // same automatic save as the rest of the preferences. `opts.debounce` should only be set
+  // by the custom-model text input -- every other caller is a one-shot select, not typing.
+  function applyModel(next: string, opts: { debounce?: boolean } = {}) { setModel(next); update('model', next.trim() || undefined, opts); }
   const save = useCallback(async (snapshot: UiSettings) => {
     const requestId = ++saveRequest.current;
     setSaveState('saving');
@@ -108,10 +122,16 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   useEffect(() => {
     if (savedSettings === null || editableSettingsMatch(settings, savedSettings)) return;
     const snapshot = settings;
+    const delay = nextSaveDelayMs.current;
+    nextSaveDelayMs.current = 0; // reset to "immediate" so the next discrete pick isn't accidentally debounced too
+    if (delay <= 0) {
+      void save(snapshot);
+      return;
+    }
     const timer = window.setTimeout(() => {
       autosaveTimer.current = null;
       void save(snapshot);
-    }, 700);
+    }, delay);
     autosaveTimer.current = timer;
     return () => {
       window.clearTimeout(timer);
@@ -159,7 +179,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
         <div className="settings-card">
           <label className="ui-field"><span className="ui-label">{copy.provider.providerLabel}</span><select className="ui-select" aria-label={copy.provider.providerLabel} value={settings.provider} onChange={(event) => update('provider', event.target.value as ProviderId)}><option value="gemini">{copy.provider.providerGemini}</option><option value="openai" disabled>{copy.provider.providerOpenAi}</option><option value="claude" disabled>{copy.provider.providerClaude}</option></select></label>
           <div className="ui-field"><label className="ui-label" htmlFor="settings-key">{copy.provider.apiKeyLabel}</label><div className="settings-key-row"><input id="settings-key" className="ui-input" type="password" autoComplete="off" value={apiKey} onChange={(event) => { setApiKey(event.target.value); setValidation('idle'); }} placeholder={settings.apiKeyConfigured ? copy.provider.apiKeyPlaceholderSaved : copy.provider.apiKeyPlaceholderEmpty} /><button className="ui-button ui-button--secondary" disabled={(!apiKey.trim() && !settings.apiKeyConfigured) || validation === 'checking'} onClick={verify}>{validation === 'checking' ? common.checking : copy.provider.verifyCta}</button></div><p className="ui-help">{copy.provider.apiKeyHelp} <button className="text-button" onClick={() => bridge.openExternal(AI_STUDIO_API_KEY_URL)}>{copy.provider.getKeyCta} <Icon name="external" /></button></p></div>
-          <label className="ui-field"><span className="ui-label">{copy.provider.modelLabel}</span><select id="settings-model" className="ui-select" aria-label={copy.provider.modelLabel} value={modelSelectValue} onChange={(event) => { const next = event.target.value; const isCustom = next === CUSTOM_MODEL_VALUE; setCustomModelSelected(isCustom); applyModel(isCustom ? customModel : next); setValidation('idle'); }}><option value="">{copy.provider.modelAutoLabel}</option>{GEMINI_MODEL_CHOICES.map((id) => <option key={id} value={id}>{copy.provider.modelOptionLabels[id]}</option>)}<option value={CUSTOM_MODEL_VALUE}>{copy.provider.modelCustomLabel}</option></select>{customModelSelected && <input className="ui-input" type="text" autoComplete="off" aria-label={copy.provider.modelCustomLabel} value={customModel} onChange={(event) => { setCustomModel(event.target.value); applyModel(event.target.value); setValidation('idle'); }} placeholder={copy.provider.modelCustomPlaceholder} />}<span className="ui-help">{copy.provider.modelHelp}</span></label>
+          <label className="ui-field"><span className="ui-label">{copy.provider.modelLabel}</span><select id="settings-model" className="ui-select" aria-label={copy.provider.modelLabel} value={modelSelectValue} onChange={(event) => { const next = event.target.value; const isCustom = next === CUSTOM_MODEL_VALUE; setCustomModelSelected(isCustom); applyModel(isCustom ? customModel : next); setValidation('idle'); }}><option value="">{copy.provider.modelAutoLabel}</option>{GEMINI_MODEL_CHOICES.map((id) => <option key={id} value={id}>{copy.provider.modelOptionLabels[id]}</option>)}<option value={CUSTOM_MODEL_VALUE}>{copy.provider.modelCustomLabel}</option></select>{customModelSelected && <input className="ui-input" type="text" autoComplete="off" aria-label={copy.provider.modelCustomLabel} value={customModel} onChange={(event) => { setCustomModel(event.target.value); applyModel(event.target.value, { debounce: true }); setValidation('idle'); }} placeholder={copy.provider.modelCustomPlaceholder} />}<span className="ui-help">{copy.provider.modelHelp}</span></label>
           {validation === 'valid' && <div className="ui-status ui-status--success"><Icon name="check" />{copy.provider.keySuccess}</div>}
           {validation && !['idle', 'checking', 'valid'].includes(validation) && <div className="ui-status ui-status--error">{copy.provider.validation[validation as keyof typeof copy.provider.validation]}</div>}
         </div>

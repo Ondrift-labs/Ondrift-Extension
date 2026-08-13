@@ -1,7 +1,7 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_SETTINGS, type UiBridge } from '../shared/contracts';
+import { DEFAULT_SETTINGS, type UiBridge, type UiSettings } from '../shared/contracts';
 import { OptionsApp } from './OptionsApp';
 
 afterEach(cleanup);
@@ -30,9 +30,8 @@ describe('OptionsApp localization', () => {
     expect(screen.getByText('Show the rewrite widget on chatgpt.com.')).toBeInTheDocument();
   });
 
-  it('re-renders every visible string in Japanese the instant the language select changes, before saving', async () => {
-    const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
-    render(<OptionsApp bridge={createBridge({ saveSettings })} />);
+  it('re-renders every visible string in Japanese the instant the language select changes', async () => {
+    render(<OptionsApp bridge={createBridge()} />);
     await screen.findByRole('heading', { name: 'Settings' });
 
     await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Language' }), '日本語');
@@ -40,7 +39,6 @@ describe('OptionsApp localization', () => {
     expect(await screen.findByRole('heading', { name: '設定' })).toBeInTheDocument();
     expect(screen.getByText('バランス型')).toBeInTheDocument();
     expect(screen.getByText('技術的な前提、エッジケース、受け入れ基準を追加します。')).toBeInTheDocument();
-    expect(saveSettings).not.toHaveBeenCalled();
   });
 
   it('automatically persists a language change and shows a localized toast', async () => {
@@ -54,7 +52,12 @@ describe('OptionsApp localization', () => {
   });
 
   it('warns before leaving only while editable settings have unsaved changes', async () => {
-    render(<OptionsApp bridge={createBridge()} />);
+    // Model this with a save that hasn't resolved yet, not a delay: since a discrete pick now
+    // saves with no artificial debounce, the in-flight request -- not a timer -- is what makes
+    // the settings briefly "dirty" here.
+    let resolveSave: (value: UiSettings) => void = () => undefined;
+    const saveSettings = vi.fn(() => new Promise<UiSettings>((resolve) => { resolveSave = resolve; }));
+    render(<OptionsApp bridge={createBridge({ saveSettings })} />);
     const languageSelect = await screen.findByRole('combobox', { name: 'Language' });
 
     const unchangedEvent = new Event('beforeunload', { cancelable: true });
@@ -66,6 +69,7 @@ describe('OptionsApp localization', () => {
     window.dispatchEvent(dirtyEvent);
     expect(dirtyEvent.defaultPrevented).toBe(true);
 
+    resolveSave({ ...DEFAULT_SETTINGS, language: 'ko' });
     await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('자동 저장 완료'));
     const savedEvent = new Event('beforeunload', { cancelable: true });
     window.dispatchEvent(savedEvent);
@@ -114,6 +118,45 @@ describe('OptionsApp localization', () => {
     await userEvent.selectOptions(await screen.findByLabelText('Model'), 'gemini-3.6-flash-lite');
 
     await waitFor(() => expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({ model: 'gemini-3.6-flash-lite' })));
+  });
+
+  it('saves a model pick immediately, with no debounce delay, unlike typing a custom model', async () => {
+    const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
+    const bridge = createBridge({ saveSettings });
+    render(<OptionsApp bridge={bridge} />);
+
+    await userEvent.selectOptions(await screen.findByLabelText('Model'), 'gemini-3.6-flash-lite');
+
+    // No `waitFor`/timer advance: a select is a one-shot decision, so it must already have
+    // been saved by the time this microtask runs -- unlike free-text typing, which debounces.
+    expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({ model: 'gemini-3.6-flash-lite' }));
+  });
+
+  it('switches back to a preset model without reverting to "Other" on the next load, even if the tab is refreshed right away', async () => {
+    let stored: UiSettings = { ...DEFAULT_SETTINGS };
+    const bridge: UiBridge = {
+      ...createBridge(),
+      getSettings: async () => ({ ...stored }),
+      saveSettings: async (patch) => { stored = { ...stored, ...patch }; return { ...stored }; },
+    };
+
+    const r1 = render(<OptionsApp bridge={bridge} />);
+    await userEvent.selectOptions(await screen.findByLabelText('Model'), 'Other (enter manually)');
+    await userEvent.type(screen.getByLabelText('Other (enter manually)'), 'gemini-experimental');
+    await waitFor(() => expect(stored.model).toBe('gemini-experimental'));
+    r1.unmount();
+
+    const r2 = render(<OptionsApp bridge={bridge} />);
+    const modelSelect = await screen.findByLabelText('Model');
+    expect(modelSelect).toHaveValue('__custom__');
+
+    await userEvent.selectOptions(modelSelect, 'gemini-3.6-flash');
+    // Simulate refreshing right away, before any debounce window would have elapsed.
+    r2.unmount();
+
+    expect(stored.model).toBe('gemini-3.6-flash');
+    render(<OptionsApp bridge={bridge} />);
+    expect(await screen.findByLabelText('Model')).toHaveValue('gemini-3.6-flash');
   });
 
   it('does not auto-save an unverified API key', async () => {
