@@ -14,6 +14,12 @@ export interface SiteAdapter {
   onSubmit(callback: SubmitListener): () => void;
 }
 
+/** Strips the trailing " - <siteName>" / " | <siteName>" suffix browsers append to the document title. */
+export function titleFromDocumentTitle(siteName: string): string | null {
+  const suffix = new RegExp(`\\s*[-|]\\s*${siteName}\\s*$`, "i");
+  return document.querySelector<HTMLTitleElement>("title")?.textContent?.replace(suffix, "").trim() || null;
+}
+
 export function readEditable(element: HTMLElement | null): string {
   if (!element) return "";
   if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) return element.value.trim();

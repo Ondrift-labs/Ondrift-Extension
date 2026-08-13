@@ -5,27 +5,15 @@ import type {
   UiBridge,
   UiSettings,
 } from "../ui/shared/contracts";
-import type { ExtensionSettings, HistoryEntry, ProviderErrorCode, ProviderId } from "../shared/types";
-import { ProviderError } from "../providers/errors";
+import type { ExtensionSettings, HistoryEntry, ProviderId } from "../shared/types";
+import { ProviderError, providerErrorReason } from "../providers/errors";
 import { sendRuntimeMessage } from "./rewrite-client";
-
-function mapProviderErrorCodeToReason(code: ProviderErrorCode): NonNullable<ApiKeyValidationResult["reason"]> {
-  switch (code) {
-    case "quota_exceeded": return "quota";
-    case "invalid_key": return "invalid_key";
-    case "network": return "network";
-    case "request_rejected": return "request";
-    case "model_unavailable":
-    case "service_unavailable": return "unavailable";
-    default: return "unknown";
-  }
-}
 
 function toUiSettings(settings: ExtensionSettings): UiSettings {
   return {
     provider: settings.provider,
     apiKeyConfigured: Boolean(settings.apiKeys[settings.provider]?.trim()),
-    apiKeyStatus: settings.apiKeyStatus ? mapProviderErrorCodeToReason(settings.apiKeyStatus) : undefined,
+    apiKeyStatus: settings.apiKeyStatus ? providerErrorReason(settings.apiKeyStatus) : undefined,
     model: settings.apiModels[settings.provider],
     persona: (settings.persona || "general") as PersonaId,
     language: settings.language || "en",
@@ -53,7 +41,7 @@ function toHistoryItem(entry: HistoryEntry): HistoryItem {
 
 function validationFailure(error: unknown): ApiKeyValidationResult {
   if (!(error instanceof ProviderError)) return { ok: false, reason: "unknown" };
-  return { ok: false, reason: mapProviderErrorCodeToReason(error.code) };
+  return { ok: false, reason: providerErrorReason(error.code) };
 }
 
 export const uiBridge: UiBridge = {
@@ -100,8 +88,8 @@ export const uiBridge: UiBridge = {
       return validationFailure(error);
     }
   },
-  openExternal(url) {
-    return chrome.tabs.create({ url }).then(() => undefined);
+  async openExternal(url) {
+    await chrome.tabs.create({ url });
   },
   async getHistory() {
     return (await sendRuntimeMessage<HistoryEntry[]>({ type: "history_list" })).map(toHistoryItem);

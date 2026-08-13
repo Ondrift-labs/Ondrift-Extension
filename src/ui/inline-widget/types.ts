@@ -1,3 +1,5 @@
+import type { LanguageId } from '../../shared/types';
+
 export type InlineWidgetState =
   | { status: 'ready'; promptLength: number }
   | { status: 'loading' }
@@ -22,4 +24,3 @@ export interface InlineWidgetController {
   setLanguage(language: LanguageId): void;
   destroy(): void;
 }
-import type { LanguageId } from '../../shared/types';

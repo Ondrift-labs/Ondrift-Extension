@@ -1,5 +1,5 @@
 import type { SiteAdapter } from "./site-adapter";
-import { firstVisible, installSubmitListener, readEditable, selectAllContents, writeEditable, writeEditableThroughPaste } from "./site-adapter";
+import { firstVisible, installSubmitListener, readEditable, selectAllContents, titleFromDocumentTitle, writeEditable, writeEditableThroughPaste } from "./site-adapter";
 
 const INPUT_SELECTORS = [
   "div[contenteditable='true'][role='textbox']",
@@ -40,7 +40,7 @@ export class PerplexityAdapter implements SiteAdapter {
     writeEditable(input, text);
   }
   getConversationTitle(): string | null {
-    return document.querySelector<HTMLTitleElement>("title")?.textContent?.replace(/\s*[-|]\s*Perplexity\s*$/i, "").trim() || null;
+    return titleFromDocumentTitle("Perplexity");
   }
   getConversationUrl(): string { return location.href; }
   onSubmit(callback: (prompt: string) => void): () => void {

@@ -1,5 +1,5 @@
 import type { SiteAdapter } from "./site-adapter";
-import { firstVisible, installSubmitListener, readEditable, writeEditable } from "./site-adapter";
+import { firstVisible, installSubmitListener, readEditable, titleFromDocumentTitle, writeEditable } from "./site-adapter";
 
 const INPUT_SELECTORS = [
   "div.ProseMirror[contenteditable='true']",
@@ -25,7 +25,7 @@ export class ClaudeAdapter implements SiteAdapter {
     writeEditable(input, text);
   }
   getConversationTitle(): string | null {
-    return document.querySelector<HTMLTitleElement>("title")?.textContent?.replace(/\s*[-|]\s*Claude\s*$/i, "").trim() || null;
+    return titleFromDocumentTitle("Claude");
   }
   getConversationUrl(): string { return location.href; }
   onSubmit(callback: (prompt: string) => void): () => void {

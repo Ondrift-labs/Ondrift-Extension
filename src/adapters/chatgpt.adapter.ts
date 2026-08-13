@@ -1,5 +1,5 @@
 import type { SiteAdapter } from "./site-adapter";
-import { firstVisible, installSubmitListener, readEditable, writeEditable } from "./site-adapter";
+import { firstVisible, installSubmitListener, readEditable, titleFromDocumentTitle, writeEditable } from "./site-adapter";
 
 const INPUT_SELECTORS = [
   "#prompt-textarea",
@@ -22,7 +22,7 @@ export class ChatGptAdapter implements SiteAdapter {
     writeEditable(input, text);
   }
   getConversationTitle(): string | null {
-    return document.querySelector<HTMLTitleElement>("title")?.textContent?.replace(/\s*[-|]\s*ChatGPT\s*$/i, "").trim() || null;
+    return titleFromDocumentTitle("ChatGPT");
   }
   getConversationUrl(): string { return location.href; }
   onSubmit(callback: (prompt: string) => void): () => void {

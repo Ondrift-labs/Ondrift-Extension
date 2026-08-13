@@ -1,5 +1,5 @@
 import type { SiteAdapter } from "./site-adapter";
-import { firstVisible, installSubmitListener, readEditable, writeEditable } from "./site-adapter";
+import { firstVisible, installSubmitListener, readEditable, titleFromDocumentTitle, writeEditable } from "./site-adapter";
 
 const INPUT_SELECTORS = [
   "rich-textarea .ql-editor[contenteditable='true']",
@@ -31,7 +31,7 @@ export class GeminiAdapter implements SiteAdapter {
     writeEditable(input, text);
   }
   getConversationTitle(): string | null {
-    return document.querySelector<HTMLTitleElement>("title")?.textContent?.replace(/\s*[-|]\s*Gemini\s*$/i, "").trim() || null;
+    return titleFromDocumentTitle("Gemini");
   }
   getConversationUrl(): string { return location.href; }
   onSubmit(callback: (prompt: string) => void): () => void {

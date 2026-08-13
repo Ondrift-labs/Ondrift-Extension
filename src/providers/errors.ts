@@ -22,3 +22,18 @@ export function serializeProviderError(error: unknown): SerializedProviderError 
     retryable: false,
   };
 }
+
+export type ProviderErrorReason = "quota" | "invalid_key" | "network" | "request" | "unavailable" | "unknown";
+
+/** Maps a provider error code to the coarser reason category the UI surfaces to the user. */
+export function providerErrorReason(code: ProviderErrorCode): ProviderErrorReason {
+  switch (code) {
+    case "quota_exceeded": return "quota";
+    case "invalid_key": return "invalid_key";
+    case "network": return "network";
+    case "request_rejected": return "request";
+    case "model_unavailable":
+    case "service_unavailable": return "unavailable";
+    default: return "unknown";
+  }
+}
