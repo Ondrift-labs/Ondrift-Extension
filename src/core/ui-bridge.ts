@@ -85,9 +85,16 @@ export const uiBridge: UiBridge = {
       // Leaving apiKey blank re-verifies the already-saved key against a new model, so
       // changing just the model doesn't force re-pasting the secret.
       await sendRuntimeMessage<void>({ type: "validate_api_key", payload: { provider, apiKey: apiKey || undefined, model } });
-      const patch: Partial<ExtensionSettings> = { provider, apiModels: { [provider]: model } as Partial<Record<ProviderId, string>> };
-      if (apiKey) patch.apiKeys = { [provider]: apiKey } as Partial<Record<ProviderId, string>>;
-      await sendRuntimeMessage<ExtensionSettings>({ type: "settings_set", payload: patch });
+      // Deliberately doesn't persist `model` here (only `provider` and, if given, the new
+      // key). The Options page's autosave already persists every model pick on its own,
+      // through a path that keeps concurrent writes in order; this call can take a while
+      // (it's a live request), and if the user picks a different model while it's in
+      // flight, writing this now-stale `model` here would silently overwrite that newer,
+      // already-saved pick once this slow request finally resolves.
+      if (apiKey) {
+        const patch: Partial<ExtensionSettings> = { provider, apiKeys: { [provider]: apiKey } as Partial<Record<ProviderId, string>> };
+        await sendRuntimeMessage<ExtensionSettings>({ type: "settings_set", payload: patch });
+      }
       return { ok: true };
     } catch (error) {
       return validationFailure(error);

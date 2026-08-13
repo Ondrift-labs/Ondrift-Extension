@@ -192,9 +192,13 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
       const result = await bridge.validateApiKey(settings.provider, apiKey.trim(), trimmedModel || undefined);
       setValidation(result.ok ? 'valid' : result.reason ?? 'unknown');
       if (result.ok) {
-        const savedModel = trimmedModel || undefined;
-        setSettings((current) => ({ ...current, apiKeyConfigured: true, model: savedModel }));
-        setSavedSettings((current) => current && ({ ...current, provider: settings.provider, apiKeyConfigured: true, model: savedModel }));
+        // Deliberately doesn't touch `model` here. `trimmedModel` was captured when this
+        // request started, and it can take a while to resolve (it's a live request); if the
+        // user picks a different model before it comes back, writing that stale value here
+        // would silently revert the newer pick, which the autosave effect already persisted
+        // correctly on its own the moment it was made.
+        setSettings((current) => ({ ...current, apiKeyConfigured: true }));
+        setSavedSettings((current) => current && ({ ...current, apiKeyConfigured: true }));
         setSaveState('saved');
       }
     } catch { setValidation('network'); }
