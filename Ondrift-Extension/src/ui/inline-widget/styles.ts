@@ -5,7 +5,13 @@ export const inlineWidgetStyles = `
 button { font:inherit; }
 button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-shell { position:relative; width:min(430px,calc(100vw - 24px)); border:1px solid var(--od-line); border-radius:9px; color:var(--od-ink); background:var(--od-paper); box-shadow:0 12px 36px rgb(28 31 27 / 16%); overflow:hidden; }
-.od-shell--loading::before { content:""; position:absolute; inset:0; z-index:2; border-radius:inherit; padding:1.5px; background:conic-gradient(from 0deg, transparent 0%, var(--od-accent) 32%, transparent 66%); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; animation:od-border-travel 3.2s linear infinite; }
+/* A short dash literally travels the shell's own rounded-rect outline (constant speed
+   along the path itself), instead of a conic-gradient hotspot rotating around the
+   center -- that reads as a dot slicing diagonally through a wide, short shell rather
+   than light gliding along its edges. */
+.od-trace { position:absolute; inset:0; width:100%; height:100%; z-index:2; pointer-events:none; opacity:0; transition:opacity 180ms ease; }
+.od-shell--loading .od-trace { opacity:1; }
+.od-trace rect { x:1px; y:1px; width:calc(100% - 2px); height:calc(100% - 2px); rx:8px; ry:8px; fill:none; stroke:var(--od-accent); stroke-width:2px; stroke-linecap:round; stroke-dasharray:12 88; animation:od-border-travel 2.6s linear infinite; }
 .od-header { min-height:42px; display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--od-line); }
 .od-logo { display:block; width:23px; height:23px; object-fit:contain; }
 .od-title { font-size:12px; font-weight:720; letter-spacing:-.01em; }
@@ -47,6 +53,6 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-applied svg { width:17px; }
 [hidden] { display:none !important; }
 @keyframes od-spin { to { transform:rotate(360deg); } }
-@keyframes od-border-travel { to { transform:rotate(360deg); } }
+@keyframes od-border-travel { to { stroke-dashoffset:-100; } }
 @media (prefers-reduced-motion:reduce) { * { animation-duration:.01ms !important; transition-duration:.01ms !important; } }
 `;
