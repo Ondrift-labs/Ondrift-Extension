@@ -38,7 +38,7 @@ export class SettingsStore {
       apiKeys: { ...DEFAULT_SETTINGS.apiKeys, ...stored?.apiKeys },
       apiModels: { ...DEFAULT_SETTINGS.apiModels, ...stored?.apiModels },
       enabledSites: { ...DEFAULT_SETTINGS.enabledSites, ...stored?.enabledSites },
-      language: language === "ko" || language === "en" || language === "ja" ? language : DEFAULT_SETTINGS.language,
+      language: language === "ko" || language === "en" || language === "ja" || language === "zh" ? language : DEFAULT_SETTINGS.language,
     };
   }
 

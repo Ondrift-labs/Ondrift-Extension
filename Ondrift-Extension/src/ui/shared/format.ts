@@ -5,6 +5,7 @@ const RELATIVE_TIME_UNITS: Record<LanguageId, { justNow: string; minutes: (n: nu
   ko: { justNow: '방금 전', minutes: (n) => `${n}분 전`, hours: (n) => `${n}시간 전`, days: (n) => `${n}일 전` },
   en: { justNow: 'Just now', minutes: (n) => `${n}m ago`, hours: (n) => `${n}h ago`, days: (n) => `${n}d ago` },
   ja: { justNow: 'たった今', minutes: (n) => `${n}分前`, hours: (n) => `${n}時間前`, days: (n) => `${n}日前` },
+  zh: { justNow: '刚刚', minutes: (n) => `${n}分钟前`, hours: (n) => `${n}小时前`, days: (n) => `${n}天前` },
 };
 
 export function formatRelativeTime(timestamp: number, now = Date.now(), language: LanguageId = 'en'): string {
@@ -22,7 +23,7 @@ export function formatRelativeTime(timestamp: number, now = Date.now(), language
 export function summarizeUsage(items: HistoryItem[], now = Date.now()): UsageSummary {
   const weekStart = now - 7 * 24 * 60 * 60 * 1_000;
   const recent = items.filter((item) => item.createdAt >= weekStart);
-  const scored = recent.filter((item) => Number.isFinite(item.score));
+  const scored = recent.filter((item): item is HistoryItem & { score: number } => typeof item.score === 'number' && Number.isFinite(item.score));
   const averageScore = scored.length
     ? Math.round(scored.reduce((total, item) => total + item.score, 0) / scored.length)
     : null;
@@ -30,8 +31,8 @@ export function summarizeUsage(items: HistoryItem[], now = Date.now()): UsageSum
   const scoreDelta = deltas.length
     ? Math.round(deltas.reduce((total, item) => total + item.score - (item.previousScore ?? item.score), 0) / deltas.length)
     : null;
-  const adoptionRate = recent.length
-    ? Math.round((recent.filter((item) => item.applied).length / recent.length) * 100)
+  const adoptionRate = scored.length
+    ? Math.round((scored.filter((item) => item.applied).length / scored.length) * 100)
     : null;
   const grouped = new Map<string, number[]>();
   for (const item of scored) {
@@ -45,7 +46,7 @@ export function summarizeUsage(items: HistoryItem[], now = Date.now()): UsageSum
       score: Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length),
     }));
   return {
-    rewritesThisWeek: recent.length,
+    rewritesThisWeek: scored.length,
     averageScore,
     scoreDelta,
     adoptionRate,

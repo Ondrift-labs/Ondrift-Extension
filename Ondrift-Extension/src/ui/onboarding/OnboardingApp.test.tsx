@@ -53,6 +53,17 @@ describe('OnboardingApp localization', () => {
     expect(await screen.findByRole('heading', { name: 'Bring better instructions to every conversation.' })).toBeInTheDocument();
   });
 
+  it('switches to Simplified Chinese and persists the choice', async () => {
+    const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
+    render(<OnboardingApp bridge={createBridge({ saveSettings })} />);
+    const select = await screen.findByRole('combobox', { name: 'Choose interface language' });
+
+    await userEvent.selectOptions(select, '简体中文');
+
+    expect(await screen.findByRole('heading', { name: '为每一次对话带来更好的指令。' })).toBeInTheDocument();
+    expect(saveSettings).toHaveBeenCalledWith({ language: 'zh' });
+  });
+
   it('hydrates the selector from a previously persisted language on mount', async () => {
     const bridge = createBridge({ getSettings: async () => ({ ...DEFAULT_SETTINGS, language: 'ja' }) });
     render(<OnboardingApp bridge={bridge} />);

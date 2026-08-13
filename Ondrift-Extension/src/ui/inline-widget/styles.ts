@@ -21,8 +21,12 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-button--secondary { border-color:var(--od-line); color:var(--od-ink); background:var(--od-paper); }
 .od-button--secondary:hover:not(:disabled) { background:#f1f1eb; }
 .od-button svg { width:14px; height:14px; }
-.od-score-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-.od-score { display:grid; place-items:center; width:48px; height:48px; border:2px solid var(--od-accent); border-radius:50%; color:var(--od-accent); font:500 19px Georgia,serif; }
+.od-score-row { display:flex; align-items:center; gap:11px; margin-bottom:10px; }
+.od-score-flow { display:flex; align-items:center; gap:6px; flex:none; }
+.od-score { display:grid; place-items:center; min-width:38px; height:38px; border:2px solid var(--od-accent); border-radius:50%; padding:0 5px; color:var(--od-accent); font:500 16px Georgia,serif; }
+.od-score--original { border-width:1px; border-color:var(--od-line); color:var(--od-muted); }
+.od-score-arrow { color:var(--od-muted); font-size:15px; }
+.od-score-delta { border-radius:999px; padding:3px 6px; color:var(--od-accent); background:var(--od-accent-soft); font-size:10px; font-weight:720; }
 .od-score-copy { display:grid; gap:3px; }
 .od-score-copy strong { font-size:12px; }
 .od-score-copy span { color:var(--od-accent); font-size:10px; font-weight:650; }

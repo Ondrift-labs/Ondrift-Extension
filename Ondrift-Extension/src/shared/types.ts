@@ -1,6 +1,6 @@
 export type SiteId = "chatgpt" | "claude" | "gemini" | "perplexity";
 export type ProviderId = "gemini" | "openai" | "claude";
-export type LanguageId = "ko" | "en" | "ja";
+export type LanguageId = "ko" | "en" | "ja" | "zh";
 
 export interface UsageMetadata {
   promptTokenCount?: number;
@@ -10,6 +10,9 @@ export interface UsageMetadata {
 
 export interface RewriteResult {
   improvedText: string;
+  /** Score for the original user draft, evaluated with the same rubric as `score`. */
+  previousScore: number;
+  /** Score for the improved prompt. */
   score: number;
   rationale: string;
   usageMetadata?: UsageMetadata;
@@ -66,6 +69,7 @@ export interface HistoryEntry {
   sourceUrl: string;
   originalText: string;
   improvedText?: string;
+  previousScore?: number;
   score?: number;
   rationale?: string;
   applied: boolean;

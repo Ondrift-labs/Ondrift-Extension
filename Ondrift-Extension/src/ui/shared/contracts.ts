@@ -1,7 +1,7 @@
 export type ProviderId = 'gemini' | 'openai' | 'claude';
 export type SiteId = 'chatgpt' | 'claude' | 'gemini' | 'perplexity';
 export type PersonaId = 'general' | 'developer' | 'writer' | 'student' | 'translator';
-export type LanguageId = 'ko' | 'en' | 'ja';
+export type LanguageId = 'ko' | 'en' | 'ja' | 'zh';
 
 export interface UiSettings {
   provider: ProviderId;
@@ -28,8 +28,8 @@ export interface HistoryItem {
   id: string;
   service: SiteId;
   originalText: string;
-  improvedText: string;
-  score: number;
+  improvedText?: string;
+  score?: number;
   previousScore?: number;
   applied: boolean;
   createdAt: number;

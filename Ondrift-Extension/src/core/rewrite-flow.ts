@@ -42,6 +42,7 @@ export class RewriteSession {
         sourceUrl: this.adapter.getConversationUrl(),
         originalText: this.originalText || submittedText,
         improvedText: this.result?.improvedText,
+        previousScore: this.result?.previousScore,
         score: this.result?.score,
         rationale: this.result?.rationale,
         applied: this.applied && this.result !== undefined && normalizeWhitespace(submittedText) === normalizeWhitespace(this.result.improvedText),

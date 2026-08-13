@@ -39,4 +39,11 @@ describe("SettingsStore", () => {
 
     await expect(new SettingsStore(storage).get()).resolves.toMatchObject({ language: "en" });
   });
+
+  it("restores Simplified Chinese from local settings", async () => {
+    const storage = new MemoryStorage();
+    storage.values["ondrift.settings"] = { language: "zh" };
+
+    await expect(new SettingsStore(storage).get()).resolves.toMatchObject({ language: "zh" });
+  });
 });

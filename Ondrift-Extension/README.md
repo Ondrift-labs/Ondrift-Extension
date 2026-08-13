@@ -11,7 +11,7 @@ prompts before they are sent on ChatGPT, Claude, Gemini, and Perplexity. Gemini
 is called directly from the extension service worker with an API key supplied
 by the user. The Free MVP has no Ondrift backend, account, or cloud sync.
 
-The settings interface and inline widget support Korean, English, and Japanese.
+The settings interface and inline widget support Korean, English, Japanese, and Simplified Chinese.
 The selected language is also used for rewritten prompts and rationales.
 
 ## Install from a GitHub ZIP
@@ -19,7 +19,7 @@ The selected language is also used for rewritten prompts and rationales.
 You can install Ondrift from its public release ZIP before the Chrome Web Store
 listing is available.
 
-1. Download `ondrift-0.1.8.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
+1. Download `ondrift-0.1.12.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
 2. Fully extract the ZIP to a folder.
 3. Open `chrome://extensions` in Chrome.
 4. Turn on **Developer mode** in the upper-right corner.

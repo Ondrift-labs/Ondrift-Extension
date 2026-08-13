@@ -47,7 +47,7 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     dismissButton.setAttribute('aria-label', messages.dismiss);
     host.hidden = false;
     body.replaceChildren();
-    status.textContent = state.status === 'result' || state.status === 'applied' ? `${messages.score} ${state.score}` : '';
+    status.textContent = state.status === 'result' || state.status === 'applied' ? `${messages.score} ${state.previousScore} → ${state.score}` : '';
     if (state.status === 'ready') {
       const wrap = document.createElement('div'); wrap.className = 'od-ready';
       const description = document.createElement('p'); description.textContent = state.promptLength < 12 ? messages.shortPrompt : messages.ready;
@@ -60,10 +60,10 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     }
     if (state.status === 'result') {
       const wrap = document.createElement('div');
-      const delta = state.previousScore === undefined ? '' : `${state.score - state.previousScore >= 0 ? '+' : ''}${state.score - state.previousScore} ${messages.points}`;
-      wrap.innerHTML = `<div class="od-score-row"><span class="od-score">${Math.round(state.score)}</span><span class="od-score-copy"><strong></strong><span></span></span></div><p class="od-rationale"></p><span class="od-preview-label"></span><p class="od-preview"></p><div class="od-actions"></div>`;
+      const delta = state.score - state.previousScore;
+      wrap.innerHTML = `<div class="od-score-row"><div class="od-score-flow"><span class="od-score od-score--original">${Math.round(state.previousScore)}</span><span class="od-score-arrow" aria-hidden="true">→</span><span class="od-score">${Math.round(state.score)}</span><span class="od-score-delta">${delta >= 0 ? '+' : ''}${delta}</span></div><span class="od-score-copy"><strong></strong></span></div><p class="od-rationale"></p><span class="od-preview-label"></span><p class="od-preview"></p><div class="od-actions"></div>`;
+      wrap.querySelector<HTMLElement>('.od-score-flow')!.setAttribute('aria-label', messages.scoreChangeAria(state.previousScore, state.score, delta));
       wrap.querySelector<HTMLElement>('.od-score-copy strong')!.textContent = state.score >= 85 ? messages.strong : state.score >= 65 ? messages.foundation : messages.needsDirection;
-      wrap.querySelector<HTMLElement>('.od-score-copy span')!.textContent = delta;
       wrap.querySelector<HTMLElement>('.od-rationale')!.textContent = state.rationale;
       wrap.querySelector<HTMLElement>('.od-preview-label')!.textContent = messages.suggested;
       wrap.querySelector<HTMLElement>('.od-preview')!.textContent = state.improvedText;

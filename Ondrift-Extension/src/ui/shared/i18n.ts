@@ -2,12 +2,12 @@ import type { LanguageId, PersonaId, SiteId } from './contracts';
 import type { GeminiModelId } from '../../shared/models';
 
 /** BCP-47 locale tags used for Intl formatting (dates, numbers, relative time). */
-export const LOCALE_TAGS: Record<LanguageId, string> = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP' };
+export const LOCALE_TAGS: Record<LanguageId, string> = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN' };
 
 /** Each language's own name for itself, shown identically regardless of the active UI language. */
-export const LANGUAGE_NAMES: Record<LanguageId, string> = { ko: '한국어', en: 'English', ja: '日本語' };
+export const LANGUAGE_NAMES: Record<LanguageId, string> = { ko: '한국어', en: 'English', ja: '日本語', zh: '简体中文' };
 
-export const SUPPORTED_LANGUAGES: readonly LanguageId[] = ['ko', 'en', 'ja'];
+export const SUPPORTED_LANGUAGES: readonly LanguageId[] = ['ko', 'en', 'ja', 'zh'];
 
 export function isLanguageId(value: unknown): value is LanguageId {
   return typeof value === 'string' && (SUPPORTED_LANGUAGES as readonly string[]).includes(value);
@@ -143,7 +143,7 @@ export interface OptionsCopy {
     sectionLead: string;
     starCta: string;
   };
-  saveBar: { saved: string; error: string; idle: string; saveCta: string };
+  saveBar: { saving: string; savingDetail: string; savedTitle: string; saved: string; errorTitle: string; error: string; idle: string; retryCta: string };
 }
 
 export interface PopupCopy {
@@ -175,6 +175,10 @@ export interface PopupCopy {
     noMatchTitle: string;
     noMatchBody: string;
     appliedLabel: string;
+    copyImprovedAria: string;
+    copiedImprovedAria: string;
+    copyFailedMessage: string;
+    scoreChangeAria(original: number, improved: number, delta: number): string;
     openConversationAria: string;
     deleteAria: string;
   };
@@ -343,10 +347,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         starCta: 'GitHub에서 스타 누르기',
       },
       saveBar: {
+        saving: '자동 저장 중',
+        savingDetail: '변경 사항을 이 브라우저에 저장하고 있습니다.',
+        savedTitle: '자동 저장 완료',
         saved: '변경 사항이 로컬에 저장되었습니다.',
+        errorTitle: '자동 저장 실패',
         error: '변경 사항을 저장하지 못했습니다.',
-        idle: '설정은 이 기기에만 저장됩니다.',
-        saveCta: '변경 사항 저장',
+        idle: '변경 사항은 이 기기에 자동으로 저장됩니다.',
+        retryCta: '다시 시도',
       },
     },
     popup: {
@@ -358,7 +366,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         ariaLabel: '최근 7일간 사용량',
         last7Days: '최근 7일',
         rewrites: '다시 쓰기',
-        avgScore: '평균 점수',
+        avgScore: '개선 후 평균',
         noBaseline: '아직 기준값 없음',
         pointLift: (delta) => `${delta >= 0 ? '+' : ''}${delta}점 변화`,
         applied: '적용됨',
@@ -366,7 +374,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       trend: {
         emptyMessage: '다시 쓰기가 이틀 이상 쌓이면 점수 추이가 표시됩니다.',
-        ariaLabel: (summary) => `최근 7일간 평균 프롬프트 점수. ${summary}`,
+        ariaLabel: (summary) => `최근 7일간 개선 후 평균 프롬프트 점수. ${summary}`,
       },
       history: {
         eyebrow: '로컬 기록',
@@ -378,6 +386,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         noMatchTitle: '일치하는 프롬프트가 없습니다',
         noMatchBody: '다른 단어나 서비스 이름으로 검색해 보세요.',
         appliedLabel: '적용됨',
+        copyImprovedAria: '개선된 프롬프트 복사',
+        copiedImprovedAria: '개선된 프롬프트가 복사됨',
+        copyFailedMessage: '프롬프트를 복사하지 못했습니다.',
+        scoreChangeAria: (original, improved, delta) => `원본 ${original}점에서 개선 후 ${improved}점, ${delta >= 0 ? `${delta}점 상승` : `${Math.abs(delta)}점 하락`}`,
         openConversationAria: '대화 열기',
         deleteAria: '로컬 기록에서 삭제',
       },
@@ -538,10 +550,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         starCta: 'Star on GitHub',
       },
       saveBar: {
+        saving: 'Saving automatically',
+        savingDetail: 'Saving your changes in this browser.',
+        savedTitle: 'Changes saved',
         saved: 'Changes saved locally.',
+        errorTitle: 'Auto-save failed',
         error: 'Could not save changes.',
-        idle: 'Settings stay on this device.',
-        saveCta: 'Save changes',
+        idle: 'Changes are saved automatically on this device.',
+        retryCta: 'Try again',
       },
     },
     popup: {
@@ -553,7 +569,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         ariaLabel: 'Usage over the last 7 days',
         last7Days: 'Last 7 days',
         rewrites: 'rewrites',
-        avgScore: 'Avg. score',
+        avgScore: 'Avg. improved',
         noBaseline: 'No baseline yet',
         pointLift: (delta) => `${delta >= 0 ? '+' : ''}${delta} point lift`,
         applied: 'Applied',
@@ -561,7 +577,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       trend: {
         emptyMessage: 'A score trend appears after two days of rewrites.',
-        ariaLabel: (summary) => `Average prompt score over the last 7 days. ${summary}`,
+        ariaLabel: (summary) => `Average improved prompt score over the last 7 days. ${summary}`,
       },
       history: {
         eyebrow: 'Local history',
@@ -573,6 +589,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         noMatchTitle: 'No matching prompts',
         noMatchBody: 'Try a different word or service name.',
         appliedLabel: 'Applied',
+        copyImprovedAria: 'Copy improved prompt',
+        copiedImprovedAria: 'Improved prompt copied',
+        copyFailedMessage: 'Could not copy the prompt.',
+        scoreChangeAria: (original, improved, delta) => `Original score ${original}, improved score ${improved}, ${Math.abs(delta)} points ${delta >= 0 ? 'higher' : 'lower'}`,
         openConversationAria: 'Open conversation',
         deleteAria: 'Delete from local history',
       },
@@ -733,10 +753,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         starCta: 'GitHub でスターを付ける',
       },
       saveBar: {
+        saving: '自動保存中',
+        savingDetail: '変更内容をこのブラウザに保存しています。',
+        savedTitle: '自動保存しました',
         saved: '変更内容はローカルに保存されました。',
+        errorTitle: '自動保存に失敗しました',
         error: '変更内容を保存できませんでした。',
-        idle: '設定はこの端末にのみ保存されます。',
-        saveCta: '変更を保存',
+        idle: '変更内容はこの端末に自動保存されます。',
+        retryCta: '再試行',
       },
     },
     popup: {
@@ -748,7 +772,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         ariaLabel: '過去7日間の利用状況',
         last7Days: '過去7日間',
         rewrites: 'リライト',
-        avgScore: '平均スコア',
+        avgScore: '改善後平均',
         noBaseline: '基準値なし',
         pointLift: (delta) => `${delta >= 0 ? '+' : ''}${delta}ポイント上昇`,
         applied: '適用済み',
@@ -756,7 +780,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       trend: {
         emptyMessage: 'リライトが2日分蓄積するとスコアの推移が表示されます。',
-        ariaLabel: (summary) => `過去7日間の平均プロンプトスコア。${summary}`,
+        ariaLabel: (summary) => `過去7日間の改善後平均プロンプトスコア。${summary}`,
       },
       history: {
         eyebrow: 'ローカル履歴',
@@ -768,10 +792,217 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         noMatchTitle: '一致するプロンプトがありません',
         noMatchBody: '別の単語やサービス名で試してください。',
         appliedLabel: '適用済み',
+        copyImprovedAria: '改善後のプロンプトをコピー',
+        copiedImprovedAria: '改善後のプロンプトをコピーしました',
+        copyFailedMessage: 'プロンプトをコピーできませんでした。',
+        scoreChangeAria: (original, improved, delta) => `元のスコア${original}から改善後${improved}、${Math.abs(delta)}ポイント${delta >= 0 ? '上昇' : '低下'}`,
         openConversationAria: '会話を開く',
         deleteAria: 'ローカル履歴から削除',
       },
       footer: { storedLabel: 'この端末に保存', settingsCta: 'プライバシーと設定' },
+    },
+  },
+  zh: {
+    common: {
+      brandHomeAria: 'Ondrift 主页',
+      back: '返回',
+      checking: '正在检查…',
+      saving: '正在保存…',
+      languageLabel: '语言',
+      settingsLoading: '正在加载 Ondrift 设置…',
+      settingsLoadErrorTitle: '无法加载 Ondrift 设置',
+      settingsLoadErrorBody: '请重新加载此页面。你的本地设置和历史记录没有被更改。',
+    },
+    onboarding: {
+      stepCount: (step, total) => `第 ${step} 步，共 ${total} 步`,
+      languageSelectorAria: '选择界面语言',
+      intro: {
+        eyebrow: '发送前，让提示词更清晰',
+        title: '为每一次对话带来更好的指令。',
+        lead: 'Ondrift 会出现在 ChatGPT、Claude、Gemini 和 Perplexity 的输入框旁。它会为草稿评分，说明缺少什么，并提供可一键应用的改写版本。',
+        promises: [
+          { title: '就在你常用的地方使用', body: '在支持的 AI 网站中使用同一套专注的工作流。' },
+          { title: '你的密钥，只留在浏览器里', body: '你的 Gemini API 密钥只保存在扩展的本地存储中。' },
+          { title: '没有开发者服务器', body: '提示词会直接发送到 Gemini，历史记录只保留在这台设备上。' },
+        ],
+        cta: '设置 Gemini',
+      },
+      key: {
+        eyebrow: '连接 Gemini',
+        title: '用三个简单步骤获取密钥。',
+        step1Title: '打开 Google AI Studio',
+        step1Body: '使用你的 Google 账号登录。Gemini 的用量限制由 Google 管理。',
+        step1Cta: '打开 AI Studio',
+        step2Title: '创建 API 密钥',
+        step2Body: '选择“Create API key”，选择一个项目，然后复制生成的值。',
+        step3Label: '粘贴到这里并验证',
+        step3Placeholder: 'AIza…',
+        verifyCta: '验证密钥',
+        step3Help: '验证会发送一次很小的测试请求。你的密钥不会发送给 Ondrift。',
+        keySuccess: '密钥已验证。接下来可以设置隐私选项。',
+        validation: {
+          invalid_key: '此密钥未被接受。请从 Google AI Studio 复制完整密钥后重试。',
+          quota: '密钥有效，但当前配额已用完。请检查项目配额，或明天再试。',
+          network: 'Chrome 无法连接到 Gemini。请检查浏览器、VPN 或防火墙访问权限后重试。',
+          request: 'Gemini 拒绝了验证请求。请重新加载 Ondrift 后重试。',
+          unavailable: '此项目暂时无法使用 Gemini。Ondrift 也尝试了兼容的备用模型。',
+          unknown: '无法验证此密钥。没有保存任何内容，请重试。',
+        },
+        continueCta: '继续',
+      },
+      privacy: {
+        eyebrow: '隐私选择',
+        title: '默认本地保存，选择清晰明确。',
+        routeAria: '你的数据如何流动',
+        routePrompt: { title: '你的提示词', detail: '支持的 AI 网站' },
+        routeApi: { title: 'Gemini API', detail: '使用你的密钥' },
+        routeHistory: { title: '本地历史记录', detail: '仅限此浏览器' },
+        notes: [
+          { lead: 'Ondrift 会读取:', rest: ' 你要求改写的文本、支持的网站、评分，以及你是否应用了建议。' },
+          { lead: 'Ondrift 不会收集:', rest: ' AI 回复内容、浏览历史，或不支持网站上的数据。' },
+          { lead: '控制权始终在你手中。', rest: ' 你可以随时在设置中关闭网站、停止保存历史记录，或删除本地记录。' },
+        ],
+        consentLabel: '我了解提示词文本的处理方式，并同意在支持的网站上启用 Ondrift。',
+        enableCta: '启用 Ondrift',
+      },
+      complete: {
+        eyebrow: '设置完成',
+        title: '你可以开始写了。',
+        body: '打开 ChatGPT、Claude、Gemini 或 Perplexity 并开始输入提示词。当有可改进的内容时，Ondrift 会出现在输入框旁。',
+        cta: '打开 ChatGPT',
+      },
+      footer: '私密、本地保存、可随时撤回。无需 Ondrift 账号。',
+    },
+    options: {
+      sidebar: {
+        nav: { provider: '服务提供方', persona: '改写风格', sites: '网站', privacy: '隐私', support: '支持' },
+        version: '版本 0.1 · 免费 MVP',
+      },
+      header: { eyebrow: '扩展偏好设置', title: '设置', lead: '选择 Ondrift 如何改写，以及哪些内容保留在你的浏览器中。' },
+      provider: {
+        sectionTitle: '服务提供方与 API 密钥',
+        sectionLead: '改写请求会从扩展直接发送到你选择的服务提供方。',
+        providerLabel: '服务提供方',
+        providerGemini: 'Google Gemini · 推荐',
+        providerOpenAi: 'OpenAI · 即将支持',
+        providerClaude: 'Anthropic Claude · 即将支持',
+        apiKeyLabel: 'API 密钥',
+        apiKeyPlaceholderSaved: '密钥已保存 · 输入新密钥以替换',
+        apiKeyPlaceholderEmpty: '粘贴你的 Gemini API 密钥',
+        verifyCta: '验证并保存',
+        apiKeyHelp: '仅保存在 chrome.storage.local 中，不使用同步存储。',
+        getKeyCta: '获取密钥',
+        keySuccess: '密钥已验证，可以使用。',
+        modelLabel: '模型',
+        modelHelp: '如果配额不足，请选择更便宜或限制更宽松的模型。如果所选模型不可用，Ondrift 会回退到默认模型。',
+        modelAutoLabel: '默认值（自动回退）',
+        modelOptionLabels: {
+          'gemini-3.6-pro': 'Gemini 3.6 Pro · 能力最强，价格最高',
+          'gemini-3.6-flash': 'Gemini 3.6 Flash · 默认，均衡',
+          'gemini-3.6-flash-lite': 'Gemini 3.6 Flash-Lite · 更便宜',
+          'gemini-3.5-flash-lite': 'Gemini 3.5 Flash-Lite · 最便宜，配额最高',
+        },
+        modelCustomLabel: '其他（手动输入）',
+        modelCustomPlaceholder: '输入 Gemini 模型名称，例如 gemini-3.6-flash',
+        validation: {
+          invalid_key: 'Gemini 拒绝了此密钥。请确认已完整复制密钥，并且具有 API 访问权限。',
+          quota: '此密钥有效，但当前配额已用完。',
+          network: 'Chrome 无法连接到 Gemini。请检查浏览器、VPN 或防火墙访问权限。',
+          request: 'Gemini 拒绝了验证请求。请重新加载 Ondrift 后重试。',
+          unavailable: '此项目暂时无法使用 Gemini，包括备用模型。',
+          unknown: '无法验证此密钥。',
+        },
+      },
+      persona: {
+        sectionTitle: '改写风格',
+        sectionLead: '所选预设会引导 Ondrift 重点优化的方向。每个结果你都可以继续编辑。',
+        languageLabel: '语言',
+        languageHelp: '控制 Ondrift 行内界面以及改写后提示词的语言。',
+        personas: {
+          general: { name: '均衡', description: '明确意图、背景、限制条件和输出格式。' },
+          developer: { name: '开发者', description: '补充技术假设、边界情况和验收标准。' },
+          writer: { name: '写作者', description: '打磨受众、语气、结构和编辑目标。' },
+          student: { name: '学生', description: '要求循序渐进的解释，并检查理解程度。' },
+          translator: { name: '译者', description: '在保留含义的同时指定地区、语气和正式程度。' },
+        },
+      },
+      sites: {
+        sectionTitle: '支持的网站',
+        sectionLead: 'Ondrift 只会在你明确启用的网站上读取提示词文本。',
+        sites: {
+          chatgpt: { title: 'ChatGPT', detail: '在 chatgpt.com 上显示改写小组件。' },
+          claude: { title: 'Claude', detail: '在 claude.ai 上显示改写小组件。' },
+          gemini: { title: 'Gemini', detail: '在 gemini.google.com 上显示改写小组件。' },
+          perplexity: { title: 'Perplexity', detail: '在 perplexity.ai 上显示改写小组件。' },
+        },
+      },
+      privacy: {
+        sectionTitle: '隐私与本地数据',
+        sectionLead: '此版本不使用云账号、同步功能或开发者运营的服务器。',
+        historyToggleTitle: '保存本地提示词历史',
+        historyToggleDetail: '在此浏览器中保存原始提示词、改写后提示词、评分、网站和时间戳。',
+        responsesTitle: '不会保存 AI 回复',
+        responsesDetail: 'Ondrift 只处理你选择改写的提示词和本地改写元数据。',
+        alwaysOn: '始终开启',
+        deleteTitle: '删除本地历史记录',
+        deleteDetail: '删除此浏览器中保存的所有提示词和使用统计。',
+        cancelCta: '取消',
+        deleteAllCta: '全部删除',
+        clearHistoryCta: '清除历史记录',
+      },
+      support: {
+        sectionTitle: '支持 Ondrift',
+        sectionLead: 'Ondrift 由个人免费构建和维护。在 GitHub 上加星可以帮助更多人发现它。',
+        starCta: '在 GitHub 上加星',
+      },
+      saveBar: {
+        saving: '正在自动保存',
+        savingDetail: '正在将更改保存到此浏览器。',
+        savedTitle: '已自动保存',
+        saved: '更改已保存在本地。',
+        errorTitle: '自动保存失败',
+        error: '无法保存更改。',
+        idle: '更改会自动保存在此设备上。',
+        retryCta: '重试',
+      },
+    },
+    popup: {
+      headerAria: { openSettings: '打开设置' },
+      setupBanner: { title: '完成设置', body: '添加 Gemini API 密钥即可开始改写。' },
+      loading: '正在加载你的本地历史记录…',
+      error: { title: '历史记录不可用。', body: '你的数据仍保存在本地，且没有被更改。', retryCta: '重试' },
+      usage: {
+        ariaLabel: '最近 7 天使用情况',
+        last7Days: '最近 7 天',
+        rewrites: '次改写',
+        avgScore: '改进后平均',
+        noBaseline: '暂无基准',
+        pointLift: (delta) => `${delta >= 0 ? '+' : ''}${delta} 分提升`,
+        applied: '已应用',
+        tokensLabel: (count) => `${count} 个 token`,
+      },
+      trend: {
+        emptyMessage: '累计两天以上的改写后，会显示评分趋势。',
+        ariaLabel: (summary) => `最近 7 天改进后提示词平均分。${summary}`,
+      },
+      history: {
+        eyebrow: '本地历史记录',
+        title: '最近的提示词',
+        searchSrLabel: '搜索提示词',
+        searchPlaceholder: '搜索提示词文本',
+        emptyTitle: '你的第一次改写会显示在这里。',
+        emptyBody: '历史记录保存在此浏览器中，方便随时搜索和回看。',
+        noMatchTitle: '没有匹配的提示词',
+        noMatchBody: '试试其他词或服务名称。',
+        appliedLabel: '已应用',
+        copyImprovedAria: '复制改进后的提示词',
+        copiedImprovedAria: '已复制改进后的提示词',
+        copyFailedMessage: '无法复制提示词。',
+        scoreChangeAria: (original, improved, delta) => `原始分数 ${original}，改进后 ${improved}，${Math.abs(delta)} 分${delta >= 0 ? '提高' : '降低'}`,
+        openConversationAria: '打开对话',
+        deleteAria: '从本地历史记录中删除',
+      },
+      footer: { storedLabel: '保存在这台设备上', settingsCta: '隐私与设置' },
     },
   },
 };

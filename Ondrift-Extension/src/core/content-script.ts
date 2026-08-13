@@ -14,6 +14,7 @@ let removeInputListener: (() => void) | undefined;
 let floatingPlacement: FloatingWidgetPlacement | undefined;
 let latestImprovedText = "";
 let latestScore = 0;
+let latestPreviousScore = 0;
 
 const widget = createInlineWidget({
   onRewrite: () => { void runRewrite(); },
@@ -54,7 +55,7 @@ async function openSettings(): Promise<void> {
 async function applyRewrite(): Promise<void> {
   try {
     await contentController.apply();
-    widget.setState({ status: "applied", score: latestScore, improvedText: latestImprovedText });
+    widget.setState({ status: "applied", previousScore: latestPreviousScore, score: latestScore, improvedText: latestImprovedText });
     floatingPlacement?.update();
   } catch (error) {
     widget.setState({
@@ -75,7 +76,8 @@ async function runRewrite(): Promise<void> {
     const result = await contentController.rewrite(settings.persona);
     latestImprovedText = result.improvedText;
     latestScore = result.score;
-    widget.setState({ status: "result", score: result.score, rationale: result.rationale, improvedText: result.improvedText });
+    latestPreviousScore = result.previousScore;
+    widget.setState({ status: "result", previousScore: result.previousScore, score: result.score, rationale: result.rationale, improvedText: result.improvedText });
     floatingPlacement?.update();
   } catch (error) {
     if (error instanceof ProviderError && error.code === "not_configured") {
