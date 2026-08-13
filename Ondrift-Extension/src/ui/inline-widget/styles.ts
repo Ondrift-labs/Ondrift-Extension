@@ -4,7 +4,7 @@ export const inlineWidgetStyles = `
 * { box-sizing:border-box; }
 button { font:inherit; }
 button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
-.od-shell { width:min(390px,calc(100vw - 24px)); border:1px solid var(--od-line); border-radius:9px; color:var(--od-ink); background:var(--od-paper); box-shadow:0 12px 36px rgb(28 31 27 / 16%); overflow:hidden; }
+.od-shell { width:min(430px,calc(100vw - 24px)); border:1px solid var(--od-line); border-radius:9px; color:var(--od-ink); background:var(--od-paper); box-shadow:0 12px 36px rgb(28 31 27 / 16%); overflow:hidden; }
 .od-header { min-height:42px; display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--od-line); }
 .od-logo { display:block; width:23px; height:23px; object-fit:contain; }
 .od-title { font-size:12px; font-weight:720; letter-spacing:-.01em; }
@@ -13,7 +13,7 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-icon-button:hover { color:var(--od-ink); background:#f0f0ea; }
 .od-icon-button svg { width:14px; height:14px; }
 .od-body { padding:12px; }
-.od-ready { display:flex; align-items:center; flex-wrap:wrap; gap:12px; }
+.od-ready { display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:12px; }
 .od-ready p { flex:1; margin:0; color:var(--od-muted); font-size:11px; line-height:1.4; }
 .od-ready p.od-hint { white-space:nowrap; }
 .od-button { min-height:32px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border:1px solid transparent; border-radius:6px; padding:6px 10px; color:white; background:var(--od-accent); font-size:11px; font-weight:680; cursor:pointer; }

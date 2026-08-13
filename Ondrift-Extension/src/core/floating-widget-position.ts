@@ -1,6 +1,6 @@
 const GAP = 8;
 const VIEWPORT_MARGIN = 12;
-const WIDGET_WIDTH = 390;
+const WIDGET_WIDTH = 430;
 
 interface Rectangle {
   top: number;
