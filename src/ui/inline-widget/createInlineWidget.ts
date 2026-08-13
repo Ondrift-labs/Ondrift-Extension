@@ -17,7 +17,7 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   host.setAttribute('data-ondrift-widget', '');
   const root = host.attachShadow({ mode: 'open' });
   const logoUrl = globalThis.chrome?.runtime?.getURL?.('icons/ondrift-32.png') ?? '/icons/ondrift-32.png';
-  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><header class="od-header"><img class="od-logo" src="${logoUrl}" alt="" /><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-settings>${icons.settings}</button><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div></section>`;
+  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><svg class="od-trace" aria-hidden="true"><rect pathLength="100"/></svg><header class="od-header"><img class="od-logo" src="${logoUrl}" alt="" /><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-settings>${icons.settings}</button><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div></section>`;
   const shell = root.querySelector<HTMLElement>('.od-shell')!;
   const body = root.querySelector<HTMLElement>('[data-body]')!;
   const status = root.querySelector<HTMLElement>('[data-status]')!;
