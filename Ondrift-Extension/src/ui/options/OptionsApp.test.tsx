@@ -159,6 +159,32 @@ describe('OptionsApp localization', () => {
     expect(await screen.findByLabelText('Model')).toHaveValue('gemini-3.6-flash');
   });
 
+  it('switches back to Default without reverting to the old preset on the next load, even if the tab is refreshed right away', async () => {
+    let stored: UiSettings = { ...DEFAULT_SETTINGS };
+    const bridge: UiBridge = {
+      ...createBridge(),
+      getSettings: async () => ({ ...stored }),
+      saveSettings: async (patch) => { stored = { ...stored, ...patch }; return { ...stored }; },
+    };
+
+    const r1 = render(<OptionsApp bridge={bridge} />);
+    await userEvent.selectOptions(await screen.findByLabelText('Model'), 'gemini-3.6-flash');
+    await waitFor(() => expect(stored.model).toBe('gemini-3.6-flash'));
+    r1.unmount();
+
+    const r2 = render(<OptionsApp bridge={bridge} />);
+    const modelSelect = await screen.findByLabelText('Model');
+    expect(modelSelect).toHaveValue('gemini-3.6-flash');
+
+    await userEvent.selectOptions(modelSelect, 'Default (automatic fallback)');
+    // Simulate refreshing right away, before any debounce window would have elapsed.
+    r2.unmount();
+
+    expect(stored.model).toBeUndefined();
+    render(<OptionsApp bridge={bridge} />);
+    expect(await screen.findByLabelText('Model')).toHaveValue('');
+  });
+
   it('does not auto-save an unverified API key', async () => {
     const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
     render(<OptionsApp bridge={createBridge({ saveSettings })} />);

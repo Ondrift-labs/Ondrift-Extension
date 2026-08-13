@@ -31,6 +31,16 @@ describe('createInlineWidget', () => {
     expect(onRewrite).not.toHaveBeenCalled();
   });
 
+  it('keeps the short-prompt hint on one line, unlike the regular ready copy', () => {
+    const widget = createInlineWidget(handlers());
+
+    widget.setState({ status: 'ready', promptLength: 11 });
+    expect(widget.element.shadowRoot?.querySelector('.od-ready p')).toHaveClass('od-hint');
+
+    widget.setState({ status: 'ready', promptLength: 80 });
+    expect(widget.element.shadowRoot?.querySelector('.od-ready p')).not.toHaveClass('od-hint');
+  });
+
   it('renders provider text as text, not executable markup', () => {
     const widget = createInlineWidget(handlers());
     widget.setState({ status: 'result', score: 40, previousScore: 20, rationale: '<img src=x>', improvedText: '<script>bad()</script>' });
