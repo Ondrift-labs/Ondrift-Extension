@@ -210,6 +210,33 @@ describe('OptionsApp localization', () => {
     await waitFor(() => expect(stored.model).toBeUndefined());
   });
 
+  it('does not let a slow "Verify & save" click revert a model picked after it started', async () => {
+    let stored: UiSettings = { ...DEFAULT_SETTINGS, apiKeyConfigured: true };
+    let resolveValidate: (() => void) | undefined;
+    const bridge: UiBridge = {
+      ...createBridge(),
+      getSettings: async () => ({ ...stored }),
+      saveSettings: async (patch) => { stored = { ...stored, ...patch }; return { ...stored }; },
+      validateApiKey: () => new Promise<{ ok: true }>((resolve) => { resolveValidate = () => resolve({ ok: true }); }),
+    };
+
+    render(<OptionsApp bridge={bridge} />);
+    const modelSelect = await screen.findByLabelText('Model');
+
+    await userEvent.selectOptions(modelSelect, 'gemini-3.6-flash');
+    await waitFor(() => expect(stored.model).toBe('gemini-3.6-flash'));
+    await userEvent.click(screen.getByRole('button', { name: 'Verify & save' }));
+
+    // Change to a different model before the slow verify request comes back.
+    await userEvent.selectOptions(modelSelect, 'Default (automatic fallback)');
+    await waitFor(() => expect(stored.model).toBeUndefined());
+
+    resolveValidate?.();
+    await waitFor(() => expect(screen.getByText('Key verified and ready to use.')).toBeInTheDocument());
+
+    expect(stored.model).toBeUndefined();
+  });
+
   it('does not auto-save an unverified API key', async () => {
     const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
     render(<OptionsApp bridge={createBridge({ saveSettings })} />);
