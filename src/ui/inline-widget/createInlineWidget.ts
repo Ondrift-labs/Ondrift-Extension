@@ -50,7 +50,8 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     status.textContent = state.status === 'result' || state.status === 'applied' ? `${messages.score} ${state.previousScore} → ${state.score}` : '';
     if (state.status === 'ready') {
       const wrap = document.createElement('div'); wrap.className = 'od-ready';
-      const description = document.createElement('p'); description.textContent = state.promptLength < 12 ? messages.shortPrompt : messages.ready;
+      const isHint = state.promptLength < 12;
+      const description = document.createElement('p'); if (isHint) description.className = 'od-hint'; description.textContent = isHint ? messages.shortPrompt : messages.ready;
       const rewrite = button(messages.rewrite, 'od-button', handlers.onRewrite, icons.spark); if (state.promptLength < 12) rewrite.disabled = true;
       wrap.append(description, rewrite); body.append(wrap); return;
     }

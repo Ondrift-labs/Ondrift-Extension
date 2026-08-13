@@ -13,8 +13,9 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-icon-button:hover { color:var(--od-ink); background:#f0f0ea; }
 .od-icon-button svg { width:14px; height:14px; }
 .od-body { padding:12px; }
-.od-ready { display:flex; align-items:center; gap:12px; }
+.od-ready { display:flex; align-items:center; flex-wrap:wrap; gap:12px; }
 .od-ready p { flex:1; margin:0; color:var(--od-muted); font-size:11px; line-height:1.4; }
+.od-ready p.od-hint { white-space:nowrap; }
 .od-button { min-height:32px; display:inline-flex; align-items:center; justify-content:center; gap:6px; border:1px solid transparent; border-radius:6px; padding:6px 10px; color:white; background:var(--od-accent); font-size:11px; font-weight:680; cursor:pointer; }
 .od-button:hover:not(:disabled) { background:#1e5949; }
 .od-button:disabled { cursor:not-allowed; opacity:.55; }
