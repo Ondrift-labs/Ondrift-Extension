@@ -4,7 +4,7 @@ export const manifest = {
   manifest_version: 3,
   name: "Ondrift",
   short_name: "Ondrift",
-  version: "0.1.12",
+  version: "0.1.13",
   minimum_chrome_version: "116",
   description:
     "Rewrite and score prompts on ChatGPT, Claude, Gemini, and Perplexity with your own Gemini API key.",
