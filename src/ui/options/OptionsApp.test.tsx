@@ -185,6 +185,31 @@ describe('OptionsApp localization', () => {
     expect(await screen.findByLabelText('Model')).toHaveValue('');
   });
 
+  it('persists two quick consecutive model picks in the order they were made, even if the saves resolve out of order', async () => {
+    let stored: UiSettings = { ...DEFAULT_SETTINGS };
+    let callIndex = 0;
+    const bridge: UiBridge = {
+      ...createBridge(),
+      getSettings: async () => ({ ...stored }),
+      // The first save (picking the preset) resolves slower than the second (picking
+      // Default back), simulating two overlapping round trips completing out of order.
+      saveSettings: async (patch) => {
+        const isFirstCall = ++callIndex === 1;
+        await new Promise((resolve) => setTimeout(resolve, isFirstCall ? 40 : 0));
+        stored = { ...stored, ...patch };
+        return { ...stored };
+      },
+    };
+
+    render(<OptionsApp bridge={bridge} />);
+    const modelSelect = await screen.findByLabelText('Model');
+
+    await userEvent.selectOptions(modelSelect, 'gemini-3.6-flash');
+    await userEvent.selectOptions(modelSelect, 'Default (automatic fallback)');
+
+    await waitFor(() => expect(stored.model).toBeUndefined());
+  });
+
   it('does not auto-save an unverified API key', async () => {
     const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
     render(<OptionsApp bridge={createBridge({ saveSettings })} />);

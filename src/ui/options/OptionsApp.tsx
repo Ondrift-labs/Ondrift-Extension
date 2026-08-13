@@ -48,6 +48,19 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   // 0 = save as soon as the pending-change effect below sees it (the default, for discrete
   // picks); set to MODEL_TEXT_DEBOUNCE_MS right before a keystroke-driven update.
   const nextSaveDelayMs = useRef(0);
+  // The most recent snapshot a save has already been dispatched for, kept separate from
+  // `savedSettings` (which only updates once that save round-trips back). Without this, a
+  // second quick change that happens to match the *previous* savedSettings value -- e.g.
+  // picking model A then quickly picking back Default while A's save is still in flight --
+  // would compare against the stale savedSettings, look like "no change", and silently never
+  // get its own save dispatched until A's save resolves (or not at all, if the page is
+  // refreshed first).
+  const pendingSnapshotRef = useRef<UiSettings | null>(null);
+  // Chains actual bridge.saveSettings() calls one after another so two overlapping saves
+  // (dispatched before the first one's round trip completes) can't race at the storage layer
+  // and land out of order -- otherwise whichever happens to resolve last wins, even if it
+  // was dispatched first with older data.
+  const saveChain = useRef<Promise<unknown>>(Promise.resolve());
   const settingsRef = useRef(settings);
   const savedSettingsRef = useRef(savedSettings);
   settingsRef.current = settings;
@@ -104,24 +117,36 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   // same automatic save as the rest of the preferences. `opts.debounce` should only be set
   // by the custom-model text input -- every other caller is a one-shot select, not typing.
   function applyModel(next: string, opts: { debounce?: boolean } = {}) { setModel(next); update('model', next.trim() || undefined, opts); }
-  const save = useCallback(async (snapshot: UiSettings) => {
+  const save = useCallback((snapshot: UiSettings) => {
     const requestId = ++saveRequest.current;
     setSaveState('saving');
-    try {
-      const saved = await bridge.saveSettings(snapshot);
-      if (requestId !== saveRequest.current) return;
-      setSavedSettings(saved);
-      setSettings((current) => editableSettingsMatch(current, snapshot) ? saved : current);
-      setSaveState('saved');
-    } catch {
-      if (requestId !== saveRequest.current) return;
-      setSaveState('error');
-    }
+    // Queue behind any save still in flight instead of firing straight away, so two
+    // overlapping saves always reach the storage layer in dispatch order.
+    const run = async () => {
+      try {
+        const saved = await bridge.saveSettings(snapshot);
+        if (requestId !== saveRequest.current) return;
+        setSavedSettings(saved);
+        if (pendingSnapshotRef.current === snapshot) pendingSnapshotRef.current = null;
+        setSettings((current) => editableSettingsMatch(current, snapshot) ? saved : current);
+        setSaveState('saved');
+      } catch {
+        if (requestId !== saveRequest.current) return;
+        if (pendingSnapshotRef.current === snapshot) pendingSnapshotRef.current = null;
+        setSaveState('error');
+      }
+    };
+    saveChain.current = saveChain.current.then(run, run);
+    return saveChain.current;
   }, [bridge]);
 
   useEffect(() => {
-    if (savedSettings === null || editableSettingsMatch(settings, savedSettings)) return;
+    // Compare against the latest snapshot a save has already been dispatched for, not
+    // `savedSettings` -- that one lags behind while a save is still in flight.
+    const baseline = pendingSnapshotRef.current ?? savedSettings;
+    if (baseline === null || editableSettingsMatch(settings, baseline)) return;
     const snapshot = settings;
+    pendingSnapshotRef.current = snapshot;
     const delay = nextSaveDelayMs.current;
     nextSaveDelayMs.current = 0; // reset to "immediate" so the next discrete pick isn't accidentally debounced too
     if (delay <= 0) {
@@ -136,6 +161,9 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
     return () => {
       window.clearTimeout(timer);
       if (autosaveTimer.current === timer) autosaveTimer.current = null;
+      // The debounce window was interrupted by a newer change before it fired -- this
+      // snapshot was never actually dispatched, so don't leave it blocking the comparison.
+      if (pendingSnapshotRef.current === snapshot) pendingSnapshotRef.current = null;
     };
   }, [save, savedSettings, settings]);
 
@@ -144,11 +172,13 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
       if (document.visibilityState !== 'hidden') return;
       const current = settingsRef.current;
       const saved = savedSettingsRef.current;
-      if (saved === null || editableSettingsMatch(current, saved)) return;
+      const baseline = pendingSnapshotRef.current ?? saved;
+      if (baseline === null || editableSettingsMatch(current, baseline)) return;
       if (autosaveTimer.current !== null) {
         window.clearTimeout(autosaveTimer.current);
         autosaveTimer.current = null;
       }
+      pendingSnapshotRef.current = current;
       void save(current);
     };
     document.addEventListener('visibilitychange', saveBeforeTabSwitch);
