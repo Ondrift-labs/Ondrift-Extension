@@ -205,7 +205,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   }
 
   return <main className="options-shell">
-    <aside className="options-sidebar"><div className="options-brand"><img className="brand-logo" src="/icons/ondrift-32.png" alt="" /><span>Ondrift</span></div><nav aria-label={copy.header.title}><a href="#provider">{copy.sidebar.nav.provider}</a><a href="#persona">{copy.sidebar.nav.persona}</a><a href="#sites">{copy.sidebar.nav.sites}</a><a href="#privacy">{copy.sidebar.nav.privacy}</a><a href="#support">{copy.sidebar.nav.support}</a></nav><p>{copy.sidebar.version}</p></aside>
+    <aside className="options-sidebar"><div className="options-sidebar-inner"><div className="options-brand"><img className="brand-logo" src="/icons/ondrift-32.png" alt="" /><span>Ondrift</span></div><nav aria-label={copy.header.title}><a href="#provider">{copy.sidebar.nav.provider}</a><a href="#persona">{copy.sidebar.nav.persona}</a><a href="#sites">{copy.sidebar.nav.sites}</a><a href="#privacy">{copy.sidebar.nav.privacy}</a><a href="#support">{copy.sidebar.nav.support}</a></nav><p>{copy.sidebar.version}</p></div></aside>
     <div className="options-content">
       <header><p className="ui-eyebrow">{copy.header.eyebrow}</p><h1>{copy.header.title}</h1><p>{copy.header.lead}</p></header>
 
