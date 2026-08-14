@@ -42,7 +42,7 @@
    content) so it stays put regardless of scroll position, and only shows up
    when the current slide's content actually overflows. */
 .scroll-hint { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line-strong); border-radius: 50%; color: var(--muted); background: var(--paper); box-shadow: 0 2px 10px rgba(0, 0, 0, .08); cursor: pointer; animation: scroll-hint-bounce 1400ms ease-in-out infinite; }
-.scroll-hint svg { width: 16px; }
+.scroll-hint svg { width: 16px; transform: rotate(90deg); }
 .scroll-hint:hover { color: var(--ink); border-color: var(--accent); }
 @keyframes scroll-hint-bounce { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 6px); } }
 @media (prefers-reduced-motion: reduce) { .scroll-hint { animation: none; } }
