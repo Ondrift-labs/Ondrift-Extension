@@ -11,6 +11,7 @@ function createBridge(overrides: Partial<UiBridge> = {}): UiBridge {
     getSettings: async () => DEFAULT_SETTINGS,
     saveSettings: vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch })),
     validateApiKey: async () => ({ ok: true }),
+    removeApiKey: vi.fn(async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: false })),
     openExternal: vi.fn(),
     getHistory: async () => [],
     deleteHistory: async () => undefined,
@@ -312,5 +313,44 @@ describe('OptionsApp localization', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Verify & save' }));
 
     expect(await screen.findByText('Gemini rejected this key. Check that it was copied completely and has API access.')).toBeInTheDocument();
+  });
+
+  it('does not offer to remove a key that has not been configured yet', async () => {
+    render(<OptionsApp bridge={createBridge()} />);
+    await screen.findByRole('heading', { name: 'Settings' });
+
+    expect(screen.queryByRole('button', { name: 'Remove key' })).not.toBeInTheDocument();
+  });
+
+  it('removes a configured API key only after an explicit confirmation step', async () => {
+    const removeApiKey = vi.fn(async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: false }));
+    const bridge = createBridge({
+      getSettings: async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: true }),
+      removeApiKey,
+    });
+    render(<OptionsApp bridge={bridge} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Remove key' }));
+    expect(removeApiKey).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm removal' }));
+
+    expect(removeApiKey).toHaveBeenCalledWith('gemini');
+    expect(await screen.findByLabelText('API key')).toHaveAttribute('placeholder', 'Paste your Gemini API key');
+    expect(screen.queryByRole('button', { name: 'Remove key' })).not.toBeInTheDocument();
+  });
+
+  it('cancels a key-removal confirmation without removing anything', async () => {
+    const removeApiKey = vi.fn(async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: false }));
+    const bridge = createBridge({
+      getSettings: async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: true }),
+      removeApiKey,
+    });
+    render(<OptionsApp bridge={bridge} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Remove key' }));
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(removeApiKey).not.toHaveBeenCalled();
+    expect(await screen.findByRole('button', { name: 'Remove key' })).toBeInTheDocument();
   });
 });

@@ -51,6 +51,9 @@ export interface UiBridge {
   getSettings(): Promise<UiSettings>;
   saveSettings(patch: Partial<UiSettings>): Promise<UiSettings>;
   validateApiKey(provider: ProviderId, apiKey: string, model?: string): Promise<ApiKeyValidationResult>;
+  /** Clears the saved key for `provider` (and its health status), leaving the provider/model
+   * choice untouched so re-adding a key later doesn't lose those preferences. */
+  removeApiKey(provider: ProviderId): Promise<UiSettings>;
   openExternal(url: string): Promise<void> | void;
   getHistory(): Promise<HistoryItem[]>;
   deleteHistory(id: string): Promise<void>;

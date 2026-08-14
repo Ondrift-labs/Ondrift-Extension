@@ -43,6 +43,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   const [validation, setValidation] = useState<'idle' | 'checking' | 'valid' | ApiKeyValidationResult['reason']>('idle');
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [confirmClear, setConfirmClear] = useState(false);
+  const [confirmRemoveKey, setConfirmRemoveKey] = useState(false);
   const autosaveTimer = useRef<number | null>(null);
   const saveRequest = useRef(0);
   // 0 = save as soon as the pending-change effect below sees it (the default, for discrete
@@ -204,6 +205,16 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
     } catch { setValidation('network'); }
   }
 
+  async function removeKey() {
+    const next = await bridge.removeApiKey(settings.provider);
+    setSettings(next);
+    setSavedSettings(next);
+    setApiKey('');
+    setValidation('idle');
+    setConfirmRemoveKey(false);
+    setSaveState('saved');
+  }
+
   return <main className="options-shell">
     <aside className="options-sidebar"><div className="options-sidebar-inner"><div className="options-brand"><img className="brand-logo" src="/icons/ondrift-32.png" alt="" /><span>Ondrift</span></div><nav aria-label={copy.header.title}><a href="#provider">{copy.sidebar.nav.provider}</a><a href="#persona">{copy.sidebar.nav.persona}</a><a href="#sites">{copy.sidebar.nav.sites}</a><a href="#privacy">{copy.sidebar.nav.privacy}</a><a href="#support">{copy.sidebar.nav.support}</a></nav><p>{copy.sidebar.version}</p></div></aside>
     <div className="options-content">
@@ -212,7 +223,11 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
       <section id="provider"><div className="section-title"><span>01</span><div><h2>{copy.provider.sectionTitle}</h2><p>{copy.provider.sectionLead}</p></div></div>
         <div className="settings-card">
           <label className="ui-field"><span className="ui-label">{copy.provider.providerLabel}</span><select className="ui-select" aria-label={copy.provider.providerLabel} value={settings.provider} onChange={(event) => update('provider', event.target.value as ProviderId)}><option value="gemini">{copy.provider.providerGemini}</option><option value="openai" disabled>{copy.provider.providerOpenAi}</option><option value="claude" disabled>{copy.provider.providerClaude}</option></select></label>
-          <div className="ui-field"><label className="ui-label" htmlFor="settings-key">{copy.provider.apiKeyLabel}</label><div className="settings-key-row"><input id="settings-key" className="ui-input" type="password" autoComplete="off" value={apiKey} onChange={(event) => { setApiKey(event.target.value); setValidation('idle'); }} placeholder={settings.apiKeyConfigured ? copy.provider.apiKeyPlaceholderSaved : copy.provider.apiKeyPlaceholderEmpty} /><button className="ui-button ui-button--secondary" disabled={(!apiKey.trim() && !settings.apiKeyConfigured) || validation === 'checking'} onClick={verify}>{validation === 'checking' ? common.checking : copy.provider.verifyCta}</button></div><p className="ui-help">{copy.provider.apiKeyHelp} <button className="text-button" onClick={() => bridge.openExternal(AI_STUDIO_API_KEY_URL)}>{copy.provider.getKeyCta} <Icon name="external" /></button></p></div>
+          <div className="ui-field"><label className="ui-label" htmlFor="settings-key">{copy.provider.apiKeyLabel}</label><div className="settings-key-row"><input id="settings-key" className="ui-input" type="password" autoComplete="off" value={apiKey} onChange={(event) => { setApiKey(event.target.value); setValidation('idle'); }} placeholder={settings.apiKeyConfigured ? copy.provider.apiKeyPlaceholderSaved : copy.provider.apiKeyPlaceholderEmpty} /><button className="ui-button ui-button--secondary" disabled={(!apiKey.trim() && !settings.apiKeyConfigured) || validation === 'checking'} onClick={verify}>{validation === 'checking' ? common.checking : copy.provider.verifyCta}</button></div><p className="ui-help">{copy.provider.apiKeyHelp} <button className="text-button" onClick={() => bridge.openExternal(AI_STUDIO_API_KEY_URL)}>{copy.provider.getKeyCta} <Icon name="external" /></button></p>
+            {settings.apiKeyConfigured && (confirmRemoveKey
+              ? <div className="ui-help remove-key-confirm"><span>{copy.provider.removeKeyConfirmDetail}</span><span className="clear-actions"><button className="ui-button ui-button--quiet" onClick={() => setConfirmRemoveKey(false)}>{copy.provider.removeKeyCancelCta}</button><button className="ui-button danger-button" onClick={removeKey}>{copy.provider.removeKeyConfirmCta}</button></span></div>
+              : <button type="button" className="text-button" onClick={() => setConfirmRemoveKey(true)}>{copy.provider.removeKeyCta}</button>)}
+          </div>
           <label className="ui-field"><span className="ui-label">{copy.provider.modelLabel}</span><select id="settings-model" className="ui-select" aria-label={copy.provider.modelLabel} value={modelSelectValue} onChange={(event) => { const next = event.target.value; const isCustom = next === CUSTOM_MODEL_VALUE; setCustomModelSelected(isCustom); applyModel(isCustom ? customModel : next); setValidation('idle'); }}><option value="">{copy.provider.modelAutoLabel}</option>{GEMINI_MODEL_CHOICES.map((id) => <option key={id} value={id}>{copy.provider.modelOptionLabels[id]}</option>)}<option value={CUSTOM_MODEL_VALUE}>{copy.provider.modelCustomLabel}</option></select>{customModelSelected && <input className="ui-input" type="text" autoComplete="off" aria-label={copy.provider.modelCustomLabel} value={customModel} onChange={(event) => { setCustomModel(event.target.value); applyModel(event.target.value, { debounce: true }); setValidation('idle'); }} placeholder={copy.provider.modelCustomPlaceholder} />}<span className="ui-help">{copy.provider.modelHelp}</span></label>
           {validation === 'valid' && <div className="ui-status ui-status--success"><Icon name="check" />{copy.provider.keySuccess}</div>}
           {validation && !['idle', 'checking', 'valid'].includes(validation) && <div className="ui-status ui-status--error">{copy.provider.validation[validation as keyof typeof copy.provider.validation]}</div>}

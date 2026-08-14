@@ -17,6 +17,7 @@ function createBridge(overrides: Partial<UiBridge> = {}): UiBridge {
     getSettings: async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: true }),
     saveSettings: async () => DEFAULT_SETTINGS,
     validateApiKey: async () => ({ ok: true }),
+    removeApiKey: vi.fn(async () => DEFAULT_SETTINGS),
     openExternal: vi.fn(),
     getHistory: async () => history,
     deleteHistory: async () => undefined,

@@ -44,6 +44,7 @@ html { scroll-behavior: smooth; }
 .toggle-row p, .privacy-row p { margin: 4px 0 0; color: var(--muted); font-size: 11px; line-height: 1.45; }
 .locked-label { flex: 0 0 auto; border: 1px solid var(--line); border-radius: 4px; padding: 4px 7px; color: var(--muted); background: var(--canvas); font-size: 10px; }
 .clear-actions { display: flex; gap: 4px; }
+.remove-key-confirm { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .danger-button { color: white; background: var(--danger); }
 .autosave-note { display: flex; align-items: center; gap: 7px; margin-top: 50px; color: var(--faint); font-size: 11px; }
 .autosave-note svg { width: 14px; height: 14px; color: var(--accent); }

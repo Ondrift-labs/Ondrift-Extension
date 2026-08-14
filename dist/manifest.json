@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Ondrift",
   "short_name": "Ondrift",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "minimum_chrome_version": "116",
   "description": "Rewrite and score prompts on ChatGPT, Claude, Gemini, and Perplexity with your own Gemini API key.",
   "icons": {
@@ -42,7 +42,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/content.ts-loader-BTNx5Go3.js"
+        "assets/content.ts-loader-CENaK1Aa.js"
       ],
       "matches": [
         "https://chatgpt.com/*",
@@ -66,9 +66,9 @@
       "resources": [
         "icons/ondrift-32.png",
         "assets/errors-B8HZ3syN.js",
-        "assets/i18n-DdHOXZyb.js",
+        "assets/i18n-Bn661j0X.js",
         "assets/settings-BLN9wWz0.js",
-        "assets/content.ts-MlQGPJoU.js"
+        "assets/content.ts-Dq84LM1S.js"
       ],
       "use_dynamic_url": false
     }
