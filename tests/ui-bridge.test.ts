@@ -32,3 +32,25 @@ describe("uiBridge.saveSettings", () => {
     });
   });
 });
+
+describe("uiBridge.removeApiKey", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("clears the saved key and its health status for the given provider, without touching the model", async () => {
+    const sendMessage = vi.fn(async () => ({
+      ok: true,
+      data: { ...DEFAULT_SETTINGS, apiKeys: { gemini: "" }, apiKeyStatus: null },
+    }));
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+
+    const result = await uiBridge.removeApiKey("gemini");
+
+    expect(sendMessage).toHaveBeenCalledWith({
+      type: "settings_set",
+      payload: { apiKeys: { gemini: "" }, apiKeyStatus: null },
+    });
+    expect(result.apiKeyConfigured).toBe(false);
+  });
+});

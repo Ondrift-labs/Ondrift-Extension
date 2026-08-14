@@ -88,6 +88,10 @@ export const uiBridge: UiBridge = {
       return validationFailure(error);
     }
   },
+  async removeApiKey(provider) {
+    const patch: Partial<ExtensionSettings> = { apiKeys: { [provider]: "" } as Partial<Record<ProviderId, string>>, apiKeyStatus: null };
+    return toUiSettings(await sendRuntimeMessage<ExtensionSettings>({ type: "settings_set", payload: patch }));
+  },
   async openExternal(url) {
     await chrome.tabs.create({ url });
   },

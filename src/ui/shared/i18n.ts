@@ -111,6 +111,10 @@ export interface OptionsCopy {
     apiKeyHelp: string;
     getKeyCta: string;
     keySuccess: string;
+    removeKeyCta: string;
+    removeKeyConfirmDetail: string;
+    removeKeyConfirmCta: string;
+    removeKeyCancelCta: string;
     modelLabel: string;
     modelHelp: string;
     modelAutoLabel: string;
@@ -298,6 +302,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyHelp: 'chrome.storage.local에만 저장되며 동기화 저장소는 사용하지 않습니다.',
         getKeyCta: '키 발급받기',
         keySuccess: '키가 확인되어 사용할 준비가 되었습니다.',
+        removeKeyCta: '키 삭제',
+        removeKeyConfirmDetail: '저장된 키를 삭제할까요? 다시 사용하려면 새 키를 붙여넣어야 합니다.',
+        removeKeyConfirmCta: '삭제 확인',
+        removeKeyCancelCta: '취소',
         modelLabel: '모델',
         modelHelp: '할당량이 부족하면 더 저렴하거나 한도가 넉넉한 모델을 선택하세요. 선택한 모델을 사용할 수 없으면 Ondrift가 기본 모델로 다시 시도합니다.',
         modelAutoLabel: '기본값 (자동 전환)',
@@ -508,6 +516,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyHelp: 'Stored with chrome.storage.local, never sync storage.',
         getKeyCta: 'Get a key',
         keySuccess: 'Key verified and ready to use.',
+        removeKeyCta: 'Remove key',
+        removeKeyConfirmDetail: 'Remove the saved key? You’ll need to paste a new one to use Ondrift again.',
+        removeKeyConfirmCta: 'Confirm removal',
+        removeKeyCancelCta: 'Cancel',
         modelLabel: 'Model',
         modelHelp: 'If you’re running short on quota, choose a cheaper or higher-limit model. Ondrift falls back to its default model if the one you pick is unavailable.',
         modelAutoLabel: 'Default (automatic fallback)',
@@ -718,6 +730,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyHelp: 'chrome.storage.local にのみ保存され、同期ストレージは使用しません。',
         getKeyCta: 'キーを取得',
         keySuccess: 'キーを確認しました。利用できます。',
+        removeKeyCta: 'キーを削除',
+        removeKeyConfirmDetail: '保存されたキーを削除しますか?再度利用するには新しいキーを貼り付ける必要があります。',
+        removeKeyConfirmCta: '削除を確認',
+        removeKeyCancelCta: 'キャンセル',
         modelLabel: 'モデル',
         modelHelp: '割り当てが不足している場合は、より安価または上限の高いモデルを選択してください。選択したモデルが利用できない場合、Ondrift は既定モデルで再試行します。',
         modelAutoLabel: '既定値(自動フォールバック)',
@@ -928,6 +944,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyHelp: '仅保存在 chrome.storage.local 中，不使用同步存储。',
         getKeyCta: '获取密钥',
         keySuccess: '密钥已验证，可以使用。',
+        removeKeyCta: '删除密钥',
+        removeKeyConfirmDetail: '要删除已保存的密钥吗?之后需要重新粘贴新密钥才能使用。',
+        removeKeyConfirmCta: '确认删除',
+        removeKeyCancelCta: '取消',
         modelLabel: '模型',
         modelHelp: '如果配额不足，请选择更便宜或限制更宽松的模型。如果所选模型不可用，Ondrift 会回退到默认模型。',
         modelAutoLabel: '默认值（自动回退）',
