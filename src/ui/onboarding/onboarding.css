@@ -6,9 +6,12 @@
 .step-count { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .step-track { flex: none; background: var(--line); }
 .step-track span { display: block; height: 2px; background: var(--accent); transition: width 240ms ease; }
-/* The one scrolling region in the whole shell: header, step-track, key-nav, and
-   footer all stay fixed in place, and only this area scrolls when its content
-   (a slide's screenshot, say) is taller than the remaining viewport space. */
+/* The one scrolling region in the whole shell: header, step-track, onboarding-nav,
+   and footer all stay fixed in place, and only this area scrolls when its content
+   (a slide's screenshot, say) is taller than the remaining viewport space. The
+   -area wrapper stays put as the scroll region's positioning context so
+   .scroll-hint can float over it without scrolling away with the content. */
+.onboarding-scroll-area { position: relative; flex: 1 1 auto; min-height: 0; display: flex; }
 .onboarding-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; }
 .onboarding-panel { width: min(680px, calc(100% - 40px)); margin: auto; padding-block: 52px; }
 .onboarding-panel h1 { max-width: 620px; margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(35px, 6vw, 58px); font-weight: 500; letter-spacing: -.045em; line-height: 1.02; }
@@ -19,7 +22,6 @@
 .promise-list span { color: var(--faint); font: 12px ui-monospace, monospace; }
 .promise-list p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .promise-list strong { display: block; margin-bottom: 2px; color: var(--ink); font-size: 14px; }
-.onboarding-next { min-width: 164px; }
 .key-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 /* The shared h1 size (clamp up to 58px) wraps this phase's longer title
    ("Get a key in three short steps.", etc.) onto two lines. Scale it down
@@ -36,13 +38,22 @@
 .key-slide strong { display: block; font-size: 14px; }
 .key-slide > p { margin: 5px 0 12px; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .key-step-image { display: block; width: 100%; max-height: 46vh; object-fit: contain; margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
-/* A shell-level sibling of .onboarding-scroll, not a child of it, so Back/Next always
-   renders below the scrolling area instead of possibly scrolling out of view with it. */
-.key-nav { flex: none; display: flex; justify-content: space-between; gap: 16px; width: min(680px, calc(100% - 40px)); margin: 0 auto; padding: 14px 0 20px; border-top: 1px solid var(--line); }
+/* Floats over .onboarding-scroll-area's bottom edge (not inside the scrolling
+   content) so it stays put regardless of scroll position, and only shows up
+   when the current slide's content actually overflows. */
+.scroll-hint { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line-strong); border-radius: 50%; color: var(--muted); background: var(--paper); box-shadow: 0 2px 10px rgba(0, 0, 0, .08); cursor: pointer; animation: scroll-hint-bounce 1400ms ease-in-out infinite; }
+.scroll-hint svg { width: 16px; }
+.scroll-hint:hover { color: var(--ink); border-color: var(--accent); }
+@keyframes scroll-hint-bounce { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 6px); } }
+@media (prefers-reduced-motion: reduce) { .scroll-hint { animation: none; } }
+/* A shell-level sibling of .onboarding-scroll-area, not a child of it, so the
+   primary action always renders below the scrolling area instead of possibly
+   scrolling out of view with it. Left/right slots so a lone CTA (intro) and a
+   back+next pair (key, privacy) both land in the same spot via space-between. */
+.onboarding-nav { flex: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; width: min(680px, calc(100% - 40px)); margin: 0 auto; padding: 14px 0 20px; border-top: 1px solid var(--line); }
 @keyframes key-slide-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) { .key-slide { animation: none; } }
 .key-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-.onboarding-actions { display: flex; justify-content: space-between; margin-top: 24px; }
 .data-route { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 10px; margin: 30px 0; padding: 18px; border: 1px solid var(--line); background: var(--paper); }
 .data-route > div { display: grid; gap: 4px; }
 .data-route strong { font-size: 13px; }

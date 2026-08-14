@@ -16,10 +16,12 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
   const [showGuideImages, setShowGuideImages] = useState(true);
   const [keyStep, setKeyStep] = useState<0 | 1 | 2>(0);
   const [language, setLanguage] = useState<LanguageId>(DEFAULT_SETTINGS.language);
+  const [canScrollMore, setCanScrollMore] = useState(false);
   const step = useMemo(() => ({ intro: 1, key: 2, privacy: 3, complete: 3 })[phase], [phase]);
   const copy = getUiCopy(language).onboarding;
   const common = getUiCopy(language).common;
   const scrollRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -32,6 +34,36 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
   // messages). Resetting the scroll area to the top on every step/phase change means
   // a taller previous screen never leaves the next one starting mid-scroll.
   useEffect(() => { scrollRef.current?.scrollTo({ top: 0 }); }, [phase, keyStep]);
+
+  // Shows a bouncing "scroll for more" hint whenever the current slide's content
+  // (a tall screenshot, say) overflows the scroll area. Watches both the scroll
+  // container (viewport size changes) and the panel itself (content size changes,
+  // e.g. an image finishing layout) so it stays accurate without polling.
+  useEffect(() => {
+    const scrollEl = scrollRef.current;
+    const panelEl = panelRef.current;
+    if (!scrollEl || !panelEl) return;
+    function update() {
+      if (!scrollEl) return;
+      const remaining = scrollEl.scrollHeight - scrollEl.clientHeight - scrollEl.scrollTop;
+      setCanScrollMore(remaining > 24);
+    }
+    update();
+    scrollEl.addEventListener('scroll', update);
+    const observer = new ResizeObserver(update);
+    observer.observe(scrollEl);
+    observer.observe(panelEl);
+    return () => {
+      scrollEl.removeEventListener('scroll', update);
+      observer.disconnect();
+    };
+  }, [phase, keyStep]);
+
+  function scrollToBottom() {
+    const scrollEl = scrollRef.current;
+    if (!scrollEl) return;
+    scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior: 'smooth' });
+  }
 
   async function changeLanguage(next: LanguageId) {
     setLanguage(next);
@@ -65,8 +97,9 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
     </header>
     <div className="step-track" aria-hidden="true"><span style={{ width: `${step / 3 * 100}%` }} /></div>
 
+    <div className="onboarding-scroll-area">
     <div className="onboarding-scroll" ref={scrollRef}>
-      <section className="onboarding-panel" id="main" aria-live="polite">
+      <section className="onboarding-panel" id="main" aria-live="polite" ref={panelRef}>
       {phase === 'intro' && <>
         <p className="ui-eyebrow">{copy.intro.eyebrow}</p>
         <h1>{copy.intro.title}</h1>
@@ -74,7 +107,6 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
         <div className="promise-list">
           {copy.intro.promises.map((promise, index) => <div key={promise.title}><span>{String(index + 1).padStart(2, '0')}</span><p><strong>{promise.title}</strong>{promise.body}</p></div>)}
         </div>
-        <button className="ui-button ui-button--primary onboarding-next" onClick={() => setPhase('key')}>{copy.intro.cta} <Icon name="arrow" /></button>
       </>}
 
       {phase === 'key' && <>
@@ -121,18 +153,26 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
           {copy.privacy.notes.map((note) => <p key={note.lead}><strong>{note.lead}</strong>{note.rest}</p>)}
         </div>
         <label className="consent-row"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span>{copy.privacy.consentLabel}</span></label>
-        <div className="onboarding-actions"><button className="ui-button ui-button--quiet" onClick={() => setPhase('key')}>{common.back}</button><button className="ui-button ui-button--primary" disabled={!consent} onClick={finish}>{copy.privacy.enableCta} <Icon name="check" /></button></div>
       </>}
 
       {phase === 'complete' && <div className="complete-state"><span className="complete-mark"><Icon name="check" /></span><p className="ui-eyebrow">{copy.complete.eyebrow}</p><h1>{copy.complete.title}</h1><p>{copy.complete.body}</p><button className="ui-button ui-button--primary" onClick={() => bridge.openExternal('https://chatgpt.com/')}>{copy.complete.cta} <Icon name="external" /></button></div>}
       </section>
     </div>
+    {canScrollMore && <button type="button" className="scroll-hint" aria-label={common.scrollHintAria} onClick={scrollToBottom}><Icon name="chevron" /></button>}
+    </div>
 
-    {phase === 'key' && <div className="key-nav">
-      <button className="ui-button ui-button--quiet" onClick={() => (keyStep === 0 ? setPhase('intro') : setKeyStep((keyStep - 1) as 0 | 1))}>{common.back}</button>
-      {keyStep < 2
-        ? <button className="ui-button ui-button--primary" onClick={() => setKeyStep((keyStep + 1) as 1 | 2)}>{copy.key.nextCta} <Icon name="arrow" /></button>
-        : <button className="ui-button ui-button--primary" disabled={validation !== 'valid'} onClick={() => setPhase('privacy')}>{copy.key.continueCta} <Icon name="arrow" /></button>}
+    {phase !== 'complete' && <div className="onboarding-nav">
+      <div className="onboarding-nav-left">
+        {phase === 'key' && <button className="ui-button ui-button--quiet" onClick={() => (keyStep === 0 ? setPhase('intro') : setKeyStep((keyStep - 1) as 0 | 1))}>{common.back}</button>}
+        {phase === 'privacy' && <button className="ui-button ui-button--quiet" onClick={() => setPhase('key')}>{common.back}</button>}
+      </div>
+      <div className="onboarding-nav-right">
+        {phase === 'intro' && <button className="ui-button ui-button--primary" onClick={() => setPhase('key')}>{copy.intro.cta} <Icon name="arrow" /></button>}
+        {phase === 'key' && (keyStep < 2
+          ? <button className="ui-button ui-button--primary" onClick={() => setKeyStep((keyStep + 1) as 1 | 2)}>{copy.key.nextCta} <Icon name="arrow" /></button>
+          : <button className="ui-button ui-button--primary" disabled={validation !== 'valid'} onClick={() => setPhase('privacy')}>{copy.key.continueCta} <Icon name="arrow" /></button>)}
+        {phase === 'privacy' && <button className="ui-button ui-button--primary" disabled={!consent} onClick={finish}>{copy.privacy.enableCta} <Icon name="check" /></button>}
+      </div>
     </div>}
 
     <footer>{copy.footer}</footer>
