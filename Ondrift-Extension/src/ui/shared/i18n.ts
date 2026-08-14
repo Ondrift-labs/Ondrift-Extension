@@ -36,6 +36,7 @@ export interface CommonCopy {
   settingsLoading: string;
   settingsLoadErrorTitle: string;
   settingsLoadErrorBody: string;
+  scrollHintAria: string;
 }
 
 export interface OnboardingCopy {
@@ -209,6 +210,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       settingsLoading: 'Ondrift 설정을 불러오는 중…',
       settingsLoadErrorTitle: 'Ondrift 설정을 불러오지 못했습니다',
       settingsLoadErrorBody: '이 페이지를 새로고침하세요. 로컬 설정과 기록은 변경되지 않았습니다.',
+      scrollHintAria: '아래로 스크롤',
     },
     onboarding: {
       stepCount: (step, total) => `${total}단계 중 ${step}단계`,
@@ -418,6 +420,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       settingsLoading: 'Loading Ondrift settings…',
       settingsLoadErrorTitle: 'Ondrift settings could not load',
       settingsLoadErrorBody: 'Reload this page. Your local settings and history have not been changed.',
+      scrollHintAria: 'Scroll down',
     },
     onboarding: {
       stepCount: (step, total) => `Step ${step} of ${total}`,
@@ -627,6 +630,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       settingsLoading: 'Ondrift の設定を読み込み中…',
       settingsLoadErrorTitle: 'Ondrift の設定を読み込めませんでした',
       settingsLoadErrorBody: 'このページを再読み込みしてください。ローカル設定と履歴は変更されていません。',
+      scrollHintAria: '下にスクロール',
     },
     onboarding: {
       stepCount: (step, total) => `${total}ステップ中${step}ステップ目`,
@@ -836,6 +840,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       settingsLoading: '正在加载 Ondrift 设置…',
       settingsLoadErrorTitle: '无法加载 Ondrift 设置',
       settingsLoadErrorBody: '请重新加载此页面。你的本地设置和历史记录没有被更改。',
+      scrollHintAria: '向下滚动',
     },
     onboarding: {
       stepCount: (step, total) => `第 ${step} 步，共 ${total} 步`,

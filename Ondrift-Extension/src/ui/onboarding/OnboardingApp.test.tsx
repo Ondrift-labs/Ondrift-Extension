@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, type UiBridge } from '../shared/contracts';
@@ -120,5 +120,33 @@ describe('OnboardingApp localization', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Show the screenshots again' }));
     expect(screen.getByAltText('The “Create a new key” dialog for choosing a project.')).toBeInTheDocument();
+  });
+
+  it('keeps every phase’s primary action outside the scrolling content, so it never scrolls out of view', () => {
+    const { container } = render(<OnboardingApp bridge={createBridge()} />);
+
+    const nav = container.querySelector('.onboarding-nav');
+    const scrollArea = container.querySelector('.onboarding-scroll');
+    expect(nav).toBeInTheDocument();
+    expect(scrollArea?.contains(nav)).toBe(false);
+    expect(screen.getByRole('button', { name: /Set up Gemini/ }).closest('.onboarding-nav')).not.toBeNull();
+  });
+
+  it('shows a bouncing scroll-down hint only once the current slide overflows, and scrolls to the bottom on click', async () => {
+    const { container } = render(<OnboardingApp bridge={createBridge()} />);
+    const scrollEl = container.querySelector('.onboarding-scroll') as HTMLDivElement;
+
+    // jsdom reports zero for both, so nothing overflows by default.
+    expect(screen.queryByRole('button', { name: 'Scroll down' })).not.toBeInTheDocument();
+
+    Object.defineProperty(scrollEl, 'scrollHeight', { value: 900, configurable: true });
+    Object.defineProperty(scrollEl, 'clientHeight', { value: 500, configurable: true });
+    Object.defineProperty(scrollEl, 'scrollTop', { value: 0, configurable: true, writable: true });
+    fireEvent.scroll(scrollEl);
+
+    const hint = await screen.findByRole('button', { name: 'Scroll down' });
+    const scrollTo = vi.spyOn(scrollEl, 'scrollTo');
+    await userEvent.click(hint);
+    expect(scrollTo).toHaveBeenCalledWith({ top: 900, behavior: 'smooth' });
   });
 });

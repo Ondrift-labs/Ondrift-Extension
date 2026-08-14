@@ -42,7 +42,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/content.ts-loader-DbIGnKJE.js"
+        "assets/content.ts-loader-BTNx5Go3.js"
       ],
       "matches": [
         "https://chatgpt.com/*",
@@ -66,9 +66,9 @@
       "resources": [
         "icons/ondrift-32.png",
         "assets/errors-B8HZ3syN.js",
-        "assets/i18n-BWZpK_jW.js",
+        "assets/i18n-DdHOXZyb.js",
         "assets/settings-BLN9wWz0.js",
-        "assets/content.ts-BfL2CEWl.js"
+        "assets/content.ts-MlQGPJoU.js"
       ],
       "use_dynamic_url": false
     }
