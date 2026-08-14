@@ -1,12 +1,16 @@
-.onboarding-shell { min-height: 100vh; display: grid; grid-template-rows: auto 2px 1fr auto; }
-.onboarding-header { height: 62px; display: flex; align-items: center; justify-content: space-between; max-width: 940px; width: 100%; margin: auto; padding: 0 28px; }
+.onboarding-shell { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+.onboarding-header { flex: none; height: 62px; display: flex; align-items: center; justify-content: space-between; max-width: 940px; width: 100%; margin: auto; padding: 0 28px; }
 .onboarding-header-right { display: flex; align-items: center; gap: 14px; }
 .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); text-decoration: none; font-weight: 760; letter-spacing: -.02em; }
 .language-select select { min-height: 30px; border: 1px solid var(--line-strong); border-radius: 6px; padding: 4px 8px; color: var(--ink); background: var(--paper); font-size: 12px; }
 .step-count { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
-.step-track { background: var(--line); }
+.step-track { flex: none; background: var(--line); }
 .step-track span { display: block; height: 2px; background: var(--accent); transition: width 240ms ease; }
-.onboarding-panel { align-self: center; width: min(680px, calc(100% - 40px)); margin: 52px auto; }
+/* The one scrolling region in the whole shell: header, step-track, key-nav, and
+   footer all stay fixed in place, and only this area scrolls when its content
+   (a slide's screenshot, say) is taller than the remaining viewport space. */
+.onboarding-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; }
+.onboarding-panel { width: min(680px, calc(100% - 40px)); margin: auto; padding-block: 52px; }
 .onboarding-panel h1 { max-width: 620px; margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(35px, 6vw, 58px); font-weight: 500; letter-spacing: -.045em; line-height: 1.02; }
 .onboarding-lead { max-width: 610px; margin: 22px 0 30px; color: var(--muted); font-size: 17px; line-height: 1.65; }
 .promise-list { margin: 24px 0 32px; border-block: 1px solid var(--line); }
@@ -27,9 +31,9 @@
 .key-slide strong { display: block; font-size: 14px; }
 .key-slide > p { margin: 5px 0 12px; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .key-step-image { display: block; width: 100%; max-height: 46vh; object-fit: contain; margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
-/* Pinned to the viewport bottom so Back/Next always stays reachable, even when a
-   taller slide (screenshot + status message) would otherwise push it below the fold. */
-.key-nav { position: sticky; bottom: 0; z-index: 1; display: flex; justify-content: space-between; gap: 16px; margin-top: 20px; padding: 14px 0 20px; background: var(--canvas); }
+/* A shell-level sibling of .onboarding-scroll, not a child of it, so Back/Next always
+   renders below the scrolling area instead of possibly scrolling out of view with it. */
+.key-nav { flex: none; display: flex; justify-content: space-between; gap: 16px; width: min(680px, calc(100% - 40px)); margin: 0 auto; padding: 14px 0 20px; border-top: 1px solid var(--line); }
 @keyframes key-slide-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) { .key-slide { animation: none; } }
 .key-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
@@ -49,5 +53,5 @@
 .complete-state > p:not(.ui-eyebrow) { margin: 18px auto 28px; color: var(--muted); line-height: 1.6; }
 .complete-mark { display: grid; place-items: center; width: 48px; height: 48px; margin: 0 auto 18px; border-radius: 50%; color: white; background: var(--accent); }
 .complete-mark svg { width: 24px; }
-.onboarding-shell footer { padding: 20px; color: var(--faint); font-size: 11px; text-align: center; }
-@media (max-width: 560px) { .onboarding-panel { margin-block: 32px; } .data-route { grid-template-columns: 1fr; } .data-route > svg { transform: rotate(90deg); margin: auto; } .key-row { grid-template-columns: 1fr; } }
+.onboarding-shell footer { flex: none; padding: 20px; color: var(--faint); font-size: 11px; text-align: center; }
+@media (max-width: 560px) { .onboarding-panel { padding-block: 32px; } .data-route { grid-template-columns: 1fr; } .data-route > svg { transform: rotate(90deg); margin: auto; } .key-row { grid-template-columns: 1fr; } }

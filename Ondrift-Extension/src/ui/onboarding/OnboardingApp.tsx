@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, type ApiKeyValidationResult, type LanguageId, type UiBridge } from '../shared/contracts';
 import { getUiCopy, LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '../shared/i18n';
 import { Icon } from '../shared/Icon';
@@ -19,6 +19,7 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
   const step = useMemo(() => ({ intro: 1, key: 2, privacy: 3, complete: 3 })[phase], [phase]);
   const copy = getUiCopy(language).onboarding;
   const common = getUiCopy(language).common;
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -28,9 +29,9 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
   useEffect(() => { bridge.getSettings().then((settings) => setLanguage(settings.language)).catch(() => undefined); }, [bridge]);
 
   // Each key-setup slide can be a different height (screenshots, help text, status
-  // messages). Jumping back to the top on every step keeps the sticky nav reachable
-  // without the page feeling like it silently scrolled out from under you.
-  useEffect(() => { if (phase === 'key') window.scrollTo({ top: 0 }); }, [phase, keyStep]);
+  // messages). Resetting the scroll area to the top on every step/phase change means
+  // a taller previous screen never leaves the next one starting mid-scroll.
+  useEffect(() => { scrollRef.current?.scrollTo({ top: 0 }); }, [phase, keyStep]);
 
   async function changeLanguage(next: LanguageId) {
     setLanguage(next);
@@ -64,7 +65,8 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
     </header>
     <div className="step-track" aria-hidden="true"><span style={{ width: `${step / 3 * 100}%` }} /></div>
 
-    <section className="onboarding-panel" id="main" aria-live="polite">
+    <div className="onboarding-scroll" ref={scrollRef}>
+      <section className="onboarding-panel" id="main" aria-live="polite">
       {phase === 'intro' && <>
         <p className="ui-eyebrow">{copy.intro.eyebrow}</p>
         <h1>{copy.intro.title}</h1>
@@ -109,13 +111,6 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
             {validation && !['idle', 'checking', 'valid'].includes(validation) && <div className="ui-status ui-status--error" role="alert">{copy.key.validation[validation as keyof typeof copy.key.validation]}</div>}
           </>}
         </div>
-
-        <div className="key-nav">
-          <button className="ui-button ui-button--quiet" onClick={() => (keyStep === 0 ? setPhase('intro') : setKeyStep((keyStep - 1) as 0 | 1))}>{common.back}</button>
-          {keyStep < 2
-            ? <button className="ui-button ui-button--primary" onClick={() => setKeyStep((keyStep + 1) as 1 | 2)}>{copy.key.nextCta} <Icon name="arrow" /></button>
-            : <button className="ui-button ui-button--primary" disabled={validation !== 'valid'} onClick={() => setPhase('privacy')}>{copy.key.continueCta} <Icon name="arrow" /></button>}
-        </div>
       </>}
 
       {phase === 'privacy' && <>
@@ -130,7 +125,16 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
       </>}
 
       {phase === 'complete' && <div className="complete-state"><span className="complete-mark"><Icon name="check" /></span><p className="ui-eyebrow">{copy.complete.eyebrow}</p><h1>{copy.complete.title}</h1><p>{copy.complete.body}</p><button className="ui-button ui-button--primary" onClick={() => bridge.openExternal('https://chatgpt.com/')}>{copy.complete.cta} <Icon name="external" /></button></div>}
-    </section>
+      </section>
+    </div>
+
+    {phase === 'key' && <div className="key-nav">
+      <button className="ui-button ui-button--quiet" onClick={() => (keyStep === 0 ? setPhase('intro') : setKeyStep((keyStep - 1) as 0 | 1))}>{common.back}</button>
+      {keyStep < 2
+        ? <button className="ui-button ui-button--primary" onClick={() => setKeyStep((keyStep + 1) as 1 | 2)}>{copy.key.nextCta} <Icon name="arrow" /></button>
+        : <button className="ui-button ui-button--primary" disabled={validation !== 'valid'} onClick={() => setPhase('privacy')}>{copy.key.continueCta} <Icon name="arrow" /></button>}
+    </div>}
+
     <footer>{copy.footer}</footer>
   </main>;
 }

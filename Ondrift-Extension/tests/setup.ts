@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 
-// jsdom doesn't implement layout, so window.scrollTo() is a stub that logs
-// "Not implemented" to the console on every call. Silence it here rather than
-// in every test that happens to trigger a scroll.
-window.scrollTo = () => undefined;
+// jsdom doesn't implement layout, so it has no Element.scrollTo() at all (unlike
+// window.scrollTo, which exists as a "not implemented" stub). Polyfill it so
+// components that scroll a specific container don't have to guard every call.
+if (!Element.prototype.scrollTo) Element.prototype.scrollTo = function scrollTo() { /* noop in jsdom */ };
