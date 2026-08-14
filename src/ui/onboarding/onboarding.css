@@ -22,11 +22,14 @@
 .key-dots { display: flex; gap: 6px; margin: 20px 0 4px; }
 .key-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--line-strong); transition: background 200ms ease, transform 200ms ease; }
 .key-dots span.is-active { background: var(--accent); transform: scale(1.35); }
-.key-slide { margin: 14px 0 22px; padding-top: 18px; border-top: 1px solid var(--line); animation: key-slide-in 240ms ease; }
+.key-slide { margin: 14px 0 4px; padding-top: 18px; border-top: 1px solid var(--line); animation: key-slide-in 240ms ease; }
 .key-slide-number { display: inline-grid; place-items: center; width: 28px; height: 28px; margin-bottom: 10px; border: 1px solid var(--line-strong); border-radius: 50%; color: var(--muted); font-size: 12px; }
 .key-slide strong { display: block; font-size: 14px; }
 .key-slide > p { margin: 5px 0 12px; color: var(--muted); font-size: 13px; line-height: 1.5; }
-.key-step-image { display: block; width: 100%; margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; }
+.key-step-image { display: block; width: 100%; max-height: 46vh; object-fit: contain; margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+/* Pinned to the viewport bottom so Back/Next always stays reachable, even when a
+   taller slide (screenshot + status message) would otherwise push it below the fold. */
+.key-nav { position: sticky; bottom: 0; z-index: 1; display: flex; justify-content: space-between; gap: 16px; margin-top: 20px; padding: 14px 0 20px; background: var(--canvas); }
 @keyframes key-slide-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) { .key-slide { animation: none; } }
 .key-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
