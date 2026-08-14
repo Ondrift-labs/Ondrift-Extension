@@ -1,0 +1,79 @@
+{
+  "manifest_version": 3,
+  "name": "Ondrift",
+  "short_name": "Ondrift",
+  "version": "0.1.21",
+  "minimum_chrome_version": "116",
+  "description": "Rewrite and score prompts on ChatGPT, Claude, Gemini, and Perplexity with your own Gemini API key.",
+  "icons": {
+    "16": "icons/ondrift-16.png",
+    "32": "icons/ondrift-32.png",
+    "48": "icons/ondrift-48.png",
+    "128": "icons/ondrift-128.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://perplexity.ai/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "action": {
+    "default_title": "Open Ondrift",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/ondrift-16.png",
+      "32": "icons/ondrift-32.png",
+      "48": "icons/ondrift-48.png"
+    }
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "assets/content.ts-loader-DbIGnKJE.js"
+      ],
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://www.perplexity.ai/*",
+        "https://perplexity.ai/*"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://perplexity.ai/*",
+        "https://www.perplexity.ai/*"
+      ],
+      "resources": [
+        "icons/ondrift-32.png",
+        "assets/errors-B8HZ3syN.js",
+        "assets/i18n-BWZpK_jW.js",
+        "assets/settings-BLN9wWz0.js",
+        "assets/content.ts-BfL2CEWl.js"
+      ],
+      "use_dynamic_url": false
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

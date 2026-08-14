@@ -21,6 +21,11 @@
 .promise-list strong { display: block; margin-bottom: 2px; color: var(--ink); font-size: 14px; }
 .onboarding-next { min-width: 164px; }
 .key-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+/* The shared h1 size (clamp up to 58px) wraps this phase's longer title
+   ("Get a key in three short steps.", etc.) onto two lines. Scale it down
+   just for this heading so it reliably fits on one line. */
+.key-title-row h1 { font-size: clamp(22px, 3.6vw, 34px); white-space: nowrap; }
+@media (max-width: 560px) { .key-title-row h1 { white-space: normal; } }
 .guide-toggle { border: 0; background: none; padding: 0; margin-top: 8px; color: var(--muted); font-size: 12px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; white-space: nowrap; }
 .guide-toggle:hover { color: var(--ink); }
 .key-dots { display: flex; gap: 6px; margin: 20px 0 4px; }
