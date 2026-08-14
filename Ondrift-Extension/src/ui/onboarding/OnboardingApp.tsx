@@ -28,7 +28,7 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
     document.title = 'Ondrift';
   }, [language]);
 
-  useEffect(() => { bridge.getSettings().then((settings) => setLanguage(settings.language)).catch(() => undefined); }, [bridge]);
+  useEffect(() => { bridge.getSettings().then((settings) => setLanguage(settings.language)).catch((error) => console.error('Ondrift: failed to load saved language', error)); }, [bridge]);
 
   // Each key-setup slide can be a different height (screenshots, help text, status
   // messages). Resetting the scroll area to the top on every step/phase change means
@@ -67,7 +67,7 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
 
   async function changeLanguage(next: LanguageId) {
     setLanguage(next);
-    await bridge.saveSettings({ language: next }).catch(() => undefined);
+    await bridge.saveSettings({ language: next }).catch((error) => console.error('Ondrift: failed to save language', error));
   }
 
   async function validateKey() {
@@ -140,7 +140,10 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
               {showGuideImages && <img className="key-step-image" src="/onboarding/key-created.png" alt={copy.key.step3ImageAlt} />}
             </div>
             {validation === 'valid' && <div className="ui-status ui-status--success" role="status"><Icon name="check" />{copy.key.keySuccess}</div>}
-            {validation && !['idle', 'checking', 'valid'].includes(validation) && <div className="ui-status ui-status--error" role="alert">{copy.key.validation[validation as keyof typeof copy.key.validation]}</div>}
+            {validation && !['idle', 'checking', 'valid'].includes(validation) && <div className="ui-status ui-status--error validation-error" role="alert">
+              <span>{copy.key.validation[validation as keyof typeof copy.key.validation]}</span>
+              <button type="button" className="ui-button ui-button--secondary" onClick={() => bridge.openExternal(AI_STUDIO_API_KEY_URL)}>{copy.key.step1Cta} <Icon name="external" /></button>
+            </div>}
           </>}
         </div>
       </>}

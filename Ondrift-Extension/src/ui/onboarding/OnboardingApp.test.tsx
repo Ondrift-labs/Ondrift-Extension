@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS, type UiBridge } from '../shared/contracts';
@@ -82,6 +82,22 @@ describe('OnboardingApp localization', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Verify key' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('That key was not accepted. Copy the full key from Google AI Studio and try again.');
+  });
+
+  it('offers a shortcut back to AI Studio right next to a failed key verification', async () => {
+    const openExternal = vi.fn();
+    const bridge = createBridge({ validateApiKey: async () => ({ ok: false, reason: 'invalid_key' }), openExternal });
+    render(<OnboardingApp bridge={bridge} />);
+    await userEvent.click(screen.getByRole('button', { name: /Set up Gemini/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next' })); // step 1 -> step 2
+    await userEvent.click(screen.getByRole('button', { name: 'Next' })); // step 2 -> step 3
+    await userEvent.type(screen.getByLabelText('Paste and verify it here'), 'bad-key');
+    await userEvent.click(screen.getByRole('button', { name: 'Verify key' }));
+    const alert = await screen.findByRole('alert');
+
+    await userEvent.click(within(alert).getByRole('button', { name: /Open AI Studio/ }));
+
+    expect(openExternal).toHaveBeenCalledWith('https://aistudio.google.com/apikey');
   });
 
   it('walks through the key setup one slide at a time instead of one long scroll', async () => {
