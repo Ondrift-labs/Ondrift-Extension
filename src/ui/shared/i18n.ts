@@ -52,10 +52,12 @@ export interface OnboardingCopy {
     eyebrow: string;
     title: string;
     guideToggleCta(showing: boolean): string;
+    subStepCount(step: number, total: number): string;
     step1Title: string;
     step1Body: string;
     step1Cta: string;
     step1ImageAlt: string;
+    nextCta: string;
     step2Title: string;
     step2Body: string;
     step2ImageAlt: string;
@@ -226,10 +228,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         eyebrow: 'Gemini 연결',
         title: '세 단계로 키를 발급받으세요.',
         guideToggleCta: (showing) => (showing ? '개발자인가요? 화면 캡처 숨기기' : '화면 캡처 다시 보기'),
+        subStepCount: (step, total) => `${total}단계 중 ${step}단계`,
         step1Title: 'Google AI Studio 열기',
         step1Body: 'Google 계정으로 로그인하세요. Gemini 사용량 한도는 Google이 관리합니다.',
         step1Cta: 'AI Studio 열기',
         step1ImageAlt: 'Google AI Studio의 API 키 화면. 오른쪽 위에 "Create API key" 버튼이 보인다.',
+        nextCta: '다음',
         step2Title: 'API 키 만들기',
         step2Body: '“API 키 만들기”를 선택하고 프로젝트를 고른 다음 생성된 값을 복사하세요.',
         step2ImageAlt: '프로젝트를 선택하는 "Create a new key" 대화상자.',
@@ -433,10 +437,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         eyebrow: 'Connect Gemini',
         title: 'Get a key in three short steps.',
         guideToggleCta: (showing) => (showing ? 'Developer? Hide the screenshots' : 'Show the screenshots again'),
+        subStepCount: (step, total) => `Step ${step} of ${total}`,
         step1Title: 'Open Google AI Studio',
         step1Body: 'Sign in with your Google account. Gemini’s usage limits are managed by Google.',
         step1Cta: 'Open AI Studio',
         step1ImageAlt: 'Google AI Studio’s API Keys screen, with the “Create API key” button in the top right.',
+        nextCta: 'Next',
         step2Title: 'Create an API key',
         step2Body: 'Select “Create API key,” choose a project, then copy the generated value.',
         step2ImageAlt: 'The “Create a new key” dialog for choosing a project.',
@@ -640,10 +646,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         eyebrow: 'Gemini と接続',
         title: '3つの短い手順でキーを取得しましょう。',
         guideToggleCta: (showing) => (showing ? '開発者の方はこちら: 画面キャプチャを非表示' : '画面キャプチャを再表示'),
+        subStepCount: (step, total) => `${total}ステップ中${step}ステップ目`,
         step1Title: 'Google AI Studio を開く',
         step1Body: 'Google アカウントでサインインしてください。Gemini の利用制限は Google が管理します。',
         step1Cta: 'AI Studio を開く',
         step1ImageAlt: 'Google AI Studio の API キー画面。右上に「Create API key」ボタンが表示されている。',
+        nextCta: '次へ',
         step2Title: 'API キーを作成する',
         step2Body: '「Create API key」を選択し、プロジェクトを選んで生成された値をコピーしてください。',
         step2ImageAlt: 'プロジェクトを選択する「Create a new key」ダイアログ。',
@@ -847,10 +855,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         eyebrow: '连接 Gemini',
         title: '用三个简单步骤获取密钥。',
         guideToggleCta: (showing) => (showing ? '是开发者?隐藏截图' : '重新显示截图'),
+        subStepCount: (step, total) => `第 ${step} 步，共 ${total} 步`,
         step1Title: '打开 Google AI Studio',
         step1Body: '使用你的 Google 账号登录。Gemini 的用量限制由 Google 管理。',
         step1Cta: '打开 AI Studio',
         step1ImageAlt: 'Google AI Studio 的 API 密钥页面,右上角显示"Create API key"按钮。',
+        nextCta: '下一步',
         step2Title: '创建 API 密钥',
         step2Body: '选择“Create API key”，选择一个项目，然后复制生成的值。',
         step2ImageAlt: '用于选择项目的"Create a new key"对话框。',

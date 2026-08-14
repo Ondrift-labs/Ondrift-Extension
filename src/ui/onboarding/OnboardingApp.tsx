@@ -14,6 +14,7 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
   const [validation, setValidation] = useState<ValidationState>('idle');
   const [consent, setConsent] = useState(false);
   const [showGuideImages, setShowGuideImages] = useState(true);
+  const [keyStep, setKeyStep] = useState<0 | 1 | 2>(0);
   const [language, setLanguage] = useState<LanguageId>(DEFAULT_SETTINGS.language);
   const step = useMemo(() => ({ intro: 1, key: 2, privacy: 3, complete: 3 })[phase], [phase]);
   const copy = getUiCopy(language).onboarding;
@@ -72,14 +73,38 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
       {phase === 'key' && <>
         <p className="ui-eyebrow">{copy.key.eyebrow}</p>
         <div className="key-title-row"><h1>{copy.key.title}</h1><button type="button" className="guide-toggle" onClick={() => setShowGuideImages((current) => !current)}>{copy.key.guideToggleCta(showGuideImages)}</button></div>
-        <ol className="key-steps">
-          <li><span>1</span><div><strong>{copy.key.step1Title}</strong><p>{copy.key.step1Body}</p><button className="ui-button ui-button--secondary" onClick={() => bridge.openExternal(AI_STUDIO_API_KEY_URL)}>{copy.key.step1Cta} <Icon name="external" /></button>{showGuideImages && <img className="key-step-image" src="/onboarding/api-keys-empty.png" alt={copy.key.step1ImageAlt} />}</div></li>
-          <li><span>2</span><div><strong>{copy.key.step2Title}</strong><p>{copy.key.step2Body}</p>{showGuideImages && <img className="key-step-image" src="/onboarding/create-key-dialog.png" alt={copy.key.step2ImageAlt} />}</div></li>
-          <li><span>3</span><div className="ui-field"><label className="ui-label" htmlFor="onboarding-key">{copy.key.step3Label}</label><div className="key-row"><input id="onboarding-key" className="ui-input" type="password" autoComplete="off" spellCheck={false} value={apiKey} onChange={(event) => { setApiKey(event.target.value); setValidation('idle'); }} placeholder={copy.key.step3Placeholder} /><button className="ui-button ui-button--primary" disabled={!apiKey.trim() || validation === 'checking'} onClick={validateKey}>{validation === 'checking' ? common.checking : copy.key.verifyCta}</button></div><p className="ui-help">{copy.key.step3Help}</p>{showGuideImages && <img className="key-step-image" src="/onboarding/key-created.png" alt={copy.key.step3ImageAlt} />}</div></li>
-        </ol>
-        {validation === 'valid' && <div className="ui-status ui-status--success" role="status"><Icon name="check" />{copy.key.keySuccess}</div>}
-        {validation && !['idle', 'checking', 'valid'].includes(validation) && <div className="ui-status ui-status--error" role="alert">{copy.key.validation[validation as keyof typeof copy.key.validation]}</div>}
-        <div className="onboarding-actions"><button className="ui-button ui-button--quiet" onClick={() => setPhase('intro')}>{common.back}</button><button className="ui-button ui-button--primary" disabled={validation !== 'valid'} onClick={() => setPhase('privacy')}>{copy.key.continueCta} <Icon name="arrow" /></button></div>
+        <div className="key-dots" aria-hidden="true"><span className={keyStep === 0 ? 'is-active' : undefined} /><span className={keyStep === 1 ? 'is-active' : undefined} /><span className={keyStep === 2 ? 'is-active' : undefined} /></div>
+        <p className="sr-only" aria-live="polite">{copy.key.subStepCount(keyStep + 1, 3)}</p>
+
+        {keyStep === 0 && <div className="key-slide">
+          <span className="key-slide-number">1</span>
+          <strong>{copy.key.step1Title}</strong>
+          <p>{copy.key.step1Body}</p>
+          <button className="ui-button ui-button--secondary" onClick={() => bridge.openExternal(AI_STUDIO_API_KEY_URL)}>{copy.key.step1Cta} <Icon name="external" /></button>
+          {showGuideImages && <img className="key-step-image" src="/onboarding/api-keys-empty.png" alt={copy.key.step1ImageAlt} />}
+          <div className="onboarding-actions"><button className="ui-button ui-button--quiet" onClick={() => setPhase('intro')}>{common.back}</button><button className="ui-button ui-button--primary" onClick={() => setKeyStep(1)}>{copy.key.nextCta} <Icon name="arrow" /></button></div>
+        </div>}
+
+        {keyStep === 1 && <div className="key-slide">
+          <span className="key-slide-number">2</span>
+          <strong>{copy.key.step2Title}</strong>
+          <p>{copy.key.step2Body}</p>
+          {showGuideImages && <img className="key-step-image" src="/onboarding/create-key-dialog.png" alt={copy.key.step2ImageAlt} />}
+          <div className="onboarding-actions"><button className="ui-button ui-button--quiet" onClick={() => setKeyStep(0)}>{common.back}</button><button className="ui-button ui-button--primary" onClick={() => setKeyStep(2)}>{copy.key.nextCta} <Icon name="arrow" /></button></div>
+        </div>}
+
+        {keyStep === 2 && <div className="key-slide">
+          <span className="key-slide-number">3</span>
+          <div className="ui-field">
+            <label className="ui-label" htmlFor="onboarding-key">{copy.key.step3Label}</label>
+            <div className="key-row"><input id="onboarding-key" className="ui-input" type="password" autoComplete="off" spellCheck={false} value={apiKey} onChange={(event) => { setApiKey(event.target.value); setValidation('idle'); }} placeholder={copy.key.step3Placeholder} /><button className="ui-button ui-button--primary" disabled={!apiKey.trim() || validation === 'checking'} onClick={validateKey}>{validation === 'checking' ? common.checking : copy.key.verifyCta}</button></div>
+            <p className="ui-help">{copy.key.step3Help}</p>
+            {showGuideImages && <img className="key-step-image" src="/onboarding/key-created.png" alt={copy.key.step3ImageAlt} />}
+          </div>
+          {validation === 'valid' && <div className="ui-status ui-status--success" role="status"><Icon name="check" />{copy.key.keySuccess}</div>}
+          {validation && !['idle', 'checking', 'valid'].includes(validation) && <div className="ui-status ui-status--error" role="alert">{copy.key.validation[validation as keyof typeof copy.key.validation]}</div>}
+          <div className="onboarding-actions"><button className="ui-button ui-button--quiet" onClick={() => setKeyStep(1)}>{common.back}</button><button className="ui-button ui-button--primary" disabled={validation !== 'valid'} onClick={() => setPhase('privacy')}>{copy.key.continueCta} <Icon name="arrow" /></button></div>
+        </div>}
       </>}
 
       {phase === 'privacy' && <>
