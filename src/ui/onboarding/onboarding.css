@@ -38,6 +38,8 @@
 .key-slide strong { display: block; font-size: 14px; }
 .key-slide > p { margin: 5px 0 12px; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .key-step-image { display: block; width: 100%; max-height: 46vh; object-fit: contain; margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+.validation-error { flex-direction: column; align-items: flex-start; gap: 8px; }
+.validation-error .ui-button { align-self: flex-start; }
 /* Floats over .onboarding-scroll-area's bottom edge (not inside the scrolling
    content) so it stays put regardless of scroll position, and only shows up
    when the current slide's content actually overflows. */
