@@ -75,24 +75,50 @@ describe('OnboardingApp localization', () => {
     const bridge = createBridge({ validateApiKey: async () => ({ ok: false, reason: 'invalid_key' }) });
     render(<OnboardingApp bridge={bridge} />);
     await userEvent.click(screen.getByRole('button', { name: /Set up Gemini/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next' })); // step 1 -> step 2
+    await userEvent.click(screen.getByRole('button', { name: 'Next' })); // step 2 -> step 3
     await userEvent.type(screen.getByLabelText('Paste and verify it here'), 'bad-key');
     await userEvent.click(screen.getByRole('button', { name: 'Verify key' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('That key was not accepted. Copy the full key from Google AI Studio and try again.');
   });
 
-  it('shows the AI Studio screenshots by default, but lets a developer hide them and bring them back', async () => {
+  it('walks through the key setup one slide at a time instead of one long scroll', async () => {
+    render(<OnboardingApp bridge={createBridge()} />);
+    await userEvent.click(screen.getByRole('button', { name: /Set up Gemini/ }));
+
+    // Only the first slide's content and screenshot are visible up front.
+    expect(screen.getByText('Open Google AI Studio')).toBeInTheDocument();
+    expect(screen.getByAltText('Google AI Studio’s API Keys screen, with the “Create API key” button in the top right.')).toBeInTheDocument();
+    expect(screen.queryByText('Create an API key')).not.toBeInTheDocument();
+    expect(screen.queryByAltText('The “Create a new key” dialog for choosing a project.')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByText('Create an API key')).toBeInTheDocument();
+    expect(screen.getByAltText('The “Create a new key” dialog for choosing a project.')).toBeInTheDocument();
+    expect(screen.queryByText('Open Google AI Studio')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByLabelText('Paste and verify it here')).toBeInTheDocument();
+    expect(screen.getByAltText('The generated API key listed on the API Keys screen.')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByText('Create an API key')).toBeInTheDocument();
+  });
+
+  it('shows the AI Studio screenshots by default, but lets a developer hide them across every slide', async () => {
     render(<OnboardingApp bridge={createBridge()} />);
     await userEvent.click(screen.getByRole('button', { name: /Set up Gemini/ }));
 
     expect(screen.getByAltText('Google AI Studio’s API Keys screen, with the “Create API key” button in the top right.')).toBeInTheDocument();
-    expect(screen.getByAltText('The “Create a new key” dialog for choosing a project.')).toBeInTheDocument();
-    expect(screen.getByAltText('The generated API key listed on the API Keys screen.')).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Developer? Hide the screenshots' }));
     expect(screen.queryByAltText('Google AI Studio’s API Keys screen, with the “Create API key” button in the top right.')).not.toBeInTheDocument();
 
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.queryByAltText('The “Create a new key” dialog for choosing a project.')).not.toBeInTheDocument();
+
     await userEvent.click(screen.getByRole('button', { name: 'Show the screenshots again' }));
-    expect(screen.getByAltText('Google AI Studio’s API Keys screen, with the “Create API key” button in the top right.')).toBeInTheDocument();
+    expect(screen.getByAltText('The “Create a new key” dialog for choosing a project.')).toBeInTheDocument();
   });
 });
