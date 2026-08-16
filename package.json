@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "description": "Local-first prompt rewriting and scoring for ChatGPT, Claude, Gemini, and Perplexity.",
+  "homepage": "https://ondrift.pages.dev/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ondrift-labs/Ondrift-Extension.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build && node scripts/verify-build.mjs",

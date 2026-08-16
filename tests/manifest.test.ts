@@ -11,6 +11,12 @@ describe("extension manifest", () => {
     });
   });
 
+  it("links the extension identity to the official Ondrift website", () => {
+    expect(manifest.name).toBe("Ondrift");
+    expect(manifest.short_name).toBe("Ondrift");
+    expect(manifest.homepage_url).toBe("https://ondrift.pages.dev/");
+  });
+
   it("requests only the local storage permission", () => {
     expect(manifest.permissions).toEqual(["storage"]);
     expect(manifest.permissions).not.toContain("tabs");
