@@ -1,7 +1,7 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_SETTINGS, GITHUB_BUG_REPORT_URL, GITHUB_DISCUSSIONS_URL, GITHUB_FEATURE_REQUEST_URL, type UiBridge, type UiSettings } from '../shared/contracts';
+import { DEFAULT_SETTINGS, GITHUB_BUG_REPORT_URL, GITHUB_FEATURE_REQUEST_URL, GITHUB_QA_URL, type UiBridge, type UiSettings } from '../shared/contracts';
 import { OptionsApp } from './OptionsApp';
 
 afterEach(cleanup);
@@ -37,11 +37,11 @@ describe('OptionsApp localization', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: 'Report a bug' }));
     await userEvent.click(screen.getByRole('button', { name: 'Suggest a feature' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Ask the community' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Ask in Q&A' }));
 
     expect(openExternal).toHaveBeenNthCalledWith(1, GITHUB_BUG_REPORT_URL);
     expect(openExternal).toHaveBeenNthCalledWith(2, GITHUB_FEATURE_REQUEST_URL);
-    expect(openExternal).toHaveBeenNthCalledWith(3, GITHUB_DISCUSSIONS_URL);
+    expect(openExternal).toHaveBeenNthCalledWith(3, GITHUB_QA_URL);
   });
 
   it('re-renders every visible string in Japanese the instant the language select changes', async () => {

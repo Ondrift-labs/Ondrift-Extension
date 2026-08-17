@@ -75,4 +75,4 @@ export const AI_STUDIO_API_KEY_URL = 'https://aistudio.google.com/apikey';
 export const GITHUB_REPO_URL = 'https://github.com/Ondrift-labs/Ondrift-Extension';
 export const GITHUB_BUG_REPORT_URL = `${GITHUB_REPO_URL}/issues/new?template=bug_report.yml`;
 export const GITHUB_FEATURE_REQUEST_URL = `${GITHUB_REPO_URL}/issues/new?template=feature_request.yml`;
-export const GITHUB_DISCUSSIONS_URL = `${GITHUB_REPO_URL}/discussions`;
+export const GITHUB_QA_URL = `${GITHUB_REPO_URL}/discussions/new?category=q-a`;
