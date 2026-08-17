@@ -152,6 +152,10 @@ export interface OptionsCopy {
   support: {
     sectionTitle: string;
     sectionLead: string;
+    bugCta: string;
+    featureCta: string;
+    questionCta: string;
+    publicNotice: string;
     starCta: string;
   };
   saveBar: { saving: string; savingDetail: string; savedTitle: string; saved: string; errorTitle: string; error: string; idle: string; retryCta: string };
@@ -284,7 +288,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     },
     options: {
       sidebar: {
-        nav: { provider: '제공자', persona: '다시 쓰기 스타일', sites: '사이트', privacy: '개인정보', support: '응원하기' },
+        nav: { provider: '제공자', persona: '다시 쓰기 스타일', sites: '사이트', privacy: '개인정보', support: '문의 및 지원' },
         version: '버전 0.1 · 무료 MVP',
       },
       header: { eyebrow: '확장 프로그램 환경설정', title: '설정', lead: 'Ondrift가 어떻게 다시 쓰고 브라우저에 무엇을 남길지 선택하세요.' },
@@ -364,8 +368,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         clearHistoryCta: '기록 지우기',
       },
       support: {
-        sectionTitle: '응원하기',
-        sectionLead: 'Ondrift는 개인이 무료로 만들고 있는 확장 프로그램입니다. GitHub에 스타를 눌러 응원해 주세요.',
+        sectionTitle: '문의 및 지원',
+        sectionLead: '문제 제보, 기능 제안, 일반 질문을 GitHub에서 무료로 접수합니다.',
+        bugCta: '버그 제보하기',
+        featureCta: '기능 제안하기',
+        questionCta: '커뮤니티에 질문하기',
+        publicNotice: '모든 내용은 공개됩니다. API 키, 비공개 프롬프트, 개인정보를 포함하지 마세요.',
         starCta: 'GitHub에서 스타 누르기',
       },
       saveBar: {
@@ -498,7 +506,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     },
     options: {
       sidebar: {
-        nav: { provider: 'Provider', persona: 'Rewrite style', sites: 'Sites', privacy: 'Privacy', support: 'Support' },
+        nav: { provider: 'Provider', persona: 'Rewrite style', sites: 'Sites', privacy: 'Privacy', support: 'Contact & support' },
         version: 'Version 0.1 · Free MVP',
       },
       header: { eyebrow: 'Extension preferences', title: 'Settings', lead: 'Choose how Ondrift rewrites and what stays in your browser.' },
@@ -578,8 +586,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         clearHistoryCta: 'Clear history',
       },
       support: {
-        sectionTitle: 'Support Ondrift',
-        sectionLead: 'Ondrift is built and maintained by one person, for free. Starring it on GitHub helps others find it.',
+        sectionTitle: 'Contact & support',
+        sectionLead: 'Report problems, suggest features, or ask general questions on GitHub for free.',
+        bugCta: 'Report a bug',
+        featureCta: 'Suggest a feature',
+        questionCta: 'Ask the community',
+        publicNotice: 'Everything is public. Never include API keys, private prompts, or personal information.',
         starCta: 'Star on GitHub',
       },
       saveBar: {
@@ -712,7 +724,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     },
     options: {
       sidebar: {
-        nav: { provider: 'プロバイダー', persona: 'リライトスタイル', sites: 'サイト', privacy: 'プライバシー', support: '応援する' },
+        nav: { provider: 'プロバイダー', persona: 'リライトスタイル', sites: 'サイト', privacy: 'プライバシー', support: 'お問い合わせ' },
         version: 'バージョン 0.1 · 無料 MVP',
       },
       header: { eyebrow: '拡張機能の環境設定', title: '設定', lead: 'Ondrift のリライト方法とブラウザに残すデータを選択してください。' },
@@ -792,8 +804,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         clearHistoryCta: '履歴を消去',
       },
       support: {
-        sectionTitle: '応援する',
-        sectionLead: 'Ondrift は個人が無料で開発している拡張機能です。GitHub でスターを付けて応援してください。',
+        sectionTitle: 'お問い合わせ・サポート',
+        sectionLead: '不具合報告、機能提案、一般的な質問をGitHubで無料受付しています。',
+        bugCta: '不具合を報告',
+        featureCta: '機能を提案',
+        questionCta: 'コミュニティに質問',
+        publicNotice: 'すべて公開されます。APIキー、非公開のプロンプト、個人情報を含めないでください。',
         starCta: 'GitHub でスターを付ける',
       },
       saveBar: {
@@ -926,7 +942,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     },
     options: {
       sidebar: {
-        nav: { provider: '服务提供方', persona: '改写风格', sites: '网站', privacy: '隐私', support: '支持' },
+        nav: { provider: '服务提供方', persona: '改写风格', sites: '网站', privacy: '隐私', support: '联系与支持' },
         version: '版本 0.1 · 免费 MVP',
       },
       header: { eyebrow: '扩展偏好设置', title: '设置', lead: '选择 Ondrift 如何改写，以及哪些内容保留在你的浏览器中。' },
@@ -1006,8 +1022,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         clearHistoryCta: '清除历史记录',
       },
       support: {
-        sectionTitle: '支持 Ondrift',
-        sectionLead: 'Ondrift 由个人免费构建和维护。在 GitHub 上加星可以帮助更多人发现它。',
+        sectionTitle: '联系与支持',
+        sectionLead: '可在GitHub上免费报告问题、建议功能或提出一般问题。',
+        bugCta: '报告问题',
+        featureCta: '建议功能',
+        questionCta: '向社区提问',
+        publicNotice: '所有内容均为公开。请勿包含API密钥、私人提示词或个人信息。',
         starCta: '在 GitHub 上加星',
       },
       saveBar: {

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, GITHUB_REPO_URL, type ApiKeyValidationResult, type LanguageId, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
+import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, GITHUB_BUG_REPORT_URL, GITHUB_DISCUSSIONS_URL, GITHUB_FEATURE_REQUEST_URL, GITHUB_REPO_URL, type ApiKeyValidationResult, type LanguageId, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
 import { getUiCopy, LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '../shared/i18n';
 import { GEMINI_MODEL_CHOICES, type GeminiModelId } from '../../shared/models';
 import { Icon } from '../shared/Icon';
@@ -248,7 +248,15 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
       </section>
 
       <section id="support"><div className="section-title"><span>05</span><div><h2>{copy.support.sectionTitle}</h2><p>{copy.support.sectionLead}</p></div></div>
-        <div className="settings-card"><button className="ui-button ui-button--secondary" onClick={() => bridge.openExternal(GITHUB_REPO_URL)}>{copy.support.starCta} <Icon name="external" /></button></div>
+        <div className="settings-card support-card">
+          <div className="support-actions">
+            <button className="ui-button ui-button--secondary" onClick={() => bridge.openExternal(GITHUB_BUG_REPORT_URL)}>{copy.support.bugCta} <Icon name="external" /></button>
+            <button className="ui-button ui-button--secondary" onClick={() => bridge.openExternal(GITHUB_FEATURE_REQUEST_URL)}>{copy.support.featureCta} <Icon name="external" /></button>
+            <button className="ui-button ui-button--secondary" onClick={() => bridge.openExternal(GITHUB_DISCUSSIONS_URL)}>{copy.support.questionCta} <Icon name="external" /></button>
+          </div>
+          <p className="support-notice">{copy.support.publicNotice}</p>
+          <button className="text-button support-star" onClick={() => bridge.openExternal(GITHUB_REPO_URL)}>{copy.support.starCta} <Icon name="external" /></button>
+        </div>
       </section>
 
       <div className="autosave-note"><Icon name="check" /><span>{copy.saveBar.idle}</span></div>
