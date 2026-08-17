@@ -1,0 +1,80 @@
+name: Bug report
+description: Report a reproducible problem with Ondrift
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Ondrift. Never include API keys, private prompts, or personal information in a public issue.
+  - type: input
+    id: summary
+    attributes:
+      label: What happened?
+      description: Briefly describe the problem.
+      placeholder: Ondrift does not appear when I open...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: List the smallest set of steps that consistently causes the problem.
+      placeholder: |
+        1. Open...
+        2. Enter...
+        3. Click...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: site
+    attributes:
+      label: Chat site
+      options:
+        - ChatGPT
+        - Claude
+        - Gemini
+        - Perplexity
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: Chrome 140
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Ondrift version
+      description: You can find this on chrome://extensions.
+      placeholder: 0.1.22
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add screenshots or other non-sensitive details if helpful.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed API keys, private prompts, and personal information from this report.
+          required: true
