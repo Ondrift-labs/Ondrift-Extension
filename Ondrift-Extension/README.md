@@ -22,7 +22,7 @@ The selected language is also used for rewritten prompts and rationales.
 You can install Ondrift from its public release ZIP before the Chrome Web Store
 listing is available.
 
-1. Download `ondrift-0.1.22.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
+1. Download `ondrift-0.1.23.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
 2. Fully extract the ZIP to a folder.
 3. Open `chrome://extensions` in Chrome.
 4. Turn on **Developer mode** in the upper-right corner.
