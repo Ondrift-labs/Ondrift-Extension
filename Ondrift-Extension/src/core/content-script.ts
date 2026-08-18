@@ -24,10 +24,6 @@ const widget = createInlineWidget({
   onReloadPage: () => window.location.reload(),
   onResetPosition: () => floatingPlacement?.resetPosition(),
 });
-widget.element.style.display = "block";
-widget.element.style.marginTop = "8px";
-widget.element.style.position = "relative";
-widget.element.style.zIndex = "2147483646";
 
 function promptLength(): number {
   if (!currentInput) return 0;
@@ -115,19 +111,15 @@ contentController.subscribe(({ input }) => {
   removeInputListener = () => input.removeEventListener("input", listener);
   const adapter = adapterRegistry.resolve();
   const anchor = adapter?.getComposerAnchor?.(input) ?? findComposerAnchor(input);
-  if (adapter?.id === "gemini") {
-    floatingPlacement = placeFloatingWidget(widget.element, anchor, {
-      dragHandle: widget.dragHandle,
-      onRepositionedChange: (repositioned) => widget.setRepositioned(repositioned),
-    });
-  } else {
-    widget.element.style.position = "relative";
-    widget.element.style.marginTop = "8px";
-    widget.element.style.width = "";
-    widget.element.style.left = "";
-    widget.element.style.top = "";
-    anchor.insertAdjacentElement("afterend", widget.element);
-  }
+  // Every adapter now pins the widget beside its composer with fixed coordinates
+  // (originally added for Gemini alone, where inserting the widget into normal
+  // document flow got it clipped/removed by the composer's own re-renders -- see
+  // "mount Gemini widget outside composer" / "pin Gemini widget beside composer").
+  // Using it everywhere also means dragging and reset-position work on every site.
+  floatingPlacement = placeFloatingWidget(widget.element, anchor, {
+    dragHandle: widget.dragHandle,
+    onRepositionedChange: (repositioned) => widget.setRepositioned(repositioned),
+  });
   showReady();
 });
 
