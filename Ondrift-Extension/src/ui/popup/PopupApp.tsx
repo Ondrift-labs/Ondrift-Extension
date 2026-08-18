@@ -13,12 +13,19 @@ const SERVICE_NAMES: Record<HistoryItem['service'], string> = {
   gemini: 'Gemini',
   perplexity: 'Perplexity',
 };
+// How long the copy-to-clipboard confirmation (or failure) message stays visible.
+const COPY_FEEDBACK_TIMEOUT_MS = 1800;
+// Only the most recent entries are shown in the popup's history list; the rest are still
+// searchable via the query field and remain in full in the options page's history.
+const HISTORY_PREVIEW_LIMIT = 12;
+const TREND_WIDTH = 260;
+const TREND_HEIGHT = 46;
 
 function ScoreTrend({ scores, copy }: { scores: Array<{ date: string; score: number }>; copy: UiCopy['popup'] }) {
   if (scores.length < 2) return <div className="trend-empty">{copy.trend.emptyMessage}</div>;
   const points = scores.slice(-7);
-  const width = 260;
-  const height = 46;
+  const width = TREND_WIDTH;
+  const height = TREND_HEIGHT;
   const plot = points.map((item, index) => `${index / (points.length - 1) * width},${height - item.score / 100 * height}`).join(' ');
   const summary = points.map(({ date, score }) => `${date}: ${score}`).join(', ');
   return <svg className="trend" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={copy.trend.ariaLabel(summary)}><path d={`M0 ${height * .5}H${width}`} /><polyline points={plot} /><circle cx={plot.split(' ').at(-1)?.split(',')[0]} cy={plot.split(' ').at(-1)?.split(',')[1]} r="3" /></svg>;
@@ -39,7 +46,7 @@ export function PopupApp({ bridge }: { bridge: UiBridge }) {
   }, [language]);
   useEffect(() => {
     if (!copyFeedback) return;
-    const timeout = window.setTimeout(() => setCopyFeedback(null), 1800);
+    const timeout = window.setTimeout(() => setCopyFeedback(null), COPY_FEEDBACK_TIMEOUT_MS);
     return () => window.clearTimeout(timeout);
   }, [copyFeedback]);
 
@@ -84,7 +91,7 @@ export function PopupApp({ bridge }: { bridge: UiBridge }) {
         {history.length === 0 && <div className="empty-state"><Icon name="history" /><strong>{copy.history.emptyTitle}</strong><p>{copy.history.emptyBody}</p></div>}
         {history.length > 0 && visible.length === 0 && <div className="empty-state empty-state--compact"><strong>{copy.history.noMatchTitle}</strong><p>{copy.history.noMatchBody}</p></div>}
         <div className="history-list">
-          {visible.slice(0, 12).map((item) => <article className="history-item" key={item.id}>
+          {visible.slice(0, HISTORY_PREVIEW_LIMIT).map((item) => <article className="history-item" key={item.id}>
             <div className="history-meta"><span className={`service-dot service-dot--${item.service}`} />{SERVICE_NAMES[item.service]}<span>·</span><time dateTime={new Date(item.createdAt).toISOString()}>{formatRelativeTime(item.createdAt, undefined, language)}</time>{typeof item.score === 'number' && <span className="score-badge" aria-label={typeof item.previousScore === 'number' ? copy.history.scoreChangeAria(item.previousScore, item.score, item.score - item.previousScore) : `${copy.usage.avgScore} ${item.score}`}>{typeof item.previousScore === 'number' && <><span>{item.previousScore}</span><i aria-hidden="true">→</i></>}<strong>{item.score}</strong>{typeof item.previousScore === 'number' && <small>{item.score - item.previousScore >= 0 ? '+' : ''}{item.score - item.previousScore}</small>}</span>}</div>
             <p>{item.improvedText || item.originalText}</p>
             <div className="history-actions">{item.applied && <span className="applied-label"><Icon name="check" />{copy.history.appliedLabel}</span>}<span className="history-spacer" />{item.improvedText && <button className={copyFeedback?.id === item.id && copyFeedback.message === copy.history.copiedImprovedAria ? 'is-copied' : undefined} aria-label={copyFeedback?.id === item.id ? copyFeedback.message : copy.history.copyImprovedAria} title={copyFeedback?.id === item.id ? copyFeedback.message : copy.history.copyImprovedAria} onClick={() => void copyImprovedPrompt(item)}><Icon name={copyFeedback?.id === item.id && copyFeedback.message === copy.history.copiedImprovedAria ? 'check' : 'copy'} /></button>}{item.sourceUrl && <button aria-label={copy.history.openConversationAria} onClick={() => bridge.openExternal(item.sourceUrl!)}><Icon name="external" /></button>}<button aria-label={copy.history.deleteAria} onClick={async () => { await bridge.deleteHistory(item.id); setHistory((current) => current.filter(({ id }) => id !== item.id)); }}><Icon name="trash" /></button></div>

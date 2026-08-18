@@ -1,5 +1,4 @@
-import type { SiteAdapter } from "./site-adapter";
-import { firstVisible, installSubmitListener, readEditable, selectAllContents, titleFromDocumentTitle, writeEditable, writeEditableThroughPaste } from "./site-adapter";
+import { BaseAdapter, hostnameMatches, selectAllContents, writeEditable, writeEditableThroughPaste } from "./site-adapter";
 
 const INPUT_SELECTORS = [
   "div[contenteditable='true'][role='textbox']",
@@ -14,16 +13,14 @@ const SUBMIT_SELECTORS = [
   "form button[type='submit']",
 ] as const;
 
-export class PerplexityAdapter implements SiteAdapter {
+export class PerplexityAdapter extends BaseAdapter {
   readonly id = "perplexity" as const;
+  protected readonly siteName = "Perplexity";
+  protected readonly inputSelectors = INPUT_SELECTORS;
+  protected readonly submitSelectors = SUBMIT_SELECTORS;
   matches(url: string): boolean {
-    try {
-      const hostname = new URL(url).hostname;
-      return hostname === "perplexity.ai" || hostname === "www.perplexity.ai";
-    } catch { return false; }
+    return hostnameMatches(url, ["perplexity.ai", "www.perplexity.ai"]);
   }
-  getInputElement(): HTMLElement | null { return firstVisible(INPUT_SELECTORS); }
-  getPromptText(): string { return readEditable(this.getInputElement()); }
   async setPromptText(text: string): Promise<void> {
     const input = this.getInputElement();
     if (!input) throw new Error("Perplexity prompt input is not available.");
@@ -38,12 +35,5 @@ export class PerplexityAdapter implements SiteAdapter {
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
     if (writeEditableThroughPaste(input, text)) return;
     writeEditable(input, text);
-  }
-  getConversationTitle(): string | null {
-    return titleFromDocumentTitle("Perplexity");
-  }
-  getConversationUrl(): string { return location.href; }
-  onSubmit(callback: (prompt: string) => void): () => void {
-    return installSubmitListener(() => this.getInputElement(), SUBMIT_SELECTORS, callback);
   }
 }

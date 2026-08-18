@@ -1,7 +1,26 @@
 import type { LanguageId } from '../../shared/types';
-import { inlineMessages } from './messages';
+import { inlineMessages, type InlineMessages } from './messages';
 import { inlineWidgetStyles } from './styles';
 import type { InlineWidgetController, InlineWidgetHandlers, InlineWidgetState } from './types';
+
+type ErrorKind = Extract<InlineWidgetState, { status: 'error' }>['kind'];
+/** The subset of `InlineMessages` keys that hold plain strings (excludes `scoreChangeAria`). */
+type StringMessageKey = { [K in keyof InlineMessages]: InlineMessages[K] extends string ? K : never }[keyof InlineMessages];
+
+/**
+ * Title/detail message keys for each error kind, keyed once instead of as two parallel
+ * 7-way ternary chains (which could silently drift out of sync if edited separately).
+ * `parse` and `unknown` share the generic "rewrite unavailable" copy, same as before.
+ */
+const ERROR_COPY: Record<ErrorKind, { title: StringMessageKey; detail: StringMessageKey }> = {
+  quota: { title: 'quotaTitle', detail: 'quotaDetail' },
+  network: { title: 'networkTitle', detail: 'networkDetail' },
+  invalid_key: { title: 'invalidKeyTitle', detail: 'invalidKeyDetail' },
+  request: { title: 'requestTitle', detail: 'requestDetail' },
+  unavailable: { title: 'unavailableTitle', detail: 'unavailableDetail' },
+  parse: { title: 'rewriteUnavailable', detail: 'unknownDetail' },
+  unknown: { title: 'rewriteUnavailable', detail: 'unknownDetail' },
+};
 
 const icon = (path: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
 const icons = {
@@ -86,10 +105,10 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     }
     const isMissing = state.status === 'missing_key';
     const needsReload = state.status === 'reload_required';
-    const kind = state.status === 'error' ? state.kind : 'invalid_key';
-    const title = needsReload ? messages.reconnectTitle : isMissing ? messages.connectKey : kind === 'quota' ? messages.quotaTitle : kind === 'network' ? messages.networkTitle : kind === 'invalid_key' ? messages.invalidKeyTitle : kind === 'request' ? messages.requestTitle : kind === 'unavailable' ? messages.unavailableTitle : messages.rewriteUnavailable;
-    const localizedDetail = needsReload ? messages.reconnectDetail : isMissing ? messages.missingKeyDetail : kind === 'quota' ? messages.quotaDetail : kind === 'network' ? messages.networkDetail : kind === 'invalid_key' ? messages.invalidKeyDetail : kind === 'request' ? messages.requestDetail : kind === 'unavailable' ? messages.unavailableDetail : messages.unknownDetail;
-    const detail = localizedDetail;
+    const kind: ErrorKind = state.status === 'error' ? state.kind : 'invalid_key';
+    const errorCopy = ERROR_COPY[kind];
+    const title = needsReload ? messages.reconnectTitle : isMissing ? messages.connectKey : messages[errorCopy.title];
+    const detail = needsReload ? messages.reconnectDetail : isMissing ? messages.missingKeyDetail : messages[errorCopy.detail];
     const message = document.createElement('div'); message.className = 'od-message'; message.innerHTML = `<span class="od-message-icon">${isMissing ? icons.settings : icons.retry}</span><div><strong></strong><p></p><div class="od-actions"></div></div>`;
     message.querySelector('strong')!.textContent = title; message.querySelector('p')!.textContent = detail;
     const action = needsReload ? button(messages.reloadPage, 'od-button', handlers.onReloadPage) : isMissing || kind === 'invalid_key' ? button(messages.openSettings, 'od-button', handlers.onOpenSettings) : button(messages.retry, 'od-button', handlers.onRetry, icons.retry);

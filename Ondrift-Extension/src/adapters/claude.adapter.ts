@@ -1,5 +1,4 @@
-import type { SiteAdapter } from "./site-adapter";
-import { firstVisible, installSubmitListener, readEditable, titleFromDocumentTitle, writeEditable } from "./site-adapter";
+import { BaseAdapter, hostnameMatches } from "./site-adapter";
 
 const INPUT_SELECTORS = [
   "div.ProseMirror[contenteditable='true']",
@@ -12,23 +11,12 @@ const INPUT_SELECTORS = [
 ] as const;
 const SUBMIT_SELECTORS = ["button[aria-label*='Send' i]", "button[data-testid*='send' i]", "fieldset button[type='button']"] as const;
 
-export class ClaudeAdapter implements SiteAdapter {
+export class ClaudeAdapter extends BaseAdapter {
   readonly id = "claude" as const;
+  protected readonly siteName = "Claude";
+  protected readonly inputSelectors = INPUT_SELECTORS;
+  protected readonly submitSelectors = SUBMIT_SELECTORS;
   matches(url: string): boolean {
-    try { return new URL(url).hostname === "claude.ai"; } catch { return false; }
-  }
-  getInputElement(): HTMLElement | null { return firstVisible(INPUT_SELECTORS); }
-  getPromptText(): string { return readEditable(this.getInputElement()); }
-  setPromptText(text: string): void {
-    const input = this.getInputElement();
-    if (!input) throw new Error("Claude prompt input is not available.");
-    writeEditable(input, text);
-  }
-  getConversationTitle(): string | null {
-    return titleFromDocumentTitle("Claude");
-  }
-  getConversationUrl(): string { return location.href; }
-  onSubmit(callback: (prompt: string) => void): () => void {
-    return installSubmitListener(() => this.getInputElement(), SUBMIT_SELECTORS, callback);
+    return hostnameMatches(url, ["claude.ai"]);
   }
 }

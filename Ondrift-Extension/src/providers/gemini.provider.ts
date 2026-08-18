@@ -1,11 +1,17 @@
 import type { LLMProvider } from "./provider";
 import { ProviderError } from "./errors";
-import type { RewriteRequest, RewriteResult, UsageMetadata } from "../shared/types";
+import type { LanguageId, RewriteRequest, RewriteResult, UsageMetadata } from "../shared/types";
 import { GEMINI_MODELS } from "../shared/models";
 
 const INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const DEFAULT_MODELS = GEMINI_MODELS;
 const MAX_ATTEMPTS = 3;
+
+const OUTPUT_LANGUAGE_NAMES: Partial<Record<LanguageId, string>> = {
+  ko: "Korean",
+  ja: "Japanese",
+  zh: "Simplified Chinese",
+};
 
 interface GeminiResponse {
   steps?: Array<{ type?: string; content?: Array<{ type?: string; text?: string }> }>;
@@ -116,6 +122,31 @@ function classifyHttpError(status: number, payload?: GeminiErrorResponse): Provi
 
 const wait = (milliseconds: number) => new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 
+/** Builds the Gemini interactions request payload for a single model attempt. */
+function buildRequestBody(model: string, systemInstruction: string, userText: string): unknown {
+  return {
+    model,
+    input: userText,
+    system_instruction: systemInstruction,
+    store: false,
+    response_format: {
+      type: "text",
+      mime_type: "application/json",
+      schema: {
+        type: "object",
+        properties: {
+          improvedText: { type: "string", description: "The improved prompt." },
+          originalScore: { type: "integer", minimum: 0, maximum: 100, description: "Score of the original user prompt using the specified rubric." },
+          improvedScore: { type: "integer", minimum: 0, maximum: 100, description: "Score of improvedText using the same rubric." },
+          rationale: { type: "string", description: "A short explanation of the improvements." },
+        },
+        required: ["improvedText", "originalScore", "improvedScore", "rationale"],
+        additionalProperties: false,
+      },
+    },
+  };
+}
+
 export class GeminiProvider implements LLMProvider {
   readonly id = "gemini" as const;
 
@@ -125,10 +156,56 @@ export class GeminiProvider implements LLMProvider {
     private readonly sleep: (milliseconds: number) => Promise<void> = wait,
   ) {}
 
+  /**
+   * Runs the attempt/backoff loop for a single model: retries on network errors and
+   * transient 5xx service errors, and stops early -- without throwing -- when the
+   * response succeeds or when the error means "try the next model instead" (an
+   * exhausted quota, or a model this project doesn't have access to). Any other error
+   * is thrown immediately, matching what the caller's per-model loop used to do inline.
+   */
+  private async attemptModel(
+    model: string,
+    apiKey: string,
+    systemInstruction: string,
+    userText: string,
+  ): Promise<{ response: Response } | { error: ProviderError }> {
+    let lastError: ProviderError | undefined;
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+      let response: Response;
+      try {
+        response = await this.fetcher(INTERACTIONS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+          body: JSON.stringify(buildRequestBody(model, systemInstruction, userText)),
+        });
+      } catch (cause) {
+        const detail = cause instanceof Error ? ` (${cause.name}: ${cause.message})` : "";
+        lastError = new ProviderError("network", `Chrome could not connect to Gemini${detail}. Check browser, VPN, or firewall access and retry.`, true, { cause });
+        if (attempt < MAX_ATTEMPTS - 1) {
+          await this.sleep(250 * (2 ** attempt));
+          continue;
+        }
+        throw lastError;
+      }
+      if (response.ok) return { response };
+      lastError = classifyHttpError(response.status, await readApiError(response));
+      // A different model has its own quota bucket, so an exhausted quota is worth
+      // moving on for rather than retrying the same model — unlike a transient
+      // service outage, it is unlikely to clear up within a few hundred milliseconds.
+      if (lastError.code === "model_unavailable" || lastError.code === "quota_exceeded") return { error: lastError };
+      if (lastError.code === "service_unavailable" && attempt < MAX_ATTEMPTS - 1) {
+        await this.sleep(250 * (2 ** attempt));
+        continue;
+      }
+      throw lastError;
+    }
+    throw lastError ?? new ProviderError("unknown", "Gemini request failed.");
+  }
+
   async rewrite(request: RewriteRequest, apiKey: string): Promise<RewriteResult> {
     if (!apiKey.trim()) throw new ProviderError("not_configured", "Add a Gemini API key in Ondrift settings.");
 
-    const outputLanguage = request.language === "ko" ? "Korean" : request.language === "ja" ? "Japanese" : request.language === "zh" ? "Simplified Chinese" : "English";
+    const outputLanguage = OUTPUT_LANGUAGE_NAMES[request.language ?? "en"] ?? "English";
     const delimiter = `ONDRIFT_USER_PROMPT_${crypto.randomUUID()}`;
     const systemInstruction = [
       "You improve prompts for another AI system.",
@@ -153,57 +230,14 @@ export class GeminiProvider implements LLMProvider {
     let response: Response | undefined;
     let lastError: ProviderError | undefined;
     for (const model of modelsToTry) {
-      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
-        try {
-          response = await this.fetcher(INTERACTIONS_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey.trim() },
-            body: JSON.stringify({
-              model,
-              input: userText,
-              system_instruction: systemInstruction,
-              store: false,
-              response_format: {
-                type: "text",
-                mime_type: "application/json",
-                schema: {
-                  type: "object",
-                  properties: {
-                    improvedText: { type: "string", description: "The improved prompt." },
-                    originalScore: { type: "integer", minimum: 0, maximum: 100, description: "Score of the original user prompt using the specified rubric." },
-                    improvedScore: { type: "integer", minimum: 0, maximum: 100, description: "Score of improvedText using the same rubric." },
-                    rationale: { type: "string", description: "A short explanation of the improvements." },
-                  },
-                  required: ["improvedText", "originalScore", "improvedScore", "rationale"],
-                  additionalProperties: false,
-                },
-              },
-            }),
-          });
-        } catch (cause) {
-          const detail = cause instanceof Error ? ` (${cause.name}: ${cause.message})` : "";
-          lastError = new ProviderError("network", `Chrome could not connect to Gemini${detail}. Check browser, VPN, or firewall access and retry.`, true, { cause });
-          if (attempt < MAX_ATTEMPTS - 1) {
-            await this.sleep(250 * (2 ** attempt));
-            continue;
-          }
-          throw lastError;
-        }
-        if (response.ok) break;
-        lastError = classifyHttpError(response.status, await readApiError(response));
-        // A different model has its own quota bucket, so an exhausted quota is worth
-        // moving on for rather than retrying the same model — unlike a transient
-        // service outage, it is unlikely to clear up within a few hundred milliseconds.
-        if (lastError.code === "model_unavailable" || lastError.code === "quota_exceeded") break;
-        if (lastError.code === "service_unavailable" && attempt < MAX_ATTEMPTS - 1) {
-          await this.sleep(250 * (2 ** attempt));
-          continue;
-        }
-        throw lastError;
+      const result = await this.attemptModel(model, apiKey.trim(), systemInstruction, userText);
+      if ("response" in result) {
+        response = result.response;
+        break;
       }
-      if (response?.ok) break;
-      if (lastError?.code !== "model_unavailable" && lastError?.code !== "quota_exceeded") {
-        throw lastError ?? new ProviderError("unknown", "Gemini request failed.");
+      lastError = result.error;
+      if (lastError.code !== "model_unavailable" && lastError.code !== "quota_exceeded") {
+        throw lastError;
       }
     }
     if (!response?.ok) {
