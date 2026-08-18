@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, GITHUB_BUG_REPORT_URL, GITHUB_FEATURE_REQUEST_URL, GITHUB_QA_URL, GITHUB_REPO_URL, type ApiKeyValidationResult, type LanguageId, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
+import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, GITHUB_BUG_REPORT_URL, GITHUB_FEATURE_REQUEST_URL, GITHUB_QA_URL, GITHUB_REPO_URL, isValidationError, type ApiKeyValidationState, type LanguageId, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
 import { getUiCopy, LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '../shared/i18n';
 import { GEMINI_MODEL_CHOICES, type GeminiModelId } from '../../shared/models';
 import { Icon } from '../shared/Icon';
@@ -15,6 +15,8 @@ const CUSTOM_MODEL_VALUE = '__custom__';
 // closing the tab) within the window loses the pick and silently falls back to whatever was
 // last actually persisted.
 const MODEL_TEXT_DEBOUNCE_MS = 700;
+// How long the "saved"/"error" autosave toast stays up before it fades back to the idle note.
+const SAVE_TOAST_DISMISS_MS = 2800;
 
 function editableSettingsMatch(current: UiSettings, saved: UiSettings) {
   return current.provider === saved.provider
@@ -40,7 +42,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   // from `model` alone would snap back to "Default" the instant "Other" is picked but
   // before anything has been typed into the custom field.
   const [customModelSelected, setCustomModelSelected] = useState(false);
-  const [validation, setValidation] = useState<'idle' | 'checking' | 'valid' | ApiKeyValidationResult['reason']>('idle');
+  const [validation, setValidation] = useState<ApiKeyValidationState>('idle');
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [confirmClear, setConfirmClear] = useState(false);
   const [confirmRemoveKey, setConfirmRemoveKey] = useState(false);
@@ -104,7 +106,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
 
   useEffect(() => {
     if (saveState !== 'saved') return;
-    const timer = window.setTimeout(() => setSaveState('idle'), 2800);
+    const timer = window.setTimeout(() => setSaveState('idle'), SAVE_TOAST_DISMISS_MS);
     return () => window.clearTimeout(timer);
   }, [saveState]);
 
@@ -230,7 +232,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
           </div>
           <label className="ui-field"><span className="ui-label">{copy.provider.modelLabel}</span><select id="settings-model" className="ui-select" aria-label={copy.provider.modelLabel} value={modelSelectValue} onChange={(event) => { const next = event.target.value; const isCustom = next === CUSTOM_MODEL_VALUE; setCustomModelSelected(isCustom); applyModel(isCustom ? customModel : next); setValidation('idle'); }}><option value="">{copy.provider.modelAutoLabel}</option>{GEMINI_MODEL_CHOICES.map((id) => <option key={id} value={id}>{copy.provider.modelOptionLabels[id]}</option>)}<option value={CUSTOM_MODEL_VALUE}>{copy.provider.modelCustomLabel}</option></select>{customModelSelected && <input className="ui-input" type="text" autoComplete="off" aria-label={copy.provider.modelCustomLabel} value={customModel} onChange={(event) => { setCustomModel(event.target.value); applyModel(event.target.value, { debounce: true }); setValidation('idle'); }} placeholder={copy.provider.modelCustomPlaceholder} />}<span className="ui-help">{copy.provider.modelHelp}</span></label>
           {validation === 'valid' && <div className="ui-status ui-status--success"><Icon name="check" />{copy.provider.keySuccess}</div>}
-          {validation && !['idle', 'checking', 'valid'].includes(validation) && <div className="ui-status ui-status--error">{copy.provider.validation[validation as keyof typeof copy.provider.validation]}</div>}
+          {isValidationError(validation) && <div className="ui-status ui-status--error">{copy.provider.validation[validation]}</div>}
         </div>
       </section>
 

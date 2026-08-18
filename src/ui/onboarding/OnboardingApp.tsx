@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, type ApiKeyValidationResult, type LanguageId, type UiBridge } from '../shared/contracts';
+import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, isValidationError, type ApiKeyValidationState, type LanguageId, type UiBridge } from '../shared/contracts';
 import { getUiCopy, LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '../shared/i18n';
 import { Icon } from '../shared/Icon';
 import '../shared/ui.css';
 import './onboarding.css';
 
 type Phase = 'intro' | 'key' | 'privacy' | 'complete';
-type ValidationState = 'idle' | 'checking' | 'valid' | ApiKeyValidationResult['reason'];
+// How far (in px) content must overflow the scroll area before the "scroll for more" hint shows.
+const SCROLL_HINT_THRESHOLD_PX = 24;
 
 export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
   const [phase, setPhase] = useState<Phase>('intro');
   const [apiKey, setApiKey] = useState('');
-  const [validation, setValidation] = useState<ValidationState>('idle');
+  const [validation, setValidation] = useState<ApiKeyValidationState>('idle');
   const [consent, setConsent] = useState(false);
   const [showGuideImages, setShowGuideImages] = useState(true);
   const [keyStep, setKeyStep] = useState<0 | 1 | 2>(0);
@@ -46,7 +47,7 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
     function update() {
       if (!scrollEl) return;
       const remaining = scrollEl.scrollHeight - scrollEl.clientHeight - scrollEl.scrollTop;
-      setCanScrollMore(remaining > 24);
+      setCanScrollMore(remaining > SCROLL_HINT_THRESHOLD_PX);
     }
     update();
     scrollEl.addEventListener('scroll', update);
@@ -140,8 +141,8 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
               {showGuideImages && <img className="key-step-image" src="/onboarding/key-created.png" alt={copy.key.step3ImageAlt} />}
             </div>
             {validation === 'valid' && <div className="ui-status ui-status--success" role="status"><Icon name="check" />{copy.key.keySuccess}</div>}
-            {validation && !['idle', 'checking', 'valid'].includes(validation) && <div className="ui-status ui-status--error validation-error" role="alert">
-              <span>{copy.key.validation[validation as keyof typeof copy.key.validation]}</span>
+            {isValidationError(validation) && <div className="ui-status ui-status--error validation-error" role="alert">
+              <span>{copy.key.validation[validation]}</span>
               <button type="button" className="ui-button ui-button--secondary" onClick={() => bridge.openExternal(AI_STUDIO_API_KEY_URL)}>{copy.key.step1Cta} <Icon name="external" /></button>
             </div>}
           </>}

@@ -1,7 +1,7 @@
 import { contentController } from "./content-controller";
 import { createInlineWidget } from "../ui/inline-widget";
 import { ProviderError, providerErrorReason } from "../providers/errors";
-import type { ExtensionSettings } from "../shared/types";
+import type { ExtensionSettings, RewriteResult } from "../shared/types";
 import { sendRuntimeMessage } from "./rewrite-client";
 import { adapterRegistry } from "./adapter-registry";
 import { findComposerAnchor } from "../adapters/site-adapter";
@@ -9,12 +9,14 @@ import { placeFloatingWidget, type FloatingWidgetPlacement } from "./floating-wi
 import { isLanguageId } from "../ui/shared/i18n";
 import { SETTINGS_STORAGE_KEY } from "../storage/settings";
 
+// Only the fields `applyRewrite` needs to re-apply after `runRewrite` reports a result --
+// `rationale` is shown once from the fresh `RewriteResult` and never needed again.
+type LatestResult = Pick<RewriteResult, "previousScore" | "score" | "improvedText">;
+
 let currentInput: HTMLElement | null = null;
 let removeInputListener: (() => void) | undefined;
 let floatingPlacement: FloatingWidgetPlacement | undefined;
-let latestImprovedText = "";
-let latestScore = 0;
-let latestPreviousScore = 0;
+let latestResult: LatestResult = { previousScore: 0, score: 0, improvedText: "" };
 
 const widget = createInlineWidget({
   onRewrite: () => { void runRewrite(); },
@@ -52,7 +54,7 @@ async function openSettings(): Promise<void> {
 async function applyRewrite(): Promise<void> {
   try {
     await contentController.apply();
-    widget.setState({ status: "applied", previousScore: latestPreviousScore, score: latestScore, improvedText: latestImprovedText });
+    widget.setState({ status: "applied", ...latestResult });
     floatingPlacement?.update();
   } catch (error) {
     widget.setState({
@@ -71,9 +73,7 @@ async function runRewrite(): Promise<void> {
     const settings = await sendRuntimeMessage<ExtensionSettings>({ type: "settings_get" });
     widget.setLanguage(settings.language);
     const result = await contentController.rewrite(settings.persona);
-    latestImprovedText = result.improvedText;
-    latestScore = result.score;
-    latestPreviousScore = result.previousScore;
+    latestResult = { previousScore: result.previousScore, score: result.score, improvedText: result.improvedText };
     widget.setState({ status: "result", previousScore: result.previousScore, score: result.score, rationale: result.rationale, improvedText: result.improvedText });
     floatingPlacement?.update();
   } catch (error) {

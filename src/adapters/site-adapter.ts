@@ -20,6 +20,47 @@ export function titleFromDocumentTitle(siteName: string): string | null {
   return document.querySelector<HTMLTitleElement>("title")?.textContent?.replace(suffix, "").trim() || null;
 }
 
+/** Shared `matches()` body: does the URL's hostname match one of a site's known hostnames? */
+export function hostnameMatches(url: string, hostnames: readonly string[]): boolean {
+  try { return hostnames.includes(new URL(url).hostname); } catch { return false; }
+}
+
+/**
+ * Every adapter implements `SiteAdapter` the same way except for `matches()`,
+ * `getComposerAnchor()`, and (for Perplexity) `setPromptText()`. Subclasses provide the
+ * per-site selectors and name; everything else is shared here so a fix to, say, how prompt
+ * text is read or how submissions are detected applies to every site at once.
+ */
+export abstract class BaseAdapter implements SiteAdapter {
+  abstract readonly id: SiteId;
+  protected abstract readonly siteName: string;
+  protected abstract readonly inputSelectors: readonly string[];
+  protected abstract readonly submitSelectors: readonly string[];
+
+  abstract matches(url: string): boolean;
+
+  getInputElement(): HTMLElement | null {
+    return firstVisible(this.inputSelectors);
+  }
+  getPromptText(): string {
+    return readEditable(this.getInputElement());
+  }
+  setPromptText(text: string): void {
+    const input = this.getInputElement();
+    if (!input) throw new Error(`${this.siteName} prompt input is not available.`);
+    writeEditable(input, text);
+  }
+  getConversationTitle(): string | null {
+    return titleFromDocumentTitle(this.siteName);
+  }
+  getConversationUrl(): string {
+    return location.href;
+  }
+  onSubmit(callback: SubmitListener): () => void {
+    return installSubmitListener(() => this.getInputElement(), this.submitSelectors, callback);
+  }
+}
+
 export function readEditable(element: HTMLElement | null): string {
   if (!element) return "";
   if (element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement) return element.value.trim();
@@ -120,11 +161,13 @@ export function firstVisible(selectors: readonly string[]): HTMLElement | null {
   return null;
 }
 
+const MAX_ANCHOR_WALK_DEPTH = 10;
+
 export function findComposerAnchor(input: HTMLElement): HTMLElement {
   const form = input.closest<HTMLElement>("form");
   let element = input.parentElement;
   let depth = 0;
-  while (element && element !== document.body && depth < 10) {
+  while (element && element !== document.body && depth < MAX_ANCHOR_WALK_DEPTH) {
     const style = getComputedStyle(element);
     const hasVisibleBorder = [
       style.borderTopWidth,
@@ -144,6 +187,8 @@ export function findComposerAnchor(input: HTMLElement): HTMLElement {
   return form?.parentElement ?? form ?? input.parentElement ?? input;
 }
 
+const DUPLICATE_SUBMIT_WINDOW_MS = 750;
+
 export function installSubmitListener(
   getInput: () => HTMLElement | null,
   submitSelectors: readonly string[],
@@ -154,7 +199,7 @@ export function installSubmitListener(
   const emit = () => {
     const prompt = readEditable(getInput());
     const now = Date.now();
-    if (!prompt || (prompt === lastPrompt && now - lastAt < 750)) return;
+    if (!prompt || (prompt === lastPrompt && now - lastAt < DUPLICATE_SUBMIT_WINDOW_MS)) return;
     lastPrompt = prompt;
     lastAt = now;
     callback(prompt);

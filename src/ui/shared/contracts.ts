@@ -24,6 +24,14 @@ export interface ApiKeyValidationResult {
   reason?: 'invalid_key' | 'quota' | 'network' | 'request' | 'unavailable' | 'unknown';
 }
 
+/** The states a "validate this API key" flow moves through in the UI (Onboarding and Options both use this). */
+export type ApiKeyValidationState = 'idle' | 'checking' | 'valid' | ApiKeyValidationResult['reason'];
+
+/** True once validation has settled on an actual error reason -- not still pending, and not a success. */
+export function isValidationError(state: ApiKeyValidationState): state is NonNullable<ApiKeyValidationResult['reason']> {
+  return state !== undefined && state !== 'idle' && state !== 'checking' && state !== 'valid';
+}
+
 export interface HistoryItem {
   id: string;
   service: SiteId;

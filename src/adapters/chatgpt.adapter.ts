@@ -1,5 +1,4 @@
-import type { SiteAdapter } from "./site-adapter";
-import { firstVisible, installSubmitListener, readEditable, titleFromDocumentTitle, writeEditable } from "./site-adapter";
+import { BaseAdapter, hostnameMatches } from "./site-adapter";
 
 const INPUT_SELECTORS = [
   "#prompt-textarea",
@@ -9,23 +8,12 @@ const INPUT_SELECTORS = [
 ] as const;
 const SUBMIT_SELECTORS = ["button[data-testid='send-button']", "button[aria-label*='Send']", "form button[type='submit']"] as const;
 
-export class ChatGptAdapter implements SiteAdapter {
+export class ChatGptAdapter extends BaseAdapter {
   readonly id = "chatgpt" as const;
+  protected readonly siteName = "ChatGPT";
+  protected readonly inputSelectors = INPUT_SELECTORS;
+  protected readonly submitSelectors = SUBMIT_SELECTORS;
   matches(url: string): boolean {
-    try { return new URL(url).hostname === "chatgpt.com"; } catch { return false; }
-  }
-  getInputElement(): HTMLElement | null { return firstVisible(INPUT_SELECTORS); }
-  getPromptText(): string { return readEditable(this.getInputElement()); }
-  setPromptText(text: string): void {
-    const input = this.getInputElement();
-    if (!input) throw new Error("ChatGPT prompt input is not available.");
-    writeEditable(input, text);
-  }
-  getConversationTitle(): string | null {
-    return titleFromDocumentTitle("ChatGPT");
-  }
-  getConversationUrl(): string { return location.href; }
-  onSubmit(callback: (prompt: string) => void): () => void {
-    return installSubmitListener(() => this.getInputElement(), SUBMIT_SELECTORS, callback);
+    return hostnameMatches(url, ["chatgpt.com"]);
   }
 }
