@@ -99,6 +99,28 @@ describe('createInlineWidget', () => {
     expect(widget.element.shadowRoot?.textContent).toContain('优化并评分');
   });
 
+  it('hides the reset-position button until the placement reports a drag, then wires its click', () => {
+    const onResetPosition = vi.fn();
+    const widget = createInlineWidget({ ...handlers(), onResetPosition });
+    const root = widget.element.shadowRoot;
+    if (!root) throw new Error('Widget shadow root is missing.');
+    const reset = root.querySelector<HTMLButtonElement>('[data-reset]');
+
+    expect(reset?.hidden).toBe(true);
+    widget.setRepositioned(true);
+    expect(reset?.hidden).toBe(false);
+    reset?.click();
+    expect(onResetPosition).toHaveBeenCalledOnce();
+
+    widget.setRepositioned(false);
+    expect(reset?.hidden).toBe(true);
+  });
+
+  it('exposes the header as a drag handle', () => {
+    const widget = createInlineWidget(handlers());
+    expect(widget.dragHandle).toBe(widget.element.shadowRoot?.querySelector('.od-header'));
+  });
+
   it('offers a one-click page reload when the extension context is disconnected', () => {
     const onReloadPage = vi.fn();
     const widget = createInlineWidget({ ...handlers(), onReloadPage });

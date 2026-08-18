@@ -55,4 +55,51 @@ describe("Gemini floating widget placement", () => {
     expect(widget.style.top).toBe("308px");
     placement.destroy();
   });
+
+  it("drags the widget by its handle and reports the repositioned state", () => {
+    document.body.innerHTML = '<main><div id="composer"></div></main>';
+    const anchor = document.querySelector<HTMLElement>("#composer")!;
+    const widget = document.createElement("aside");
+    const handle = document.createElement("header");
+    widget.append(handle);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue({
+      top: 200, right: 800, bottom: 300, left: 200, width: 600, height: 100,
+      x: 200, y: 200, toJSON: () => undefined,
+    });
+    vi.spyOn(widget, "getBoundingClientRect").mockReturnValue({
+      top: 308, right: 590, bottom: 428, left: 200, width: 390, height: 120,
+      x: 200, y: 308, toJSON: () => undefined,
+    });
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1200 });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 });
+    handle.setPointerCapture = vi.fn();
+    handle.releasePointerCapture = vi.fn();
+    handle.hasPointerCapture = vi.fn().mockReturnValue(true);
+
+    const onRepositionedChange = vi.fn();
+    const placement = placeFloatingWidget(widget, anchor, { dragHandle: handle, onRepositionedChange });
+
+    expect(handle.getAttribute("data-draggable")).toBe("");
+    expect(placement.isRepositioned()).toBe(false);
+
+    handle.dispatchEvent(new PointerEvent("pointerdown", { clientX: 210, clientY: 320, pointerId: 1 }));
+    expect(handle.getAttribute("data-dragging")).toBe("");
+    handle.dispatchEvent(new PointerEvent("pointermove", { clientX: 260, clientY: 370, pointerId: 1 }));
+    expect(widget.style.left).toBe("250px");
+    expect(widget.style.top).toBe("358px");
+    handle.dispatchEvent(new PointerEvent("pointerup", { clientX: 260, clientY: 370, pointerId: 1 }));
+
+    expect(handle.hasAttribute("data-dragging")).toBe(false);
+    expect(placement.isRepositioned()).toBe(true);
+    expect(onRepositionedChange).toHaveBeenCalledWith(true);
+
+    placement.resetPosition();
+    expect(placement.isRepositioned()).toBe(false);
+    expect(onRepositionedChange).toHaveBeenCalledWith(false);
+    expect(widget.style.left).toBe("200px");
+    expect(widget.style.top).toBe("308px");
+
+    placement.destroy();
+    expect(handle.getAttribute("data-draggable")).toBeNull();
+  });
 });

@@ -22,6 +22,7 @@ const widget = createInlineWidget({
   onApply: () => { void applyRewrite(); },
   onOpenSettings: () => { void openSettings(); },
   onReloadPage: () => window.location.reload(),
+  onResetPosition: () => floatingPlacement?.resetPosition(),
 });
 widget.element.style.display = "block";
 widget.element.style.marginTop = "8px";
@@ -103,6 +104,7 @@ contentController.subscribe(({ input }) => {
   removeInputListener?.();
   floatingPlacement?.destroy();
   floatingPlacement = undefined;
+  widget.setRepositioned(false);
   currentInput = input;
   if (!input) {
     widget.element.remove();
@@ -114,7 +116,10 @@ contentController.subscribe(({ input }) => {
   const adapter = adapterRegistry.resolve();
   const anchor = adapter?.getComposerAnchor?.(input) ?? findComposerAnchor(input);
   if (adapter?.id === "gemini") {
-    floatingPlacement = placeFloatingWidget(widget.element, anchor);
+    floatingPlacement = placeFloatingWidget(widget.element, anchor, {
+      dragHandle: widget.dragHandle,
+      onRepositionedChange: (repositioned) => widget.setRepositioned(repositioned),
+    });
   } else {
     widget.element.style.position = "relative";
     widget.element.style.marginTop = "8px";

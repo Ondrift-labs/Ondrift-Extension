@@ -13,6 +13,8 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-shell--loading .od-trace { opacity:1; }
 .od-trace rect { x:1px; y:1px; width:calc(100% - 2px); height:calc(100% - 2px); rx:8px; ry:8px; fill:none; stroke:var(--od-accent); stroke-width:2px; stroke-linecap:round; stroke-dasharray:12 88; animation:od-border-travel 2.6s linear infinite; }
 .od-header { min-height:42px; display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--od-line); }
+.od-header[data-draggable] { cursor:grab; touch-action:none; }
+.od-header[data-dragging] { cursor:grabbing; }
 .od-logo { display:block; width:23px; height:23px; object-fit:contain; }
 .od-title { font-size:12px; font-weight:720; letter-spacing:-.01em; }
 .od-status { margin-left:auto; color:var(--od-muted); font-size:10px; }
