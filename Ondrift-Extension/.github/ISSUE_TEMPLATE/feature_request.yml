@@ -1,0 +1,43 @@
+name: Feature request
+description: Suggest an improvement for Ondrift
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing an idea. Please describe the problem first so we can evaluate the simplest solution.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Explain when you encounter the problem and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe what you would like Ondrift to do.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Example use case
+      description: Give a concrete example of when you would use this feature.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or references
+      description: Share any workarounds or similar products you have considered.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed API keys, private prompts, and personal information from this request.
+          required: true
