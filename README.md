@@ -4,7 +4,7 @@
 
 # Ondrift Chrome Extension
 
-English | [한국어](docs/README.ko.md)
+English | [한국어](docs/README.ko.md) | [日本語](docs/README.ja.md) | [简体中文](docs/README.zh.md)
 
 Ondrift is a local-first Manifest V3 Chrome extension that rewrites and scores
 prompts before they are sent on ChatGPT, Claude, Gemini, and Perplexity. Gemini
@@ -22,7 +22,7 @@ The selected language is also used for rewritten prompts and rationales.
 You can install Ondrift from its public release ZIP before the Chrome Web Store
 listing is available.
 
-1. Download `ondrift-0.1.12.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
+1. Download `ondrift-0.1.22.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
 2. Fully extract the ZIP to a folder.
 3. Open `chrome://extensions` in Chrome.
 4. Turn on **Developer mode** in the upper-right corner.

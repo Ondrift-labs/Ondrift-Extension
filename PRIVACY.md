@@ -1,5 +1,7 @@
 # Ondrift privacy policy
 
+English | [한국어](docs/PRIVACY.ko.md) | [日本語](docs/PRIVACY.ja.md) | [简体中文](docs/PRIVACY.zh.md)
+
 Effective date: August 10, 2026
 
 Ondrift is a Chrome extension published by Ondrift Labs. It helps users rewrite
