@@ -10,6 +10,7 @@ const icons = {
   retry: icon('<path d="M20 7v5h-5M4 17v-5h5M6.1 9a7 7 0 0 1 11.8-2L20 12M4 12l2.1 5a7 7 0 0 0 11.8-2"/>'),
   settings: icon('<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A7 7 0 0 0 14.8 6l-.3-2.5h-4L10.2 6a7 7 0 0 0-1.7 1.1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 1.7 1.1l.3 2.5h4l.3-2.5a7 7 0 0 0 1.7-1.1l2.4 1 2-3.4-2-1.5a7 7 0 0 0 .1-1Z"/>'),
   spark: icon('<path d="m12 3 1.4 4.1 4.1 1.4-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z"/>'),
+  recenter: icon('<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="3"/>'),
 };
 
 export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidgetController {
@@ -17,15 +18,18 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   host.setAttribute('data-ondrift-widget', '');
   const root = host.attachShadow({ mode: 'open' });
   const logoUrl = globalThis.chrome?.runtime?.getURL?.('icons/ondrift-32.png') ?? '/icons/ondrift-32.png';
-  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><svg class="od-trace" aria-hidden="true"><rect pathLength="100"/></svg><header class="od-header"><img class="od-logo" src="${logoUrl}" alt="" /><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-settings>${icons.settings}</button><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div></section>`;
+  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><svg class="od-trace" aria-hidden="true"><rect pathLength="100"/></svg><header class="od-header"><img class="od-logo" src="${logoUrl}" alt="" /><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-reset hidden>${icons.recenter}</button><button type="button" class="od-icon-button" data-settings>${icons.settings}</button><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div></section>`;
   const shell = root.querySelector<HTMLElement>('.od-shell')!;
+  const header = root.querySelector<HTMLElement>('.od-header')!;
   const body = root.querySelector<HTMLElement>('[data-body]')!;
   const status = root.querySelector<HTMLElement>('[data-status]')!;
+  const resetButton = root.querySelector<HTMLButtonElement>('[data-reset]')!;
   const settingsButton = root.querySelector<HTMLButtonElement>('[data-settings]')!;
   const dismissButton = root.querySelector<HTMLButtonElement>('[data-dismiss]')!;
   let currentState: InlineWidgetState = { status: 'ready', promptLength: 0 };
   let currentLanguage: LanguageId = 'en';
 
+  resetButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); handlers.onResetPosition?.(); });
   settingsButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); handlers.onOpenSettings(); });
   dismissButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); host.hidden = true; handlers.onDismiss?.(); });
 
@@ -46,6 +50,8 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     host.setAttribute('aria-label', messages.ariaLabel);
     settingsButton.setAttribute('aria-label', messages.settings);
     dismissButton.setAttribute('aria-label', messages.dismiss);
+    resetButton.setAttribute('aria-label', messages.resetPosition);
+    resetButton.title = messages.resetPosition;
     host.hidden = false;
     shell.classList.toggle('od-shell--loading', state.status === 'loading');
     body.replaceChildren();
@@ -93,8 +99,10 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   render(currentState);
   return {
     element: host,
+    dragHandle: header,
     setState: render,
     setLanguage(language) { currentLanguage = language; render(currentState); },
+    setRepositioned(repositioned) { resetButton.hidden = !repositioned; },
     destroy() { host.remove(); },
   };
 }
