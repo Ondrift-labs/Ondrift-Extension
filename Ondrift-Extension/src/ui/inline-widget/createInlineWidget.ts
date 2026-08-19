@@ -30,6 +30,7 @@ const icons = {
   settings: icon('<circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A7 7 0 0 0 14.8 6l-.3-2.5h-4L10.2 6a7 7 0 0 0-1.7 1.1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1a7 7 0 0 0 1.7 1.1l.3 2.5h4l.3-2.5a7 7 0 0 0 1.7-1.1l2.4 1 2-3.4-2-1.5a7 7 0 0 0 .1-1Z"/>'),
   spark: icon('<path d="m12 3 1.4 4.1 4.1 1.4-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z"/>'),
   recenter: icon('<path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="3"/>'),
+  grip: icon('<path d="M15 15h.01M11 15h.01M15 11h.01"/>'),
 };
 
 export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidgetController {
@@ -37,7 +38,7 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   host.setAttribute('data-ondrift-widget', '');
   const root = host.attachShadow({ mode: 'open' });
   const logoUrl = globalThis.chrome?.runtime?.getURL?.('icons/ondrift-32.png') ?? '/icons/ondrift-32.png';
-  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><svg class="od-trace" aria-hidden="true"><rect pathLength="100"/></svg><header class="od-header"><img class="od-logo" src="${logoUrl}" alt="" /><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-reset hidden>${icons.recenter}</button><button type="button" class="od-icon-button" data-settings>${icons.settings}</button><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div></section>`;
+  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><svg class="od-trace" aria-hidden="true"><rect pathLength="100"/></svg><header class="od-header"><img class="od-logo" src="${logoUrl}" alt="" /><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-reset hidden>${icons.recenter}</button><button type="button" class="od-icon-button" data-settings>${icons.settings}</button><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div><div class="od-resize-handle" data-resize tabindex="-1">${icons.grip}</div></section>`;
   const shell = root.querySelector<HTMLElement>('.od-shell')!;
   const header = root.querySelector<HTMLElement>('.od-header')!;
   const body = root.querySelector<HTMLElement>('[data-body]')!;
@@ -45,6 +46,7 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   const resetButton = root.querySelector<HTMLButtonElement>('[data-reset]')!;
   const settingsButton = root.querySelector<HTMLButtonElement>('[data-settings]')!;
   const dismissButton = root.querySelector<HTMLButtonElement>('[data-dismiss]')!;
+  const resizeHandle = root.querySelector<HTMLElement>('[data-resize]')!;
   let currentState: InlineWidgetState = { status: 'ready', promptLength: 0 };
   let currentLanguage: LanguageId = 'en';
 
@@ -71,6 +73,8 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     dismissButton.setAttribute('aria-label', messages.dismiss);
     resetButton.setAttribute('aria-label', messages.resetPosition);
     resetButton.title = messages.resetPosition;
+    resizeHandle.setAttribute('aria-label', messages.resizeHandle);
+    resizeHandle.title = messages.resizeHandle;
     host.hidden = false;
     shell.classList.toggle('od-shell--loading', state.status === 'loading');
     body.replaceChildren();
@@ -119,6 +123,7 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   return {
     element: host,
     dragHandle: header,
+    resizeHandle,
     setState: render,
     setLanguage(language) { currentLanguage = language; render(currentState); },
     setRepositioned(repositioned) { resetButton.hidden = !repositioned; },

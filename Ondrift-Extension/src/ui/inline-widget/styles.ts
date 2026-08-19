@@ -4,7 +4,11 @@ export const inlineWidgetStyles = `
 * { box-sizing:border-box; }
 button { font:inherit; }
 button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
-.od-shell { position:relative; width:min(430px,calc(100vw - 24px)); border:1px solid var(--od-line); border-radius:9px; color:var(--od-ink); background:var(--od-paper); box-shadow:0 12px 36px rgb(28 31 27 / 16%); overflow:hidden; }
+/* Width comes from the host element's inline style, set by floating-widget-position.ts
+   (auto-computed, or a user-resized value); the min() below is only a fallback for the
+   rare case the widget renders without that placement (e.g. directly in tests). */
+.od-shell { position:relative; width:100%; max-width:min(430px,calc(100vw - 24px)); border:1px solid var(--od-line); border-radius:9px; color:var(--od-ink); background:var(--od-paper); box-shadow:0 12px 36px rgb(28 31 27 / 16%); overflow:hidden; }
+:host([style*="width"]) .od-shell { max-width:none; }
 /* A short dash literally travels the shell's own rounded-rect outline (constant speed
    along the path itself), instead of a conic-gradient hotspot rotating around the
    center -- that reads as a dot slicing diagonally through a wide, short shell rather
@@ -53,6 +57,9 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-spinner { width:17px; height:17px; border:2px solid var(--od-line); border-top-color:var(--od-accent); border-radius:50%; animation:od-spin .75s linear infinite; }
 .od-applied { display:flex; align-items:center; gap:9px; color:var(--od-accent); font-size:11px; font-weight:650; }
 .od-applied svg { width:17px; }
+.od-resize-handle { position:absolute; right:1px; bottom:1px; z-index:1; width:16px; height:16px; display:grid; place-items:center; color:var(--od-line); cursor:nwse-resize; touch-action:none; }
+.od-resize-handle:hover, .od-resize-handle[data-resizing] { color:var(--od-muted); }
+.od-resize-handle svg { width:11px; height:11px; }
 [hidden] { display:none !important; }
 @keyframes od-spin { to { transform:rotate(360deg); } }
 @keyframes od-border-travel { to { stroke-dashoffset:-100; } }
