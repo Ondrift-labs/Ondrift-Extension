@@ -100,13 +100,20 @@ export function writeEditable(element: HTMLElement, text: string): void {
   } else {
     const selection = window.getSelection();
     selectAllContents(element);
-    const beforeInputAccepted = element.dispatchEvent(new InputEvent("beforeinput", {
+    element.dispatchEvent(new InputEvent("beforeinput", {
       bubbles: true,
       cancelable: true,
       inputType: "insertText",
       data: text,
     }));
-    if (beforeInputAccepted && readEditable(element) !== text.trim()) {
+    // Whether the dispatch above was cancelled (dispatchEvent returns false) doesn't
+    // distinguish "a rich-text editor (ProseMirror/Lexical) intercepted it and applied the
+    // change itself" from "it intercepted it and deferred to its own async model update" --
+    // both look identical here. The read-back check below covers the first case (nothing
+    // left to do) and drives the fallback for the second, so the fallback must run
+    // regardless of whether the dispatch was accepted; gating it on acceptance skipped the
+    // fallback in exactly the case it exists for.
+    if (readEditable(element) !== text.trim()) {
       const inserted = typeof document.execCommand === "function" && document.execCommand("insertText", false, text);
       if (!inserted && typeof DataTransfer !== "undefined" && typeof ClipboardEvent !== "undefined") {
         const transfer = new DataTransfer();
@@ -115,7 +122,6 @@ export function writeEditable(element: HTMLElement, text: string): void {
       }
     }
     selection?.removeAllRanges();
-    if (!beforeInputAccepted) return;
   }
   element.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: text }));
   element.dispatchEvent(new Event("change", { bubbles: true }));
