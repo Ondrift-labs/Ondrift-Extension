@@ -102,4 +102,96 @@ describe("Gemini floating widget placement", () => {
     placement.destroy();
     expect(handle.getAttribute("data-draggable")).toBeNull();
   });
+
+  it("resizes the widget by its handle and reports the repositioned state", () => {
+    document.body.innerHTML = '<main><div id="composer"></div></main>';
+    const anchor = document.querySelector<HTMLElement>("#composer")!;
+    const widget = document.createElement("aside");
+    const resizeHandle = document.createElement("div");
+    widget.append(resizeHandle);
+    let width = 390;
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue({
+      top: 200, right: 800, bottom: 300, left: 200, width: 600, height: 100,
+      x: 200, y: 200, toJSON: () => undefined,
+    });
+    vi.spyOn(widget, "getBoundingClientRect").mockImplementation(() => ({
+      top: 308, right: 200 + width, bottom: 428, left: 200, width, height: 120,
+      x: 200, y: 308, toJSON: () => undefined,
+    }));
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1200 });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 });
+    resizeHandle.setPointerCapture = vi.fn();
+    resizeHandle.releasePointerCapture = vi.fn();
+    resizeHandle.hasPointerCapture = vi.fn().mockReturnValue(true);
+
+    const onRepositionedChange = vi.fn();
+    const placement = placeFloatingWidget(widget, anchor, { resizeHandle, onRepositionedChange });
+
+    expect(placement.isRepositioned()).toBe(false);
+
+    resizeHandle.dispatchEvent(new PointerEvent("pointerdown", { clientX: 590, clientY: 428, pointerId: 1 }));
+    expect(resizeHandle.getAttribute("data-resizing")).toBe("");
+    resizeHandle.dispatchEvent(new PointerEvent("pointermove", { clientX: 640, clientY: 428, pointerId: 1 }));
+    expect(widget.style.width).toBe("440px");
+    width = 440;
+    resizeHandle.dispatchEvent(new PointerEvent("pointerup", { clientX: 640, clientY: 428, pointerId: 1 }));
+
+    expect(resizeHandle.hasAttribute("data-resizing")).toBe(false);
+    expect(placement.isRepositioned()).toBe(true);
+    expect(onRepositionedChange).toHaveBeenCalledWith(true);
+
+    placement.resetPosition();
+    expect(placement.isRepositioned()).toBe(false);
+    expect(widget.style.width).toBe("430px");
+
+    placement.destroy();
+  });
+
+  it("re-anchors without losing a manual drag when the caller swaps in a live anchor", () => {
+    document.body.innerHTML = '<main><div id="composer"></div><div id="composer-2"></div></main>';
+    const anchor = document.querySelector<HTMLElement>("#composer")!;
+    const nextAnchor = document.querySelector<HTMLElement>("#composer-2")!;
+    const widget = document.createElement("aside");
+    const handle = document.createElement("header");
+    widget.append(handle);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue({
+      top: 200, right: 800, bottom: 300, left: 200, width: 600, height: 100,
+      x: 200, y: 200, toJSON: () => undefined,
+    });
+    vi.spyOn(nextAnchor, "getBoundingClientRect").mockReturnValue({
+      top: 400, right: 800, bottom: 500, left: 250, width: 600, height: 100,
+      x: 250, y: 400, toJSON: () => undefined,
+    });
+    vi.spyOn(widget, "getBoundingClientRect").mockReturnValue({
+      top: 358, right: 640, bottom: 478, left: 250, width: 390, height: 120,
+      x: 250, y: 358, toJSON: () => undefined,
+    });
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1200 });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 });
+    handle.setPointerCapture = vi.fn();
+    handle.releasePointerCapture = vi.fn();
+    handle.hasPointerCapture = vi.fn().mockReturnValue(true);
+
+    const placement = placeFloatingWidget(widget, anchor, { dragHandle: handle });
+    handle.dispatchEvent(new PointerEvent("pointerdown", { clientX: 210, clientY: 320, pointerId: 1 }));
+    handle.dispatchEvent(new PointerEvent("pointermove", { clientX: 260, clientY: 370, pointerId: 1 }));
+    handle.dispatchEvent(new PointerEvent("pointerup", { clientX: 260, clientY: 370, pointerId: 1 }));
+    expect(placement.isRepositioned()).toBe(true);
+
+    // Simulate the composer's wrapping anchor getting detached, the way chat apps
+    // replace it on every turn while `input` itself is untouched.
+    anchor.remove();
+    expect(anchor.isConnected).toBe(false);
+    // A sentinel value distinct from anything computeFloatingPosition would ever
+    // produce here, so a no-op update() is distinguishable from one that overwrote it.
+    widget.style.left = "999px";
+    placement.update();
+    expect(widget.style.left).toBe("999px");
+
+    placement.setAnchor(nextAnchor);
+    expect(widget.style.left).not.toBe("999px");
+    expect(placement.isRepositioned()).toBe(true);
+
+    placement.destroy();
+  });
 });

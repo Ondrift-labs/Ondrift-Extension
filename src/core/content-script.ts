@@ -14,6 +14,7 @@ import { SETTINGS_STORAGE_KEY } from "../storage/settings";
 type LatestResult = Pick<RewriteResult, "previousScore" | "score" | "improvedText">;
 
 let currentInput: HTMLElement | null = null;
+let currentAnchor: HTMLElement | null = null;
 let removeInputListener: (() => void) | undefined;
 let floatingPlacement: FloatingWidgetPlacement | undefined;
 let latestResult: LatestResult = { previousScore: 0, score: 0, improvedText: "" };
@@ -96,7 +97,22 @@ async function runRewrite(): Promise<void> {
 }
 
 contentController.subscribe(({ input }) => {
-  if (input === currentInput && widget.element.isConnected) return;
+  if (input === currentInput && widget.element.isConnected) {
+    // The composer node itself is unchanged, but chat apps frequently replace its
+    // wrapping anchor on every turn while leaving `input` in place. When that happens
+    // `currentAnchor` goes stale (detached from the document), which silently breaks
+    // both auto-tracking and the reset-position button: floating-widget-position.ts's
+    // update() bails out whenever the anchor it holds isn't connected, so clicking
+    // reset still flips the button off but never actually moves the widget back.
+    // Re-resolve a live anchor and hand it to the existing placement instead of
+    // tearing the whole thing down, so a manual drag/resize survives the swap.
+    if (currentAnchor && !currentAnchor.isConnected && input) {
+      const adapter = adapterRegistry.resolve();
+      currentAnchor = adapter?.getComposerAnchor?.(input) ?? findComposerAnchor(input);
+      floatingPlacement?.setAnchor(currentAnchor);
+    }
+    return;
+  }
   removeInputListener?.();
   floatingPlacement?.destroy();
   floatingPlacement = undefined;
@@ -104,6 +120,7 @@ contentController.subscribe(({ input }) => {
   currentInput = input;
   if (!input) {
     widget.element.remove();
+    currentAnchor = null;
     return;
   }
   const listener = () => showReady();
@@ -111,13 +128,16 @@ contentController.subscribe(({ input }) => {
   removeInputListener = () => input.removeEventListener("input", listener);
   const adapter = adapterRegistry.resolve();
   const anchor = adapter?.getComposerAnchor?.(input) ?? findComposerAnchor(input);
+  currentAnchor = anchor;
   // Every adapter now pins the widget beside its composer with fixed coordinates
   // (originally added for Gemini alone, where inserting the widget into normal
   // document flow got it clipped/removed by the composer's own re-renders -- see
   // "mount Gemini widget outside composer" / "pin Gemini widget beside composer").
-  // Using it everywhere also means dragging and reset-position work on every site.
+  // Using it everywhere also means dragging, resizing, and reset-position work on
+  // every site.
   floatingPlacement = placeFloatingWidget(widget.element, anchor, {
     dragHandle: widget.dragHandle,
+    resizeHandle: widget.resizeHandle,
     onRepositionedChange: (repositioned) => widget.setRepositioned(repositioned),
   });
   showReady();

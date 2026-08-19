@@ -25,6 +25,10 @@ export interface InlineWidgetController {
    * floating-widget-position.ts) can use it as a drag handle. Unused when the widget
    * is placed in normal document flow. */
   dragHandle: HTMLElement;
+  /** The corner grip inside the shadow root, exposed so a fixed-position placement can
+   * use it to resize the widget's width. Unused when the widget is placed in normal
+   * document flow. */
+  resizeHandle: HTMLElement;
   setState(state: InlineWidgetState): void;
   setLanguage(language: LanguageId): void;
   /** Shows or hides the header's "reset position" button. A placement strategy that

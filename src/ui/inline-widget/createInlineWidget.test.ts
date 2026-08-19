@@ -121,6 +121,11 @@ describe('createInlineWidget', () => {
     expect(widget.dragHandle).toBe(widget.element.shadowRoot?.querySelector('.od-header'));
   });
 
+  it('exposes a corner grip as a resize handle', () => {
+    const widget = createInlineWidget(handlers());
+    expect(widget.resizeHandle).toBe(widget.element.shadowRoot?.querySelector('[data-resize]'));
+  });
+
   it('offers a one-click page reload when the extension context is disconnected', () => {
     const onReloadPage = vi.fn();
     const widget = createInlineWidget({ ...handlers(), onReloadPage });
