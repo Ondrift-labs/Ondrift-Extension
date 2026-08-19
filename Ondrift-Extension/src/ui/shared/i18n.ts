@@ -1,22 +1,18 @@
-import type { LanguageId, PersonaId, SiteId } from './contracts';
+import { isLanguageId, LANGUAGES, normalizeLanguage, SUPPORTED_LANGUAGES, type LanguageId } from 'ondrift-i18n';
+import type { PersonaId, SiteId } from './contracts';
 import type { GeminiModelId } from '../../shared/models';
 
+export { isLanguageId, normalizeLanguage, SUPPORTED_LANGUAGES };
+
 /** BCP-47 locale tags used for Intl formatting (dates, numbers, relative time). */
-export const LOCALE_TAGS: Record<LanguageId, string> = { ko: 'ko-KR', en: 'en-US', ja: 'ja-JP', zh: 'zh-CN' };
+export const LOCALE_TAGS: Record<LanguageId, string> = Object.fromEntries(
+  SUPPORTED_LANGUAGES.map((id) => [id, LANGUAGES[id].locale]),
+) as Record<LanguageId, string>;
 
 /** Each language's own name for itself, shown identically regardless of the active UI language. */
-export const LANGUAGE_NAMES: Record<LanguageId, string> = { ko: '한국어', en: 'English', ja: '日本語', zh: '简体中文' };
-
-export const SUPPORTED_LANGUAGES: readonly LanguageId[] = ['ko', 'en', 'ja', 'zh'];
-
-export function isLanguageId(value: unknown): value is LanguageId {
-  return typeof value === 'string' && (SUPPORTED_LANGUAGES as readonly string[]).includes(value);
-}
-
-export function normalizeLanguage(value: string | undefined): LanguageId {
-  const base = value?.toLowerCase().split('-')[0];
-  return isLanguageId(base) ? base : 'en';
-}
+export const LANGUAGE_NAMES: Record<LanguageId, string> = Object.fromEntries(
+  SUPPORTED_LANGUAGES.map((id) => [id, LANGUAGES[id].nativeName]),
+) as Record<LanguageId, string>;
 
 export interface ApiKeyValidationCopy {
   invalid_key: string;

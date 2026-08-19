@@ -1,7 +1,9 @@
+import type { LanguageId } from 'ondrift-i18n';
+
+export type { LanguageId };
 export type ProviderId = 'gemini' | 'openai' | 'claude';
 export type SiteId = 'chatgpt' | 'claude' | 'gemini' | 'perplexity';
 export type PersonaId = 'general' | 'developer' | 'writer' | 'student' | 'translator';
-export type LanguageId = 'ko' | 'en' | 'ja' | 'zh';
 
 export interface UiSettings {
   provider: ProviderId;
