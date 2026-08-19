@@ -17,10 +17,18 @@ overview, privacy model, and latest installation entry point.
 The settings interface and inline widget support Korean, English, Japanese, and Simplified Chinese.
 The selected language is also used for rewritten prompts and rationales.
 
-## Install from a GitHub ZIP
+## Install
 
-You can install Ondrift from its public release ZIP before the Chrome Web Store
-listing is available.
+### From the Chrome Web Store (recommended)
+
+Install Ondrift directly from the
+[Chrome Web Store listing](https://chromewebstore.google.com/detail/aonkgefdmgjcnhopbkeehmoacncpkeje).
+It updates automatically and is the easiest way to get started.
+
+### From a GitHub ZIP
+
+You can also install a specific release manually from its public ZIP, for
+example to test a build before it reaches the Chrome Web Store.
 
 1. Download `ondrift-0.1.23.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
 2. Fully extract the ZIP to a folder.
