@@ -11,9 +11,17 @@ Gemini를 직접 호출하며, Free MVP에는 Ondrift 백엔드, 계정, 클라�
 설정 화면과 인라인 위젯은 한국어, 영어, 일본어, 중국어(간체)를 지원합니다. 선택한 언어는
 재작성된 프롬프트와 개선 근거에도 적용됩니다.
 
-## GitHub ZIP으로 설치
+## 설치
 
-Chrome 웹스토어 등록 전에도 공개 릴리스 ZIP으로 설치해 사용할 수 있습니다.
+### Chrome 웹스토어에서 설치 (권장)
+
+[Chrome 웹스토어 페이지](https://chromewebstore.google.com/detail/aonkgefdmgjcnhopbkeehmoacncpkeje)에서
+바로 설치할 수 있습니다. 자동으로 업데이트되며 가장 간편한 방법입니다.
+
+### GitHub ZIP으로 설치
+
+Chrome 웹스토어에 반영되기 전의 빌드를 미리 테스트하는 등, 특정 릴리스를 직접
+설치하고 싶을 때는 공개 릴리스 ZIP을 사용할 수도 있습니다.
 
 1. [최신 릴리스](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)에서 `ondrift-0.1.23.zip`을 다운로드합니다.
 2. ZIP을 원하는 폴더에 완전히 압축 해제합니다.

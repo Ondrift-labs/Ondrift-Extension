@@ -13,9 +13,17 @@ service worker 使用你自己提供的 API 密钥直接调用。Free MVP 版本
 设置界面和内嵌小组件支持韩语、英语、日语和简体中文。所选语言同样会应用于
 改写后的提示词及其说明。
 
-## 通过 GitHub ZIP 安装
+## 安装
 
-在 Chrome 网上应用店上架之前,你也可以通过公开发布的 ZIP 包安装使用。
+### 从 Chrome 网上应用店安装(推荐)
+
+可以直接从 [Chrome 网上应用店页面](https://chromewebstore.google.com/detail/aonkgefdmgjcnhopbkeehmoacncpkeje)
+安装。该方式会自动更新,是最简单的安装方式。
+
+### 通过 GitHub ZIP 安装
+
+如果你想手动安装某个特定版本,例如在 Chrome 网上应用店更新之前先体验新版本,
+也可以通过公开发布的 ZIP 包安装。
 
 1. 从[最新发布版本](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)下载 `ondrift-0.1.23.zip`。
 2. 完整解压该 ZIP 文件到一个文件夹。

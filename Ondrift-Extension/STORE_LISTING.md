@@ -28,8 +28,8 @@ Main features:
 - Uses your own Gemini API key; no Ondrift account is required.
 - Stores settings and optional prompt history in your local Chrome profile.
 - Does not collect or store AI response bodies.
-- Supports Korean, English, and Japanese in the extension interface and rewrite
-  output.
+- Supports Korean, English, Japanese, and Simplified Chinese in the extension
+  interface and rewrite output.
 
 The Free MVP has no Ondrift backend or cloud sync. Prompt text is sent directly
 from the extension service worker to Google's Gemini API when you request a
