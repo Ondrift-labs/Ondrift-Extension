@@ -2,7 +2,7 @@ import { contentController } from "./content-controller";
 import { createInlineWidget } from "../ui/inline-widget";
 import { ProviderError, providerErrorReason } from "../providers/errors";
 import type { ExtensionSettings, RewriteResult } from "../shared/types";
-import { sendRuntimeMessage } from "./rewrite-client";
+import { isExtensionContextInvalidated, sendRuntimeMessage } from "./rewrite-client";
 import { adapterRegistry } from "./adapter-registry";
 import { findComposerAnchor } from "../adapters/site-adapter";
 import { placeFloatingWidget, type FloatingWidgetPlacement } from "./floating-widget-position";
@@ -18,6 +18,9 @@ let currentAnchor: HTMLElement | null = null;
 let removeInputListener: (() => void) | undefined;
 let floatingPlacement: FloatingWidgetPlacement | undefined;
 let latestResult: LatestResult = { previousScore: 0, score: 0, improvedText: "" };
+// Guards against a rewrite fired while one is already in flight -- see runRewrite() and
+// showReady() below.
+let rewriteInFlight = false;
 
 const widget = createInlineWidget({
   onRewrite: () => { void runRewrite(); },
@@ -36,6 +39,11 @@ function promptLength(): number {
 }
 
 function showReady(): void {
+  // A prompt edit while a rewrite is in flight would otherwise flip the widget back to its
+  // "ready" state (re-enabling the button) mid-request, letting a second, overlapping
+  // rewrite fire on the same session -- see runRewrite(). Once the in-flight request
+  // settles it renders its own "result"/"error" state, so there's nothing to restore here.
+  if (rewriteInFlight) return;
   widget.setState({ status: "ready", promptLength: promptLength() });
   floatingPlacement?.update();
 }
@@ -68,6 +76,10 @@ async function applyRewrite(): Promise<void> {
 }
 
 async function runRewrite(): Promise<void> {
+  // onRewrite/onRetry both call this; a click while a request is already pending would
+  // otherwise start a second, overlapping rewrite on the same session (see showReady()).
+  if (rewriteInFlight) return;
+  rewriteInFlight = true;
   widget.setState({ status: "loading" });
   floatingPlacement?.update();
   try {
@@ -83,6 +95,15 @@ async function runRewrite(): Promise<void> {
       floatingPlacement?.update();
       return;
     }
+    // Mirrors openSettings()'s handling of the same failure: a non-ProviderError means the
+    // background was never reached at all (most commonly because this tab's extension
+    // context was invalidated by an extension reload/update), not that it responded with a
+    // rewrite failure, so the recovery step is reloading the page rather than a retry.
+    if (isExtensionContextInvalidated(error)) {
+      widget.setState({ status: "reload_required" });
+      floatingPlacement?.update();
+      return;
+    }
     const code = error instanceof ProviderError ? error.code : "unknown";
     widget.setState({
       status: "error",
@@ -93,6 +114,8 @@ async function runRewrite(): Promise<void> {
       message: error instanceof Error ? error.message : undefined,
     });
     floatingPlacement?.update();
+  } finally {
+    rewriteInFlight = false;
   }
 }
 
@@ -170,10 +193,25 @@ function onStorageChanged(changes: Record<string, chrome.storage.StorageChange>,
 // around an awaited call can catch, so guard the property access itself instead.
 chrome.storage?.onChanged?.addListener(onStorageChanged);
 
-window.addEventListener("pagehide", () => {
+function teardown(): void {
   chrome.storage?.onChanged?.removeListener(onStorageChanged);
   removeInputListener?.();
   floatingPlacement?.destroy();
   widget.destroy();
   contentController.stop();
-}, { once: true });
+}
+
+// Not `{ once: true }`: a page that's eligible for the back/forward cache can go through
+// pagehide/pageshow more than once without the content script ever being torn down and
+// re-injected, so teardown has to be able to run every time the page is hidden, not just
+// on the first (which might not even be a real unload).
+window.addEventListener("pagehide", teardown);
+
+window.addEventListener("pageshow", (event) => {
+  // A non-persisted pageshow is just the page's normal first paint, already covered by the
+  // boot() call below at module load. Only a bfcache restore (`persisted`) needs the
+  // explicit re-init, since the script itself never re-ran for that case.
+  if (!event.persisted) return;
+  chrome.storage?.onChanged?.addListener(onStorageChanged);
+  void boot();
+});

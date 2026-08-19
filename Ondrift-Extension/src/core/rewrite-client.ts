@@ -13,3 +13,12 @@ export async function sendRuntimeMessage<T>(message: RuntimeRequest): Promise<T>
 export function rewritePrompt(payload: RewriteRequest): Promise<RewriteResult> {
   return sendRuntimeMessage<RewriteResult>({ type: "rewrite", payload });
 }
+
+/**
+ * True when `error` is the plain Error `chrome.runtime.sendMessage` throws once this tab's
+ * extension context has been invalidated (e.g. by an extension reload/update) -- distinct
+ * from a `ProviderError`, which means the background was reachable and reported a failure.
+ */
+export function isExtensionContextInvalidated(error: unknown): boolean {
+  return error instanceof Error && error.message.includes("Extension context invalidated");
+}

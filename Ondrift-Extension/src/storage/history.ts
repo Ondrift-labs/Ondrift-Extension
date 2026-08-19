@@ -29,7 +29,7 @@ export class HistoryStore {
 
   private open(): Promise<IDBDatabase> {
     if (this.database) return this.database;
-    this.database = new Promise((resolve, reject) => {
+    const opened = new Promise<IDBDatabase>((resolve, reject) => {
       const request = (this.factory ?? indexedDB).open(this.dbName, DB_VERSION);
       request.onupgradeneeded = () => {
         const database = request.result;
@@ -40,8 +40,16 @@ export class HistoryStore {
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error ?? new Error("Could not open local history"));
       request.onblocked = () => reject(new Error("Local history upgrade is blocked"));
+    }).catch((error: unknown) => {
+      // A failed/blocked open must not be cached forever -- otherwise a transient issue (the
+      // upgrade was blocked by another open tab, a one-off disk error) permanently breaks
+      // history for the rest of this service worker's lifetime. Clear the cached promise on
+      // failure so the next call retries with a fresh `indexedDB.open()`.
+      this.database = undefined;
+      throw error;
     });
-    return this.database;
+    this.database = opened;
+    return opened;
   }
 
   async add(entry: HistoryEntry): Promise<number> {

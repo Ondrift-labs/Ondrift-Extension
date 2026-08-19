@@ -45,4 +45,29 @@ describe("HistoryStore", () => {
     await store.clear();
     await expect(store.list()).resolves.toEqual([]);
   });
+
+  it("retries after a failed IndexedDB open instead of caching the failure forever", async () => {
+    const real = new IDBFactory();
+    let attempts = 0;
+    // The first open fails outright; the second one is left to the real factory. Only the
+    // request object needs faking -- HistoryStore attaches its own onsuccess/onerror/etc.
+    // handlers to whatever `factory.open()` returns.
+    const flaky = {
+      open: (name: string, version?: number) => {
+        attempts += 1;
+        if (attempts === 1) {
+          const failingRequest = {} as IDBOpenDBRequest;
+          queueMicrotask(() => failingRequest.onerror?.(new Event("error") as Event));
+          return failingRequest;
+        }
+        return real.open(name, version);
+      },
+    } as unknown as IDBFactory;
+    const store = new HistoryStore(flaky, "retry-test");
+    const entry = { service: "chatgpt" as const, sourceUrl: "https://chatgpt.com", originalText: "a", applied: false, createdAt: 1 };
+
+    await expect(store.add(entry)).rejects.toThrow("Could not open local history");
+    await expect(store.add(entry)).resolves.toEqual(expect.any(Number));
+    expect(attempts).toBe(2);
+  });
 });

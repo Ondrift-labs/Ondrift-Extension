@@ -139,6 +139,22 @@ describe("site adapter URL matching", () => {
     expect(execCommand).not.toHaveBeenCalled();
   });
 
+  it("still tries the fallback insertion when a rich-text editor cancels beforeinput without applying it itself", () => {
+    document.body.innerHTML = '<div contenteditable="true" role="textbox">draft</div>';
+    const editor = document.querySelector<HTMLElement>("[contenteditable]")!;
+    const execCommand = vi.fn(() => { editor.textContent = "improved"; return true; });
+    Object.defineProperty(document, "execCommand", { configurable: true, value: execCommand });
+    // Unlike the "controlled" editors above, this one cancels the native insertion but
+    // doesn't apply the change itself -- e.g. it queues an async model update instead of
+    // updating the DOM synchronously. The synthetic-event fallback exists for exactly this.
+    editor.addEventListener("beforeinput", (event) => event.preventDefault());
+
+    writeEditable(editor, "improved");
+
+    expect(execCommand).toHaveBeenCalledWith("insertText", false, "improved");
+    expect(editor.textContent).toBe("improved");
+  });
+
   it("does not force-replace a managed editor when its input handlers reject the rewrite", () => {
     document.body.innerHTML = '<div contenteditable="true" role="textbox">draft</div>';
     const editor = document.querySelector<HTMLElement>("[contenteditable]")!;
