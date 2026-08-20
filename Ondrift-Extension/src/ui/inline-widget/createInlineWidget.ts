@@ -104,20 +104,18 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   };
   document.addEventListener('click', onDocumentClick);
   // Right-clicking the collapsed bubble opens an explicit "Expand" menu item instead of
-  // the browser's own context menu -- a left click alone is ambiguous with the drag
-  // handle's pointerdown (see floating-widget-position.ts) and can silently swallow a tap
-  // that moved a pixel or two, so this gives minimizing a way back that doesn't depend on
-  // hitting a plain click just right. Only intercepted while minimized: an expanded
-  // widget has nothing this needs to replace, so its native context menu still works.
+  // the browser's own context menu -- this is the *only* way to expand it again. A plain
+  // click used to do it too, but the header also doubles as the drag handle (see
+  // floating-widget-position.ts): releasing a drag fires a click on the same element, so
+  // every drag-to-reposition was immediately re-expanding the bubble it just finished
+  // moving. Only intercepted while minimized: an expanded widget has nothing this needs
+  // to replace, so its native context menu still works.
   header.addEventListener('contextmenu', (event) => {
     if (!minimized) return;
     event.preventDefault(); event.stopPropagation();
     expandMenu.hidden = false;
     syncMenuOpenClass();
   });
-  // A plain click still expands too -- convenient when it doesn't get read as a drag, and
-  // harmless to keep alongside the menu above when it does.
-  header.addEventListener('click', (event) => { if (minimized) { event.preventDefault(); event.stopPropagation(); setMinimized(false); } });
   dismissButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); host.hidden = true; handlers.onDismiss?.(); });
 
   function button(label: string, className: string, action: () => void, iconMarkup = '') {
