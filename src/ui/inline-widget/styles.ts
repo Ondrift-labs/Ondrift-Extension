@@ -25,7 +25,23 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-icon-button { position:relative; z-index:1; width:26px; height:26px; display:grid; place-items:center; border:0; border-radius:5px; color:var(--od-muted); background:transparent; cursor:pointer; pointer-events:auto; }
 .od-icon-button:hover { color:var(--od-ink); background:#f0f0ea; }
 .od-icon-button svg { width:14px; height:14px; }
+.od-menu-anchor { position:relative; }
+.od-menu { position:absolute; top:calc(100% + 6px); right:0; z-index:3; display:grid; min-width:132px; border:1px solid var(--od-line); border-radius:8px; padding:4px; background:var(--od-paper); box-shadow:0 8px 24px rgb(28 31 27 / 18%); }
+.od-menu[hidden] { display:none; }
+.od-menu-item { display:flex; align-items:center; width:100%; border:0; border-radius:5px; padding:7px 9px; color:var(--od-ink); background:transparent; font-size:11.5px; text-align:left; cursor:pointer; }
+.od-menu-item:hover { background:#f0f0ea; }
 .od-body { padding:12px; }
+/* Collapsed to just the logo (the "Hide" menu action) -- everything else in the header,
+   the body, and the resize handle disappear so the bubble stops covering the page, and
+   the shell itself becomes a small round tap target that expands back on click. */
+.od-shell--minimized { width:42px !important; border-radius:50%; cursor:pointer; }
+.od-shell--minimized .od-header { min-height:42px; justify-content:center; padding:0; border-bottom:0; cursor:pointer; }
+.od-shell--minimized .od-title,
+.od-shell--minimized .od-status,
+.od-shell--minimized .od-icon-button,
+.od-shell--minimized .od-menu,
+.od-shell--minimized .od-body,
+.od-shell--minimized .od-resize-handle { display:none; }
 .od-ready { display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:12px; }
 .od-ready p { flex:1; margin:0; color:var(--od-muted); font-size:11px; line-height:1.4; }
 .od-ready p.od-hint { white-space:nowrap; }

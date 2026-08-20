@@ -17,6 +17,10 @@ let currentInput: HTMLElement | null = null;
 let currentAnchor: HTMLElement | null = null;
 let removeInputListener: (() => void) | undefined;
 let floatingPlacement: FloatingWidgetPlacement | undefined;
+// Tracked separately from the placement itself so it survives a composer swap: `input ===
+// currentInput` teardown below destroys and recreates `floatingPlacement` (a fresh anchor),
+// and the new one needs to start compact too if the user had minimized the widget.
+let minimized = false;
 let latestResult: LatestResult = { previousScore: 0, score: 0, improvedText: "" };
 // Guards against a rewrite fired while one is already in flight -- see runRewrite() and
 // showReady() below.
@@ -29,6 +33,7 @@ const widget = createInlineWidget({
   onOpenSettings: () => { void openSettings(); },
   onReloadPage: () => window.location.reload(),
   onResetPosition: () => floatingPlacement?.resetPosition(),
+  onMinimizedChange: (next) => { minimized = next; floatingPlacement?.setCompact(next); },
 });
 
 function promptLength(): number {
@@ -163,6 +168,7 @@ contentController.subscribe(({ input }) => {
     resizeHandle: widget.resizeHandle,
     onRepositionedChange: (repositioned) => widget.setRepositioned(repositioned),
   });
+  floatingPlacement.setCompact(minimized);
   showReady();
 });
 

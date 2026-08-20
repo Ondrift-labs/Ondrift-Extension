@@ -38,7 +38,7 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   host.setAttribute('data-ondrift-widget', '');
   const root = host.attachShadow({ mode: 'open' });
   const logoUrl = globalThis.chrome?.runtime?.getURL?.('icons/ondrift-32.png') ?? '/icons/ondrift-32.png';
-  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><svg class="od-trace" aria-hidden="true"><rect pathLength="100"/></svg><header class="od-header"><img class="od-logo" src="${logoUrl}" alt="" /><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-reset hidden>${icons.recenter}</button><button type="button" class="od-icon-button" data-settings>${icons.settings}</button><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div><div class="od-resize-handle" data-resize tabindex="-1">${icons.grip}</div></section>`;
+  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><svg class="od-trace" aria-hidden="true"><rect pathLength="100"/></svg><header class="od-header"><img class="od-logo" src="${logoUrl}" alt="" /><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-reset hidden>${icons.recenter}</button><span class="od-menu-anchor"><button type="button" class="od-icon-button" data-settings aria-haspopup="true" aria-expanded="false">${icons.settings}</button><div class="od-menu" data-menu hidden><button type="button" class="od-menu-item" data-menu-settings></button><button type="button" class="od-menu-item" data-menu-hide></button></div></span><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div><div class="od-resize-handle" data-resize tabindex="-1">${icons.grip}</div></section>`;
   const shell = root.querySelector<HTMLElement>('.od-shell')!;
   const header = root.querySelector<HTMLElement>('.od-header')!;
   const body = root.querySelector<HTMLElement>('[data-body]')!;
@@ -47,11 +47,44 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   const settingsButton = root.querySelector<HTMLButtonElement>('[data-settings]')!;
   const dismissButton = root.querySelector<HTMLButtonElement>('[data-dismiss]')!;
   const resizeHandle = root.querySelector<HTMLElement>('[data-resize]')!;
+  const menu = root.querySelector<HTMLElement>('[data-menu]')!;
+  const menuOpenSettings = root.querySelector<HTMLButtonElement>('[data-menu-settings]')!;
+  const menuHide = root.querySelector<HTMLButtonElement>('[data-menu-hide]')!;
   let currentState: InlineWidgetState = { status: 'ready', promptLength: 0 };
   let currentLanguage: LanguageId = 'en';
+  let minimized = false;
+
+  function closeMenu() {
+    menu.hidden = true;
+    settingsButton.setAttribute('aria-expanded', 'false');
+  }
+
+  function setMinimized(next: boolean) {
+    if (minimized === next) return;
+    minimized = next;
+    shell.classList.toggle('od-shell--minimized', minimized);
+    if (minimized) closeMenu();
+    handlers.onMinimizedChange?.(minimized);
+  }
 
   resetButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); handlers.onResetPosition?.(); });
-  settingsButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); handlers.onOpenSettings(); });
+  // The gear icon no longer jumps straight to settings -- it opens a small menu instead,
+  // since that's also where "Hide" now lives (see setMinimized() above and the menuHide
+  // listener below). Settings itself is one click further away via the menu item.
+  settingsButton.addEventListener('click', (event) => {
+    event.preventDefault(); event.stopPropagation();
+    const next = menu.hidden;
+    menu.hidden = !next;
+    settingsButton.setAttribute('aria-expanded', String(next));
+  });
+  menuOpenSettings.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); closeMenu(); handlers.onOpenSettings(); });
+  menuHide.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); setMinimized(true); });
+  const onDocumentClick = (event: MouseEvent) => { if (!menu.hidden && !event.composedPath().includes(menu) && !event.composedPath().includes(settingsButton)) closeMenu(); };
+  document.addEventListener('click', onDocumentClick);
+  // Clicking the collapsed bubble restores the full widget. The header also doubles as a
+  // drag handle (see floating-widget-position.ts), so this only needs to fire while
+  // minimized -- when expanded, a header click is just the start of a drag.
+  header.addEventListener('click', (event) => { if (minimized) { event.preventDefault(); event.stopPropagation(); setMinimized(false); } });
   dismissButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); host.hidden = true; handlers.onDismiss?.(); });
 
   function button(label: string, className: string, action: () => void, iconMarkup = '') {
@@ -75,6 +108,10 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     resetButton.title = messages.resetPosition;
     resizeHandle.setAttribute('aria-label', messages.resizeHandle);
     resizeHandle.title = messages.resizeHandle;
+    menuOpenSettings.textContent = messages.openSettings;
+    menuHide.textContent = messages.hide;
+    if (minimized) header.setAttribute('aria-label', messages.expand);
+    else header.removeAttribute('aria-label');
     host.hidden = false;
     shell.classList.toggle('od-shell--loading', state.status === 'loading');
     body.replaceChildren();
@@ -127,6 +164,6 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     setState: render,
     setLanguage(language) { currentLanguage = language; render(currentState); },
     setRepositioned(repositioned) { resetButton.hidden = !repositioned; },
-    destroy() { host.remove(); },
+    destroy() { document.removeEventListener('click', onDocumentClick); host.remove(); },
   };
 }

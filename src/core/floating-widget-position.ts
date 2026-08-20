@@ -5,6 +5,11 @@ const WIDGET_WIDTH = 430;
  * without wrapping, wide enough that a bigger pick doesn't dwarf the composer beside it. */
 const MIN_WIDGET_WIDTH = 320;
 const MAX_WIDGET_WIDTH = 640;
+/** Width used while the widget is minimized to just its logo (see setCompact()) --
+ * matches the circular ".od-shell--minimized" size in inline-widget's styles.ts. Without
+ * this the host element would keep its full inline width even though the shell inside
+ * shrinks visually, leaving an invisible click-blocking area over the page. */
+const COMPACT_WIDTH = 42;
 
 interface Rectangle {
   top: number;
@@ -60,6 +65,10 @@ export interface FloatingWidgetPlacement {
    * anchor reference goes stale (detached from the document) -- the caller re-resolves a
    * live anchor and hands it in here instead of tearing down and recreating the placement. */
   setAnchor(anchor: HTMLElement): void;
+  /** Switches the host element's inline width between the full auto/manual width and a
+   * small fixed size, to match the widget collapsing down to just its logo. A manual
+   * resize (if any) is preserved and reapplied once compact mode is turned back off. */
+  setCompact(compact: boolean): void;
 }
 
 export interface FloatingWidgetPlacementOptions {
@@ -94,13 +103,15 @@ export function placeFloatingWidget(
   // Width (in px) the user has manually dragged the resize handle to. Takes over from
   // the auto-computed width the same way manualOffset takes over from the auto position.
   let manualWidth: number | null = null;
+  // True while the widget is minimized to just its logo -- see setCompact().
+  let compact = false;
 
   const update = () => {
     if (!anchor.isConnected || !widget.isConnected) return;
     const anchorRect = anchor.getBoundingClientRect();
     const widgetRect = widget.getBoundingClientRect();
     const viewport = { width: window.innerWidth, height: window.innerHeight };
-    const preferredWidth = manualWidth ?? undefined;
+    const preferredWidth = compact ? COMPACT_WIDTH : manualWidth ?? undefined;
     const position = computeFloatingPosition(anchorRect, widgetRect, viewport, preferredWidth);
     const left = manualOffset
       ? clamp(position.left + manualOffset.dx, VIEWPORT_MARGIN, viewport.width - position.width - VIEWPORT_MARGIN)
@@ -124,6 +135,12 @@ export function placeFloatingWidget(
     manualOffset = null;
     manualWidth = null;
     options.onRepositionedChange?.(false);
+    update();
+  }
+
+  function setCompact(nextCompact: boolean) {
+    if (compact === nextCompact) return;
+    compact = nextCompact;
     update();
   }
 
@@ -219,6 +236,7 @@ export function placeFloatingWidget(
     update,
     resetPosition,
     setAnchor,
+    setCompact,
     isRepositioned: () => manualOffset !== null || manualWidth !== null,
     destroy() {
       observer?.disconnect();
