@@ -38,7 +38,7 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   host.setAttribute('data-ondrift-widget', '');
   const root = host.attachShadow({ mode: 'open' });
   const logoUrl = globalThis.chrome?.runtime?.getURL?.('icons/ondrift-32.png') ?? '/icons/ondrift-32.png';
-  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><svg class="od-trace" aria-hidden="true"><rect pathLength="100"/></svg><header class="od-header"><img class="od-logo" src="${logoUrl}" alt="" /><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-reset hidden>${icons.recenter}</button><span class="od-menu-anchor"><button type="button" class="od-icon-button" data-settings aria-haspopup="true" aria-expanded="false">${icons.settings}</button><div class="od-menu" data-menu hidden><button type="button" class="od-menu-item" data-menu-settings></button><button type="button" class="od-menu-item" data-menu-hide></button></div></span><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div><div class="od-resize-handle" data-resize tabindex="-1">${icons.grip}</div></section>`;
+  root.innerHTML = `<style>${inlineWidgetStyles}</style><section class="od-shell"><svg class="od-trace" aria-hidden="true"><rect pathLength="100"/></svg><header class="od-header"><img class="od-logo" src="${logoUrl}" alt="" /><span class="od-title">Ondrift</span><span class="od-status" data-status></span><button type="button" class="od-icon-button" data-reset hidden>${icons.recenter}</button><button type="button" class="od-icon-button" data-settings aria-haspopup="true" aria-expanded="false">${icons.settings}</button><div class="od-menu od-settings-menu" data-menu hidden><button type="button" class="od-menu-item" data-menu-settings></button><button type="button" class="od-menu-item" data-menu-hide></button></div><div class="od-menu od-expand-menu" data-expand-menu hidden><button type="button" class="od-menu-item" data-expand-item></button></div><button type="button" class="od-icon-button" data-dismiss>${icons.close}</button></header><div class="od-body" data-body aria-live="polite"></div><div class="od-resize-handle" data-resize tabindex="-1">${icons.grip}</div></section>`;
   const shell = root.querySelector<HTMLElement>('.od-shell')!;
   const header = root.querySelector<HTMLElement>('.od-header')!;
   const body = root.querySelector<HTMLElement>('[data-body]')!;
@@ -50,20 +50,36 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   const menu = root.querySelector<HTMLElement>('[data-menu]')!;
   const menuOpenSettings = root.querySelector<HTMLButtonElement>('[data-menu-settings]')!;
   const menuHide = root.querySelector<HTMLButtonElement>('[data-menu-hide]')!;
+  const expandMenu = root.querySelector<HTMLElement>('[data-expand-menu]')!;
+  const expandMenuItem = root.querySelector<HTMLButtonElement>('[data-expand-item]')!;
   let currentState: InlineWidgetState = { status: 'ready', promptLength: 0 };
   let currentLanguage: LanguageId = 'en';
   let minimized = false;
 
+  // The shell clips overflow for the loading trace/resize handle, but that also cuts off
+  // either menu below whenever the widget's own content is short -- lift the clip only
+  // while a menu is actually open.
+  function syncMenuOpenClass() {
+    shell.classList.toggle('od-shell--menu-open', !menu.hidden || !expandMenu.hidden);
+  }
+
   function closeMenu() {
     menu.hidden = true;
     settingsButton.setAttribute('aria-expanded', 'false');
+    syncMenuOpenClass();
+  }
+
+  function closeExpandMenu() {
+    expandMenu.hidden = true;
+    syncMenuOpenClass();
   }
 
   function setMinimized(next: boolean) {
     if (minimized === next) return;
     minimized = next;
     shell.classList.toggle('od-shell--minimized', minimized);
-    if (minimized) closeMenu();
+    closeMenu();
+    closeExpandMenu();
     handlers.onMinimizedChange?.(minimized);
   }
 
@@ -76,14 +92,31 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     const next = menu.hidden;
     menu.hidden = !next;
     settingsButton.setAttribute('aria-expanded', String(next));
+    syncMenuOpenClass();
   });
   menuOpenSettings.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); closeMenu(); handlers.onOpenSettings(); });
   menuHide.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); setMinimized(true); });
-  const onDocumentClick = (event: MouseEvent) => { if (!menu.hidden && !event.composedPath().includes(menu) && !event.composedPath().includes(settingsButton)) closeMenu(); };
+  expandMenuItem.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); closeExpandMenu(); setMinimized(false); });
+  const onDocumentClick = (event: MouseEvent) => {
+    const path = event.composedPath();
+    if (!menu.hidden && !path.includes(menu) && !path.includes(settingsButton)) closeMenu();
+    if (!expandMenu.hidden && !path.includes(expandMenu)) closeExpandMenu();
+  };
   document.addEventListener('click', onDocumentClick);
-  // Clicking the collapsed bubble restores the full widget. The header also doubles as a
-  // drag handle (see floating-widget-position.ts), so this only needs to fire while
-  // minimized -- when expanded, a header click is just the start of a drag.
+  // Right-clicking the collapsed bubble opens an explicit "Expand" menu item instead of
+  // the browser's own context menu -- a left click alone is ambiguous with the drag
+  // handle's pointerdown (see floating-widget-position.ts) and can silently swallow a tap
+  // that moved a pixel or two, so this gives minimizing a way back that doesn't depend on
+  // hitting a plain click just right. Only intercepted while minimized: an expanded
+  // widget has nothing this needs to replace, so its native context menu still works.
+  header.addEventListener('contextmenu', (event) => {
+    if (!minimized) return;
+    event.preventDefault(); event.stopPropagation();
+    expandMenu.hidden = false;
+    syncMenuOpenClass();
+  });
+  // A plain click still expands too -- convenient when it doesn't get read as a drag, and
+  // harmless to keep alongside the menu above when it does.
   header.addEventListener('click', (event) => { if (minimized) { event.preventDefault(); event.stopPropagation(); setMinimized(false); } });
   dismissButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); host.hidden = true; handlers.onDismiss?.(); });
 
@@ -110,6 +143,7 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     resizeHandle.title = messages.resizeHandle;
     menuOpenSettings.textContent = messages.openSettings;
     menuHide.textContent = messages.hide;
+    expandMenuItem.textContent = messages.expandAction;
     if (minimized) header.setAttribute('aria-label', messages.expand);
     else header.removeAttribute('aria-label');
     host.hidden = false;

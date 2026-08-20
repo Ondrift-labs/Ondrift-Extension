@@ -16,7 +16,11 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-trace { position:absolute; inset:0; width:100%; height:100%; z-index:2; pointer-events:none; opacity:0; transition:opacity 180ms ease; }
 .od-shell--loading .od-trace { opacity:1; }
 .od-trace rect { x:1px; y:1px; width:calc(100% - 2px); height:calc(100% - 2px); rx:8px; ry:8px; fill:none; stroke:var(--od-accent); stroke-width:2px; stroke-linecap:round; stroke-dasharray:12 88; animation:od-border-travel 2.6s linear infinite; }
-.od-header { min-height:42px; display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--od-line); }
+.od-header { position:relative; min-height:42px; display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid var(--od-line); }
+/* While a menu is open, let it hang past the shell's own rounded-rect clip instead of
+   being cut off by it -- overflow:hidden above exists for the border-trace animation and
+   the resize handle, neither of which is visible while a menu is showing anyway. */
+.od-shell--menu-open { overflow:visible; }
 .od-header[data-draggable] { cursor:grab; touch-action:none; }
 .od-header[data-dragging] { cursor:grabbing; }
 .od-logo { display:block; width:23px; height:23px; object-fit:contain; }
@@ -25,11 +29,18 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-icon-button { position:relative; z-index:1; width:26px; height:26px; display:grid; place-items:center; border:0; border-radius:5px; color:var(--od-muted); background:transparent; cursor:pointer; pointer-events:auto; }
 .od-icon-button:hover { color:var(--od-ink); background:#f0f0ea; }
 .od-icon-button svg { width:14px; height:14px; }
-.od-menu-anchor { position:relative; }
-.od-menu { position:absolute; top:calc(100% + 6px); right:0; z-index:3; display:grid; min-width:132px; border:1px solid var(--od-line); border-radius:8px; padding:4px; background:var(--od-paper); box-shadow:0 8px 24px rgb(28 31 27 / 18%); }
+.od-menu { position:absolute; z-index:3; display:grid; min-width:132px; border:1px solid var(--od-line); border-radius:8px; padding:4px; background:var(--od-paper); box-shadow:0 8px 24px rgb(28 31 27 / 18%); }
 .od-menu[hidden] { display:none; }
-.od-menu-item { display:flex; align-items:center; width:100%; border:0; border-radius:5px; padding:7px 9px; color:var(--od-ink); background:transparent; font-size:11.5px; text-align:left; cursor:pointer; }
+.od-menu-item { display:flex; align-items:center; width:100%; border:0; border-radius:5px; padding:7px 9px; color:var(--od-ink); background:transparent; font-size:11.5px; text-align:left; cursor:pointer; white-space:nowrap; }
 .od-menu-item:hover { background:#f0f0ea; }
+/* Anchored to the header itself (not the settings button) so its right edge lines up
+   with the header's own right padding -- anchoring it to the button instead left it
+   hanging further left than the header's actual edge, overlapping the ready-state
+   button sitting underneath instead of clearing it. */
+.od-settings-menu { top:calc(100% + 6px); right:10px; }
+/* The minimized bubble's right-click menu -- centered under it regardless of the
+   bubble's own (fixed, small) width. */
+.od-expand-menu { top:100%; left:50%; transform:translateX(-50%); margin-top:6px; }
 .od-body { padding:12px; }
 /* Collapsed to just the logo (the "Hide" menu action) -- everything else in the header,
    the body, and the resize handle disappear so the bubble stops covering the page, and
@@ -39,7 +50,7 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
 .od-shell--minimized .od-title,
 .od-shell--minimized .od-status,
 .od-shell--minimized .od-icon-button,
-.od-shell--minimized .od-menu,
+.od-shell--minimized .od-settings-menu,
 .od-shell--minimized .od-body,
 .od-shell--minimized .od-resize-handle { display:none; }
 .od-ready { display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:12px; }
