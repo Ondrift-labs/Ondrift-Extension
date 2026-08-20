@@ -67,23 +67,53 @@ describe('createInlineWidget', () => {
     expect(onOpenSettings).toHaveBeenCalledOnce();
   });
 
-  it('runs header settings and dismiss actions without submitting the host page', () => {
+  it('opens a menu from the settings icon instead of navigating straight to settings', () => {
     const onOpenSettings = vi.fn();
     const onDismiss = vi.fn();
     const widget = createInlineWidget({ ...handlers(), onOpenSettings, onDismiss });
     const root = widget.element.shadowRoot;
     if (!root) throw new Error('Widget shadow root is missing.');
     const settings = root.querySelector<HTMLButtonElement>('[data-settings]');
+    const menu = root.querySelector<HTMLElement>('[data-menu]');
     const dismiss = root.querySelector<HTMLButtonElement>('[data-dismiss]');
 
     expect(settings?.type).toBe('button');
+    expect(menu?.hidden).toBe(true);
     settings?.click();
-    dismiss?.click();
+    expect(menu?.hidden).toBe(false);
+    expect(onOpenSettings).not.toHaveBeenCalled();
 
+    root.querySelector<HTMLButtonElement>('[data-menu-settings]')?.click();
     expect(onOpenSettings).toHaveBeenCalledOnce();
+    expect(menu?.hidden).toBe(true);
+
+    dismiss?.click();
     expect(onDismiss).toHaveBeenCalledOnce();
     expect(widget.element.hidden).toBe(true);
     expect(root.querySelector('style')?.textContent).toContain(':host([hidden])');
+  });
+
+  it('minimizes to the logo via the menu, then restores on a header click', () => {
+    const onMinimizedChange = vi.fn();
+    const widget = createInlineWidget({ ...handlers(), onMinimizedChange });
+    const root = widget.element.shadowRoot;
+    if (!root) throw new Error('Widget shadow root is missing.');
+    const shell = root.querySelector('.od-shell');
+    const header = root.querySelector<HTMLElement>('.od-header');
+
+    root.querySelector<HTMLButtonElement>('[data-settings]')?.click();
+    root.querySelector<HTMLButtonElement>('[data-menu-hide]')?.click();
+    expect(shell).toHaveClass('od-shell--minimized');
+    expect(onMinimizedChange).toHaveBeenLastCalledWith(true);
+
+    // A prompt edit while minimized re-renders the widget's body -- it must not undo the
+    // collapsed state (that was the original bug with the plain dismiss button).
+    widget.setState({ status: 'ready', promptLength: 40 });
+    expect(shell).toHaveClass('od-shell--minimized');
+
+    header?.click();
+    expect(shell).not.toHaveClass('od-shell--minimized');
+    expect(onMinimizedChange).toHaveBeenLastCalledWith(false);
   });
 
   it('switches the inline interface between Korean, English, Japanese, and Simplified Chinese', () => {

@@ -17,6 +17,11 @@ export interface InlineWidgetHandlers {
   onReloadPage(): void;
   onDismiss?(): void;
   onResetPosition?(): void;
+  /** Fired when the settings menu's "Hide" action collapses the widget down to just its
+   * logo, and again when clicking that logo restores it. Lets the caller shrink/restore
+   * the floating placement's width to match (see floating-widget-position.ts's
+   * setCompact()) -- CSS alone can't do it because the placement sets width inline. */
+  onMinimizedChange?(minimized: boolean): void;
 }
 
 export interface InlineWidgetController {
