@@ -93,7 +93,7 @@ describe('createInlineWidget', () => {
     expect(root.querySelector('style')?.textContent).toContain(':host([hidden])');
   });
 
-  it('minimizes to the logo via the menu, then restores on a header click', () => {
+  it('minimizes to the logo via the menu, and only restores through the right-click menu', () => {
     const onMinimizedChange = vi.fn();
     const widget = createInlineWidget({ ...handlers(), onMinimizedChange });
     const root = widget.element.shadowRoot;
@@ -111,7 +111,15 @@ describe('createInlineWidget', () => {
     widget.setState({ status: 'ready', promptLength: 40 });
     expect(shell).toHaveClass('od-shell--minimized');
 
+    // A plain click must NOT expand it: the header doubles as the drag handle, and a
+    // click also fires on pointerup after a drag -- if a click expanded the bubble,
+    // every drag-to-reposition would immediately pop it back open.
     header?.click();
+    expect(shell).toHaveClass('od-shell--minimized');
+    expect(onMinimizedChange).toHaveBeenLastCalledWith(true);
+
+    header?.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, composed: true }));
+    root.querySelector<HTMLButtonElement>('[data-expand-item]')?.click();
     expect(shell).not.toHaveClass('od-shell--minimized');
     expect(onMinimizedChange).toHaveBeenLastCalledWith(false);
   });
