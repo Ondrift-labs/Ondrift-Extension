@@ -116,6 +116,27 @@ describe('createInlineWidget', () => {
     expect(onMinimizedChange).toHaveBeenLastCalledWith(false);
   });
 
+  it('offers an explicit "Expand" item on right-click while minimized, and leaves the native menu alone otherwise', () => {
+    const widget = createInlineWidget(handlers());
+    const root = widget.element.shadowRoot;
+    if (!root) throw new Error('Widget shadow root is missing.');
+    const header = root.querySelector<HTMLElement>('.od-header');
+    const expandMenu = root.querySelector<HTMLElement>('[data-expand-menu]');
+    const contextmenu = () => header!.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, composed: true }));
+
+    expect(contextmenu()).toBe(true); // not prevented -- widget is expanded, browser menu still shows
+    expect(expandMenu?.hidden).toBe(true);
+
+    root.querySelector<HTMLButtonElement>('[data-settings]')?.click();
+    root.querySelector<HTMLButtonElement>('[data-menu-hide]')?.click();
+    expect(contextmenu()).toBe(false); // prevented -- Ondrift's own menu takes over instead
+    expect(expandMenu?.hidden).toBe(false);
+
+    root.querySelector<HTMLButtonElement>('[data-expand-item]')?.click();
+    expect(root.querySelector('.od-shell')).not.toHaveClass('od-shell--minimized');
+    expect(expandMenu?.hidden).toBe(true);
+  });
+
   it('switches the inline interface between Korean, English, Japanese, and Simplified Chinese', () => {
     const widget = createInlineWidget(handlers());
 
