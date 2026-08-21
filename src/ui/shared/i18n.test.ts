@@ -3,7 +3,7 @@ import type { PersonaId, SiteId } from './contracts';
 import { getUiCopy, isLanguageId, LANGUAGE_NAMES, SUPPORTED_LANGUAGES, uiCopy } from './i18n';
 
 const PERSONA_IDS: readonly PersonaId[] = ['general', 'developer', 'writer', 'student', 'translator'];
-const SITE_IDS: readonly SiteId[] = ['chatgpt', 'claude', 'gemini', 'perplexity'];
+const SITE_IDS: readonly SiteId[] = ['chatgpt', 'claude', 'gemini', 'perplexity', 'grok'];
 
 function collectStrings(value: unknown, path: string, out: Array<[string, unknown]>): void {
   if (typeof value === 'function') return;

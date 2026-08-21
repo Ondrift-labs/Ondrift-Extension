@@ -9,7 +9,7 @@ const INPUT_SELECTORS = [
   "div[contenteditable='true'][data-placeholder]",
   "textarea[placeholder]",
 ] as const;
-const SUBMIT_SELECTORS = ["button[aria-label*='Send' i]", "button[data-testid*='send' i]", "fieldset button[type='button']"] as const;
+const SUBMIT_SELECTORS = ["button[aria-label*='Send' i]", "button[data-testid*='send' i]"] as const;
 
 export class ClaudeAdapter extends BaseAdapter {
   readonly id = "claude" as const;

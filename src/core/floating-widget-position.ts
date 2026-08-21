@@ -211,6 +211,7 @@ export function placeFloatingWidget(
     if (!resizeOrigin) return;
     const maxWidth = Math.min(MAX_WIDGET_WIDTH, window.innerWidth - VIEWPORT_MARGIN - resizeOrigin.left);
     const width = clamp(resizeOrigin.width + (event.clientX - resizeOrigin.pointerX), MIN_WIDGET_WIDTH, maxWidth);
+    manualWidth = width;
     widget.style.width = `${width}px`;
   };
   const endResize = (event: PointerEvent) => {

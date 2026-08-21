@@ -1,9 +1,9 @@
 {
   "name": "ondrift-extension",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "private": true,
   "type": "module",
-  "description": "Local-first prompt rewriting and scoring for ChatGPT, Claude, Gemini, and Perplexity.",
+  "description": "Local-first prompt rewriting and scoring for ChatGPT, Claude, Gemini, Perplexity, and Grok.",
   "homepage": "https://ondrift.pages.dev/",
   "repository": {
     "type": "git",

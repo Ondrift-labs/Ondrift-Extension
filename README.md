@@ -7,7 +7,7 @@
 English | [한국어](docs/README.ko.md) | [日本語](docs/README.ja.md) | [简体中文](docs/README.zh.md)
 
 Ondrift is a local-first Manifest V3 Chrome extension that rewrites and scores
-prompts before they are sent on ChatGPT, Claude, Gemini, and Perplexity. Gemini
+prompts before they are sent on ChatGPT, Claude, Gemini, Perplexity, and Grok. Gemini
 is called directly from the extension service worker with an API key supplied
 by the user. The Free MVP has no Ondrift backend, account, or cloud sync.
 
@@ -37,7 +37,7 @@ example to test a build before it reaches the Chrome Web Store.
 5. Select **Load unpacked**.
 6. Choose the extracted folder that contains `manifest.json`.
 7. Add and verify your own Gemini API key in the Ondrift onboarding flow.
-8. Refresh a ChatGPT, Claude, Gemini, or Perplexity tab and use the Ondrift widget.
+8. Refresh a ChatGPT, Claude, Gemini, Perplexity, or Grok tab and use the Ondrift widget.
 
 Do not select the ZIP file itself in Chrome; extract it first. GitHub-installed
 builds do not update automatically. For a new release, download the new ZIP,
@@ -73,7 +73,7 @@ The archive is written to `release/` with `manifest.json` at its root.
 ## Privacy and permissions
 
 - `storage` stores settings locally; prompt history uses local IndexedDB.
-- Access to `chatgpt.com`, `claude.ai`, `gemini.google.com`, and `perplexity.ai` is used only to detect prompt editors, show the rewrite interface, and apply a user-approved rewrite.
+- Access to `chatgpt.com`, `claude.ai`, `gemini.google.com`, `perplexity.ai`, and `grok.com` is used only to detect prompt editors, show the rewrite interface, and apply a user-approved rewrite.
 - Access to `generativelanguage.googleapis.com` is used only to call Gemini with the user's own API key.
 - Ondrift does not collect or store AI response bodies and does not send prompts to a developer-operated server.
 

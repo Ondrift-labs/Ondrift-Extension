@@ -30,6 +30,7 @@ describe("extension manifest", () => {
       "https://gemini.google.com/*",
       "https://www.perplexity.ai/*",
       "https://perplexity.ai/*",
+      "https://grok.com/*",
       "https://generativelanguage.googleapis.com/*",
     ]);
     expect(manifest.host_permissions).not.toContain("<all_urls>");
@@ -39,6 +40,7 @@ describe("extension manifest", () => {
       "https://gemini.google.com/*",
       "https://www.perplexity.ai/*",
       "https://perplexity.ai/*",
+      "https://grok.com/*",
     ]);
   });
 

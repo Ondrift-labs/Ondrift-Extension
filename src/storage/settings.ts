@@ -8,7 +8,7 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   apiModels: {},
   persona: "general",
   language: "en",
-  enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true },
+  enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true },
   onboardingComplete: false,
   saveHistory: true,
   consentGranted: false,

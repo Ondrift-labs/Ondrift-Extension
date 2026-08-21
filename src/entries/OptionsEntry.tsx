@@ -12,7 +12,10 @@ function OptionsEntry() {
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
-    uiBridge.getSettings().then(setSettings).catch(() => setFailed(true));
+    uiBridge.getSettings().then((nextSettings) => {
+      setSettings(nextSettings);
+      setFailed(false);
+    }).catch(() => setFailed(true));
   }, []);
 
   useEffect(() => {
@@ -22,7 +25,10 @@ function OptionsEntry() {
     // forever, even after onboarding was actually finished in that same tab -- refetch
     // settings whenever the tab regains focus so it re-decides Onboarding vs. Options.
     function refresh() {
-      uiBridge.getSettings().then(setSettings).catch(() => undefined);
+      uiBridge.getSettings().then((nextSettings) => {
+        setSettings(nextSettings);
+        setFailed(false);
+      }).catch(() => undefined);
     }
     function onVisibilityChange() {
       if (document.visibilityState === "visible") refresh();

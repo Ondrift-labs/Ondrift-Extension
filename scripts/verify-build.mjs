@@ -22,6 +22,7 @@ invariant(
     "https://gemini.google.com/*",
     "https://www.perplexity.ai/*",
     "https://perplexity.ai/*",
+    "https://grok.com/*",
     "https://generativelanguage.googleapis.com/*",
   ]),
   "host access must be limited to supported AI sites and the Gemini API",
@@ -33,6 +34,7 @@ invariant(
     "https://gemini.google.com/*",
     "https://www.perplexity.ai/*",
     "https://perplexity.ai/*",
+    "https://grok.com/*",
   ]),
   "content script access must be limited to supported AI sites",
 );

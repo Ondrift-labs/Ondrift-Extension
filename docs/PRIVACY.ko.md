@@ -5,7 +5,7 @@
 발효일: 2026년 8월 10일
 
 Ondrift는 Ondrift Labs가 배포하는 Chrome 확장 프로그램입니다. ChatGPT, Claude,
-Gemini, Perplexity에서 프롬프트를 전송하기 전에 다시 작성하고 점수를 매기는 데
+Gemini, Perplexity, Grok에서 프롬프트를 전송하기 전에 다시 작성하고 점수를 매기는 데
 도움을 줍니다. 이 방침은 Ondrift Free MVP가 다루는 데이터를 설명합니다.
 
 ## Ondrift가 다루는 데이터
@@ -49,7 +49,7 @@ Chrome 프로필에 저장됩니다. 로컬 기록 기능이 켜져 있으면 �
 ## 권한
 
 - `storage` 권한은 사용자의 키, 설정, 환경설정을 로컬 Chrome 프로필에 저장하는 데 사용됩니다.
-- ChatGPT, Claude, Gemini, Perplexity에 대한 접근 권한은 프롬프트 입력창을 감지하고, Ondrift 컨트롤을 표시하고, 사용자가 다시 쓰기를 요청한 후 프롬프트를 읽고, 승인된 다시 쓰기를 적용하는 데에만 사용됩니다.
+- ChatGPT, Claude, Gemini, Perplexity, Grok에 대한 접근 권한은 프롬프트 입력창을 감지하고, Ondrift 컨트롤을 표시하고, 사용자가 다시 쓰기를 요청한 후 프롬프트를 읽고, 승인된 다시 쓰기를 적용하는 데에만 사용됩니다.
 - `generativelanguage.googleapis.com`에 대한 접근 권한은 사용자가 요청한 Gemini API 호출을 수행하는 데에만 사용됩니다.
 
 ## 보안

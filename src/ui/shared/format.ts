@@ -36,8 +36,9 @@ export function summarizeUsage(items: HistoryItem[], now = Date.now()): UsageSum
     : null;
   const grouped = new Map<string, number[]>();
   for (const item of scored) {
-    const date = new Date(item.createdAt).toISOString().slice(0, 10);
-    grouped.set(date, [...(grouped.get(date) ?? []), item.score]);
+    const date = new Date(item.createdAt);
+    const day = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    grouped.set(day, [...(grouped.get(day) ?? []), item.score]);
   }
   const dailyScores = [...grouped.entries()]
     .sort(([a], [b]) => a.localeCompare(b))

@@ -2,6 +2,12 @@ import { normalizeWhitespace, type SiteAdapter } from "../adapters/site-adapter"
 import type { HistoryEntry, RewriteResult } from "../shared/types";
 import { rewritePrompt, sendRuntimeMessage } from "./rewrite-client";
 
+// Sending the first message in a brand-new chat only gets a real conversation URL once the
+// site's own router pushes it, which happens moments after the synchronous submit event this
+// callback fires on -- reading getConversationUrl() immediately would capture the generic
+// new-chat URL instead. This delay is a best-effort wait for that pushState, not a guarantee.
+const CONVERSATION_URL_CAPTURE_DELAY_MS = 500;
+
 export class RewriteSession {
   private originalText = "";
   private result?: RewriteResult;
@@ -37,9 +43,9 @@ export class RewriteSession {
   startHistoryCapture(): () => void {
     this.removeSubmitListener?.();
     this.removeSubmitListener = this.adapter.onSubmit((submittedText) => {
-      const entry: HistoryEntry = {
-        service: this.adapter.id,
-        sourceUrl: this.adapter.getConversationUrl(),
+      const { adapter } = this;
+      const entryWithoutUrl: Omit<HistoryEntry, "sourceUrl"> = {
+        service: adapter.id,
         originalText: this.originalText || submittedText,
         improvedText: this.result?.improvedText,
         previousScore: this.result?.previousScore,
@@ -49,7 +55,12 @@ export class RewriteSession {
         createdAt: Date.now(),
         usageMetadata: this.result?.usageMetadata,
       };
-      void sendRuntimeMessage<number>({ type: "history_add", payload: entry }).catch(() => undefined);
+      // Deferred so a brand-new chat's router has a chance to push its real conversation URL
+      // before we read it -- see CONVERSATION_URL_CAPTURE_DELAY_MS above.
+      setTimeout(() => {
+        const entry: HistoryEntry = { ...entryWithoutUrl, sourceUrl: adapter.getConversationUrl() };
+        void sendRuntimeMessage<number>({ type: "history_add", payload: entry }).catch(() => undefined);
+      }, CONVERSATION_URL_CAPTURE_DELAY_MS);
       this.originalText = "";
       this.result = undefined;
       this.applied = false;

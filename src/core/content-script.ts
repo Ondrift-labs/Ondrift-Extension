@@ -172,16 +172,36 @@ contentController.subscribe(({ input }) => {
   showReady();
 });
 
+const SETTINGS_RETRY_DELAY_MS = 300;
+
+async function fetchSettings(): Promise<ExtensionSettings | null> {
+  try {
+    return await sendRuntimeMessage<ExtensionSettings>({ type: "settings_get" });
+  } catch (error) {
+    // A stale tab whose extension context is gone can't recover without a reload, so
+    // there's nothing worth retrying. Otherwise this is most likely a startup race with
+    // the background registering its listener -- worth one short retry, since starting
+    // the widget anyway on a permanent failure would bypass a site the user disabled.
+    if (isExtensionContextInvalidated(error)) return null;
+    await new Promise((resolve) => { setTimeout(resolve, SETTINGS_RETRY_DELAY_MS); });
+    try {
+      return await sendRuntimeMessage<ExtensionSettings>({ type: "settings_get" });
+    } catch {
+      return null;
+    }
+  }
+}
+
 async function boot(): Promise<void> {
   const adapter = adapterRegistry.resolve();
   if (!adapter) return;
-  try {
-    const settings = await sendRuntimeMessage<ExtensionSettings>({ type: "settings_get" });
-    widget.setLanguage(settings.language);
-    if (!settings.enabledSites[adapter.id]) return;
-  } catch {
-    // The background may be waking up; rewrite will surface a structured error if it remains unavailable.
-  }
+  const settings = await fetchSettings();
+  // Settings stayed unreachable after the retry: don't guess -- leave the widget off
+  // rather than risk activating on a site the user explicitly disabled. A later storage
+  // change or navigation triggers boot() again.
+  if (!settings) return;
+  widget.setLanguage(settings.language);
+  if (!settings.enabledSites[adapter.id]) return;
   contentController.start();
 }
 
@@ -219,5 +239,6 @@ window.addEventListener("pageshow", (event) => {
   // explicit re-init, since the script itself never re-ran for that case.
   if (!event.persisted) return;
   chrome.storage?.onChanged?.addListener(onStorageChanged);
+  widget.reattach();
   void boot();
 });

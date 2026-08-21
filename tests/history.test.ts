@@ -40,7 +40,7 @@ describe("HistoryStore", () => {
       adoptionRate: 0.5,
       averageScore: 90,
       totalTokens: 20,
-      byService: { chatgpt: 1, claude: 1, gemini: 0, perplexity: 0 },
+      byService: { chatgpt: 1, claude: 1, gemini: 0, perplexity: 0, grok: 0 },
     });
     await store.clear();
     await expect(store.list()).resolves.toEqual([]);

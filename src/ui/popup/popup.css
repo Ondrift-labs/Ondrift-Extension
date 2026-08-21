@@ -40,6 +40,7 @@ body { width: 380px; }
 .service-dot--claude { background: #a45d43; }
 .service-dot--gemini { background: #4285f4; }
 .service-dot--perplexity { background: #168a87; }
+.service-dot--grok { background: #1a1a1a; }
 .score-badge { display:inline-flex; align-items:center; gap:3px; margin-left:auto; border:1px solid #bcd2ca; border-radius:999px; padding:2px 5px; color:var(--accent); background:var(--accent-soft); font-weight:700; text-transform:none; }
 .score-badge > span,.score-badge > i { color:var(--faint); font-style:normal; font-weight:500; }
 .score-badge > small { border-left:1px solid #bcd2ca; margin-left:1px; padding-left:4px; font-size:9px; }
