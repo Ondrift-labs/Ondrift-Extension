@@ -1,7 +1,7 @@
 import type { LanguageId } from "ondrift-i18n";
 
 export type { LanguageId };
-export type SiteId = "chatgpt" | "claude" | "gemini" | "perplexity";
+export type SiteId = "chatgpt" | "claude" | "gemini" | "perplexity" | "grok";
 export type ProviderId = "gemini" | "openai" | "claude";
 
 export interface UsageMetadata {

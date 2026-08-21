@@ -5,7 +5,7 @@
 発効日: 2026年8月10日
 
 Ondrift は Ondrift Labs が公開する Chrome 拡張機能です。ChatGPT、Claude、
-Gemini、Perplexity でプロンプトを送信する前に、書き直しとスコアリングを
+Gemini、Perplexity、Grok でプロンプトを送信する前に、書き直しとスコアリングを
 行います。本ポリシーは Ondrift Free MVP が扱うデータについて説明します。
 
 ## Ondrift が扱うデータ
@@ -51,7 +51,7 @@ Ondrift は Chrome の同期ストレージや開発者が運営するクラウ�
 ## 権限
 
 - `storage` 権限は、ユーザーのキー、設定、環境設定をローカルの Chrome プロファイルに保存するために使用されます。
-- ChatGPT、Claude、Gemini、Perplexity へのアクセスは、プロンプト入力欄の検出、Ondrift コントロールの表示、ユーザーが書き直しを要求した後のプロンプトの読み取り、承認された書き直しの適用にのみ使用されます。
+- ChatGPT、Claude、Gemini、Perplexity、Grok へのアクセスは、プロンプト入力欄の検出、Ondrift コントロールの表示、ユーザーが書き直しを要求した後のプロンプトの読み取り、承認された書き直しの適用にのみ使用されます。
 - `generativelanguage.googleapis.com` へのアクセスは、ユーザーが要求した Gemini API 呼び出しの実行にのみ使用されます。
 
 ## セキュリティ

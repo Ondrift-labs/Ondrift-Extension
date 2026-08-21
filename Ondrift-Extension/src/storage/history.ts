@@ -99,7 +99,7 @@ export class HistoryStore {
     const entries = await this.allEntries();
     const scores = entries.flatMap((entry) => typeof entry.score === "number" ? [entry.score] : []);
     const rewritesApplied = entries.filter((entry) => entry.applied).length;
-    const byService: Record<SiteId, number> = { chatgpt: 0, claude: 0, gemini: 0, perplexity: 0 };
+    const byService: Record<SiteId, number> = { chatgpt: 0, claude: 0, gemini: 0, perplexity: 0, grok: 0 };
     for (const entry of entries) byService[entry.service] += 1;
     return {
       totalPrompts: entries.length,

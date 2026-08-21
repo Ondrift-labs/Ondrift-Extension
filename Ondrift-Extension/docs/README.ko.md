@@ -2,7 +2,7 @@
 
 [English](../README.md) | 한국어 | [日本語](README.ja.md) | [简体中文](README.zh.md)
 
-Ondrift는 ChatGPT, Claude, Gemini, Perplexity에서 프롬프트를 전송하기 전에
+Ondrift는 ChatGPT, Claude, Gemini, Perplexity, Grok에서 프롬프트를 전송하기 전에
 더 명확하게 다듬고 점수화하는 로컬 우선 Manifest V3 Chrome 확장 프로그램입니다.
 사용자가 등록한 Gemini API 키로 브라우저의 확장 프로그램 서비스 워커에서
 Gemini를 직접 호출하며, Free MVP에는 Ondrift 백엔드, 계정, 클라우드 동기화가
@@ -30,7 +30,7 @@ Chrome 웹스토어에 반영되기 전의 빌드를 미리 테스트하는 등,
 5. **압축해제된 확장 프로그램을 로드**를 누릅니다.
 6. `manifest.json`이 들어 있는 압축 해제 폴더를 선택합니다.
 7. Ondrift 온보딩에서 본인의 Gemini API 키를 등록하고 검증합니다.
-8. ChatGPT, Claude, Gemini 또는 Perplexity 탭을 새로고침한 뒤 Ondrift 위젯을 사용합니다.
+8. ChatGPT, Claude, Gemini, Perplexity 또는 Grok 탭을 새로고침한 뒤 Ondrift 위젯을 사용합니다.
 
 ZIP 파일 자체를 Chrome에 선택하면 안 됩니다. 먼저 압축을 해제해야 합니다.
 GitHub 설치판은 자동 업데이트되지 않으므로 새 릴리스가 나오면 ZIP을 다시
@@ -67,7 +67,7 @@ npm run package:release
 ## 개인정보 및 권한
 
 - `storage` 권한은 설정을 로컬에 저장하며 프롬프트 기록은 로컬 IndexedDB에 저장됩니다.
-- `chatgpt.com`, `claude.ai`, `gemini.google.com`, `perplexity.ai` 접근 권한은 프롬프트 입력창 감지, 재작성 UI 표시, 사용자가 승인한 결과 적용에만 사용됩니다.
+- `chatgpt.com`, `claude.ai`, `gemini.google.com`, `perplexity.ai`, `grok.com` 접근 권한은 프롬프트 입력창 감지, 재작성 UI 표시, 사용자가 승인한 결과 적용에만 사용됩니다.
 - `generativelanguage.googleapis.com` 접근 권한은 사용자의 API 키로 Gemini를 호출하는 데만 사용됩니다.
 - Ondrift는 AI 응답 본문을 수집하거나 저장하지 않으며 프롬프트를 개발자 운영 서버로 전송하지 않습니다.
 

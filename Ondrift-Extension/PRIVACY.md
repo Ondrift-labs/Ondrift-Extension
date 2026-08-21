@@ -5,8 +5,8 @@ English | [한국어](docs/PRIVACY.ko.md) | [日本語](docs/PRIVACY.ja.md) | [�
 Effective date: August 10, 2026
 
 Ondrift is a Chrome extension published by Ondrift Labs. It helps users rewrite
-and score prompts before sending them on ChatGPT, Claude, Gemini, and
-Perplexity. This policy describes the data handled by the Ondrift Free MVP.
+and score prompts before sending them on ChatGPT, Claude, Gemini, Perplexity,
+and Grok. This policy describes the data handled by the Ondrift Free MVP.
 
 ## Data Ondrift handles
 
@@ -54,9 +54,9 @@ to Chrome's extension-data behavior.
 
 - `storage` stores the user's key, settings, and preferences in the local Chrome
   profile.
-- Access to ChatGPT, Claude, Gemini, and Perplexity is used only to detect the
-  prompt editor, display Ondrift controls, read a prompt after the user requests
-  a rewrite, and apply an approved rewrite.
+- Access to ChatGPT, Claude, Gemini, Perplexity, and Grok is used only to detect
+  the prompt editor, display Ondrift controls, read a prompt after the user
+  requests a rewrite, and apply an approved rewrite.
 - Access to `generativelanguage.googleapis.com` is used only to make the Gemini
   API request initiated by the user.
 

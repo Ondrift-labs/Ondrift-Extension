@@ -12,6 +12,7 @@ const SERVICE_NAMES: Record<HistoryItem['service'], string> = {
   claude: 'Claude',
   gemini: 'Gemini',
   perplexity: 'Perplexity',
+  grok: 'Grok',
 };
 // How long the copy-to-clipboard confirmation (or failure) message stays visible.
 const COPY_FEEDBACK_TIMEOUT_MS = 1800;

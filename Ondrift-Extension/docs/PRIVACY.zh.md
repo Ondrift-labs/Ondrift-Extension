@@ -5,7 +5,7 @@
 生效日期:2026 年 8 月 10 日
 
 Ondrift 是由 Ondrift Labs 发布的 Chrome 扩展程序。它可以在你于 ChatGPT、Claude、
-Gemini、Perplexity 发送提示词之前,帮助你改写并评分。本政策描述了 Ondrift
+Gemini、Perplexity、Grok 发送提示词之前,帮助你改写并评分。本政策描述了 Ondrift
 Free MVP 版本所处理的数据。
 
 ## Ondrift 处理的数据
@@ -45,7 +45,7 @@ API 密钥和扩展程序设置通过 `chrome.storage.local` 保存在用户本�
 ## 权限
 
 - `storage` 权限用于将用户的密钥、设置和偏好保存在本地 Chrome 配置文件中。
-- 访问 ChatGPT、Claude、Gemini、Perplexity 仅用于检测提示词输入框、显示 Ondrift 控件、在用户请求改写后读取提示词,以及应用已批准的改写结果。
+- 访问 ChatGPT、Claude、Gemini、Perplexity、Grok 仅用于检测提示词输入框、显示 Ondrift 控件、在用户请求改写后读取提示词,以及应用已批准的改写结果。
 - 访问 `generativelanguage.googleapis.com` 仅用于执行用户请求的 Gemini API 调用。
 
 ## 安全性

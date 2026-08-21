@@ -2,7 +2,7 @@ import type { LanguageId } from 'ondrift-i18n';
 
 export type { LanguageId };
 export type ProviderId = 'gemini' | 'openai' | 'claude';
-export type SiteId = 'chatgpt' | 'claude' | 'gemini' | 'perplexity';
+export type SiteId = 'chatgpt' | 'claude' | 'gemini' | 'perplexity' | 'grok';
 export type PersonaId = 'general' | 'developer' | 'writer' | 'student' | 'translator';
 
 export interface UiSettings {
@@ -76,7 +76,7 @@ export const DEFAULT_SETTINGS: UiSettings = {
   apiKeyConfigured: false,
   persona: 'general',
   language: 'en',
-  siteAccess: { chatgpt: true, claude: true, gemini: true, perplexity: true },
+  siteAccess: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true },
   saveHistory: true,
   consentGranted: false,
 };

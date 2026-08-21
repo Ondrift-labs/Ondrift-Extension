@@ -51,7 +51,7 @@ Do not copy these examples repeatedly. They illustrate tone only.
 
 These claims may be used when they remain true in the current release:
 
-- Ondrift is a Chrome extension for ChatGPT, Claude, Gemini, and Perplexity.
+- Ondrift is a Chrome extension for ChatGPT, Claude, Gemini, Perplexity, and Grok.
 - It scores a draft prompt, explains missing context or constraints, and suggests a rewrite the user can apply.
 - It uses the user’s own Gemini API key.
 - There is no Ondrift account or Ondrift backend involved in prompt rewriting.

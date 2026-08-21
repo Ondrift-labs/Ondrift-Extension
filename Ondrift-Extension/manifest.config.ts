@@ -7,7 +7,7 @@ export const manifest = {
   version: "0.1.25",
   minimum_chrome_version: "116",
   description:
-    "Rewrite and score prompts on ChatGPT, Claude, Gemini, and Perplexity with your own Gemini API key.",
+    "Rewrite and score prompts on ChatGPT, Claude, Gemini, Perplexity, and Grok with your own Gemini API key.",
   homepage_url: "https://ondrift.pages.dev/",
   icons: {
     16: "icons/ondrift-16.png",
@@ -22,6 +22,7 @@ export const manifest = {
     "https://gemini.google.com/*",
     "https://www.perplexity.ai/*",
     "https://perplexity.ai/*",
+    "https://grok.com/*",
     "https://generativelanguage.googleapis.com/*"
   ],
   action: {
@@ -48,7 +49,8 @@ export const manifest = {
         "https://claude.ai/*",
         "https://gemini.google.com/*",
         "https://www.perplexity.ai/*",
-        "https://perplexity.ai/*"
+        "https://perplexity.ai/*",
+        "https://grok.com/*"
       ],
       js: ["src/content.ts"],
       run_at: "document_idle"
@@ -62,7 +64,8 @@ export const manifest = {
         "https://claude.ai/*",
         "https://gemini.google.com/*",
         "https://www.perplexity.ai/*",
-        "https://perplexity.ai/*"
+        "https://perplexity.ai/*",
+        "https://grok.com/*"
       ]
     }
   ],

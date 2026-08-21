@@ -2,6 +2,7 @@ import type { SiteAdapter } from "../adapters/site-adapter";
 import { ChatGptAdapter } from "../adapters/chatgpt.adapter";
 import { ClaudeAdapter } from "../adapters/claude.adapter";
 import { GeminiAdapter } from "../adapters/gemini.adapter";
+import { GrokAdapter } from "../adapters/grok.adapter";
 import { PerplexityAdapter } from "../adapters/perplexity.adapter";
 
 export class AdapterRegistry {
@@ -12,6 +13,7 @@ export class AdapterRegistry {
     new ClaudeAdapter(),
     new GeminiAdapter(),
     new PerplexityAdapter(),
+    new GrokAdapter(),
   ]) {
     adapters.forEach((adapter) => this.register(adapter));
   }

@@ -6,8 +6,8 @@
 
 **Summary (132 characters or fewer):**
 
-Rewrite and score prompts on ChatGPT, Claude, Gemini, and Perplexity with your
-own Gemini API key.
+Rewrite and score prompts on ChatGPT, Claude, Gemini, Perplexity, and Grok with
+your own Gemini API key.
 
 **Recommended category:** Workflow & Planning
 
@@ -16,14 +16,14 @@ own Gemini API key.
 Ondrift helps you turn rough drafts into clearer, more useful prompts before
 you send them to an AI assistant.
 
-Write normally on ChatGPT, Claude, Gemini, or Perplexity, then choose Rewrite &
-score. Ondrift reviews clarity, context, and constraints, proposes an improved
-version, and lets you decide whether to apply it.
+Write normally on ChatGPT, Claude, Gemini, Perplexity, or Grok, then choose
+Rewrite & score. Ondrift reviews clarity, context, and constraints, proposes an
+improved version, and lets you decide whether to apply it.
 
 Main features:
 
-- Works directly in the prompt editors of ChatGPT, Claude, Gemini, and
-  Perplexity.
+- Works directly in the prompt editors of ChatGPT, Claude, Gemini, Perplexity,
+  and Grok.
 - Rewrites and scores only when you request it.
 - Uses your own Gemini API key; no Ondrift account is required.
 - Stores settings and optional prompt history in your local Chrome profile.
@@ -57,6 +57,9 @@ lets the user apply the improved text.
 - `https://www.perplexity.ai/*` and `https://perplexity.ai/*`: Detect the
   Perplexity prompt editor, display the Ondrift control, read text only after a
   user requests a rewrite, and apply a rewrite only after user confirmation.
+- `https://grok.com/*`: Detects the Grok prompt editor, displays the Ondrift
+  control, reads text only after a user requests a rewrite, and applies a
+  rewrite only after user confirmation.
 - `https://generativelanguage.googleapis.com/*`: Allows the extension service
   worker to send the user-initiated rewrite request directly to Gemini with the
   user's own API key.
@@ -88,7 +91,7 @@ data is processed or stored only on the user's device.
 1. Install the extension and open its options page.
 2. Select a display language.
 3. Enter a valid Google Gemini API key and choose **Verify key**.
-4. Open ChatGPT, Claude, Gemini, or Perplexity in a signed-in browser session.
+4. Open ChatGPT, Claude, Gemini, Perplexity, or Grok in a signed-in browser session.
 5. Enter a prompt of at least several words.
 6. Choose **Rewrite & score** in the Ondrift control.
 7. Review the score and improved text, then choose **Apply**.

@@ -7,7 +7,7 @@ import '../shared/ui.css';
 import './options.css';
 
 const PERSONA_IDS: readonly PersonaId[] = ['general', 'developer', 'writer', 'student', 'translator'];
-const SITE_IDS: readonly SiteId[] = ['chatgpt', 'claude', 'gemini', 'perplexity'];
+const SITE_IDS: readonly SiteId[] = ['chatgpt', 'claude', 'gemini', 'perplexity', 'grok'];
 const CUSTOM_MODEL_VALUE = '__custom__';
 // Only free-text typing (the custom model field) needs this: it keeps a save from firing on
 // every keystroke. A select/radio/checkbox pick is already a complete, one-shot decision, so

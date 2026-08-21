@@ -222,7 +222,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       intro: {
         eyebrow: '보내기 전, 더 명확한 프롬프트',
         title: '모든 대화에 더 나은 지시를 더하세요.',
-        lead: 'Ondrift는 ChatGPT, Claude, Gemini, Perplexity의 입력창 옆에 나타납니다. 초안을 채점하고 부족한 부분을 설명하며, 한 번의 클릭으로 적용할 수 있는 다시 쓰기를 제안합니다.',
+        lead: 'Ondrift는 ChatGPT, Claude, Gemini, Perplexity, Grok의 입력창 옆에 나타납니다. 초안을 채점하고 부족한 부분을 설명하며, 한 번의 클릭으로 적용할 수 있는 다시 쓰기를 제안합니다.',
         promises: [
           { title: '이미 사용하는 곳에서 그대로', body: '지원되는 AI 사이트 전체에서 동일한 워크플로를 사용하세요.' },
           { title: '내 키는 내 브라우저에만', body: 'Gemini API 키는 브라우저 로컬 저장소에만 보관됩니다.' },
@@ -277,7 +277,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       complete: {
         eyebrow: '설정 완료',
         title: '이제 시작할 준비가 되었습니다.',
-        body: 'ChatGPT, Claude, Gemini, Perplexity를 열고 프롬프트를 작성해 보세요. 개선할 부분이 있으면 Ondrift가 입력창 옆에 나타납니다.',
+        body: 'ChatGPT, Claude, Gemini, Perplexity, Grok을 열고 프롬프트를 작성해 보세요. 개선할 부분이 있으면 Ondrift가 입력창 옆에 나타납니다.',
         cta: 'ChatGPT 열기',
       },
       footer: '비공개, 로컬 저장, 언제든 되돌릴 수 있습니다. Ondrift 계정이 필요하지 않습니다.',
@@ -347,6 +347,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           claude: { title: 'Claude', detail: 'claude.ai에서 다시 쓰기 위젯을 표시합니다.' },
           gemini: { title: 'Gemini', detail: 'gemini.google.com에서 다시 쓰기 위젯을 표시합니다.' },
           perplexity: { title: 'Perplexity', detail: 'perplexity.ai에서 다시 쓰기 위젯을 표시합니다.' },
+          grok: { title: 'Grok', detail: 'grok.com에서 다시 쓰기 위젯을 표시합니다.' },
         },
       },
       privacy: {
@@ -440,7 +441,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       intro: {
         eyebrow: 'A clearer prompt, before you send',
         title: 'Bring better instructions to every conversation.',
-        lead: 'Ondrift sits beside the prompt box in ChatGPT, Claude, Gemini, and Perplexity. It scores your draft, explains what is missing, and offers a rewrite you can apply in one click.',
+        lead: 'Ondrift sits beside the prompt box in ChatGPT, Claude, Gemini, Perplexity, and Grok. It scores your draft, explains what is missing, and offers a rewrite you can apply in one click.',
         promises: [
           { title: 'Works where you already write', body: 'Use the same focused workflow across supported AI sites.' },
           { title: 'Your key, your browser', body: 'Your Gemini API key stays in local extension storage.' },
@@ -495,7 +496,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       complete: {
         eyebrow: 'Setup complete',
         title: 'You’re ready to write.',
-        body: 'Open ChatGPT, Claude, Gemini, or Perplexity and start a prompt. Ondrift will appear beside the composer when there is something useful to improve.',
+        body: 'Open ChatGPT, Claude, Gemini, Perplexity, or Grok and start a prompt. Ondrift will appear beside the composer when there is something useful to improve.',
         cta: 'Open ChatGPT',
       },
       footer: 'Private, local, and reversible. No Ondrift account required.',
@@ -565,6 +566,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           claude: { title: 'Claude', detail: 'Show the rewrite widget on claude.ai.' },
           gemini: { title: 'Gemini', detail: 'Show the rewrite widget on gemini.google.com.' },
           perplexity: { title: 'Perplexity', detail: 'Show the rewrite widget on perplexity.ai.' },
+          grok: { title: 'Grok', detail: 'Show the rewrite widget on grok.com.' },
         },
       },
       privacy: {
@@ -658,7 +660,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       intro: {
         eyebrow: '送信する前に、もっと明確なプロンプトへ',
         title: 'すべての会話に、より良い指示を。',
-        lead: 'Ondrift は ChatGPT、Claude、Gemini、Perplexity の入力欄の横に表示されます。下書きを採点し、不足している点を説明し、ワンクリックで適用できる改善案を提案します。',
+        lead: 'Ondrift は ChatGPT、Claude、Gemini、Perplexity、Grok の入力欄の横に表示されます。下書きを採点し、不足している点を説明し、ワンクリックで適用できる改善案を提案します。',
         promises: [
           { title: 'すでに使っている場所で', body: '対応する AI サイト全体で同じワークフローを使えます。' },
           { title: 'キーはこのブラウザだけに', body: 'Gemini API キーはこの拡張機能のローカルストレージに保存されます。' },
@@ -713,7 +715,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       complete: {
         eyebrow: '設定完了',
         title: 'さあ、書き始めましょう。',
-        body: 'ChatGPT、Claude、Gemini、Perplexity を開いてプロンプトを入力してください。改善できる点があれば、Ondrift が入力欄の横に表示されます。',
+        body: 'ChatGPT、Claude、Gemini、Perplexity、Grok を開いてプロンプトを入力してください。改善できる点があれば、Ondrift が入力欄の横に表示されます。',
         cta: 'ChatGPT を開く',
       },
       footer: '非公開・ローカル保存・いつでも元に戻せます。Ondrift のアカウントは不要です。',
@@ -783,6 +785,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           claude: { title: 'Claude', detail: 'claude.ai でリライトウィジェットを表示します。' },
           gemini: { title: 'Gemini', detail: 'gemini.google.com でリライトウィジェットを表示します。' },
           perplexity: { title: 'Perplexity', detail: 'perplexity.ai でリライトウィジェットを表示します。' },
+          grok: { title: 'Grok', detail: 'grok.com でリライトウィジェットを表示します。' },
         },
       },
       privacy: {
@@ -876,7 +879,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       intro: {
         eyebrow: '发送前，让提示词更清晰',
         title: '为每一次对话带来更好的指令。',
-        lead: 'Ondrift 会出现在 ChatGPT、Claude、Gemini 和 Perplexity 的输入框旁。它会为草稿评分，说明缺少什么，并提供可一键应用的改写版本。',
+        lead: 'Ondrift 会出现在 ChatGPT、Claude、Gemini、Perplexity 和 Grok 的输入框旁。它会为草稿评分，说明缺少什么，并提供可一键应用的改写版本。',
         promises: [
           { title: '就在你常用的地方使用', body: '在支持的 AI 网站中使用同一套专注的工作流。' },
           { title: '你的密钥，只留在浏览器里', body: '你的 Gemini API 密钥只保存在扩展的本地存储中。' },
@@ -931,7 +934,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       complete: {
         eyebrow: '设置完成',
         title: '你可以开始写了。',
-        body: '打开 ChatGPT、Claude、Gemini 或 Perplexity 并开始输入提示词。当有可改进的内容时，Ondrift 会出现在输入框旁。',
+        body: '打开 ChatGPT、Claude、Gemini、Perplexity 或 Grok 并开始输入提示词。当有可改进的内容时，Ondrift 会出现在输入框旁。',
         cta: '打开 ChatGPT',
       },
       footer: '私密、本地保存、可随时撤回。无需 Ondrift 账号。',
@@ -1001,6 +1004,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           claude: { title: 'Claude', detail: '在 claude.ai 上显示改写小组件。' },
           gemini: { title: 'Gemini', detail: '在 gemini.google.com 上显示改写小组件。' },
           perplexity: { title: 'Perplexity', detail: '在 perplexity.ai 上显示改写小组件。' },
+          grok: { title: 'Grok', detail: '在 grok.com 上显示改写小组件。' },
         },
       },
       privacy: {

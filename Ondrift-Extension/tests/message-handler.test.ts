@@ -9,7 +9,7 @@ function dependencies(overrides: Partial<MessageHandlerDependencies> = {}): Mess
         provider: "gemini" as const,
         apiKeys: { gemini: "key" },
         apiModels: {},
-        enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true },
+        enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true },
         onboardingComplete: true,
         persona: "general",
         language: "en" as const,
@@ -41,7 +41,7 @@ describe("handleRuntimeRequest", () => {
 
   it("rejects disabled sites before calling a provider", async () => {
     const deps = dependencies({
-      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: { gemini: "key" }, apiModels: {}, enabledSites: { chatgpt: false, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: true })) } as never,
+      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: { gemini: "key" }, apiModels: {}, enabledSites: { chatgpt: false, claude: true, gemini: true, perplexity: true, grok: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: true })) } as never,
     });
     await expect(handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "chatgpt" } }, deps))
       .resolves.toMatchObject({ ok: false, error: { code: "not_configured" } });
@@ -72,7 +72,7 @@ describe("handleRuntimeRequest", () => {
 
   it("does not persist history before consent", async () => {
     const deps = dependencies({
-      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: {}, apiModels: {}, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true }, onboardingComplete: false, persona: "general", language: "en", saveHistory: true, consentGranted: false })) } as never,
+      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: {}, apiModels: {}, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true }, onboardingComplete: false, persona: "general", language: "en", saveHistory: true, consentGranted: false })) } as never,
     });
     const payload = { service: "chatgpt" as const, sourceUrl: "https://chatgpt.com", originalText: "private", applied: false, createdAt: 1 };
     await expect(handleRuntimeRequest({ type: "history_add", payload }, deps)).resolves.toEqual({ ok: true, data: 0 });
@@ -103,7 +103,7 @@ describe("handleRuntimeRequest", () => {
 
   it("does not persist a key status for errors unrelated to the key's own health", async () => {
     const deps = dependencies({
-      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: { gemini: "key" }, apiModels: {}, enabledSites: { chatgpt: false, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: true })), update: vi.fn(async (patch: unknown) => patch) } as never,
+      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: { gemini: "key" }, apiModels: {}, enabledSites: { chatgpt: false, claude: true, gemini: true, perplexity: true, grok: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: true })), update: vi.fn(async (patch: unknown) => patch) } as never,
     });
     await handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "chatgpt" } }, deps);
     expect(deps.settings.update).not.toHaveBeenCalled();
@@ -112,7 +112,7 @@ describe("handleRuntimeRequest", () => {
   it("passes the user's chosen model through to the provider on rewrite", async () => {
     const rewrite = vi.fn(async () => ({ improvedText: "better", previousScore: 50, score: 90, rationale: "clear" }));
     const deps = dependencies({
-      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: { gemini: "key" }, apiModels: { gemini: "gemini-3.5-flash-lite" }, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: true })), update: vi.fn(async (patch: unknown) => patch) } as never,
+      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: { gemini: "key" }, apiModels: { gemini: "gemini-3.5-flash-lite" }, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: true })), update: vi.fn(async (patch: unknown) => patch) } as never,
       provider: vi.fn(() => ({ id: "gemini" as const, rewrite, validateKey: vi.fn() })),
     });
     await handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "chatgpt" } }, deps);
@@ -130,7 +130,7 @@ describe("handleRuntimeRequest", () => {
 
   it("does not treat completed onboarding as history consent", async () => {
     const deps = dependencies({
-      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: {}, apiModels: {}, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: false })) } as never,
+      settings: { get: vi.fn(async () => ({ provider: "gemini", apiKeys: {}, apiModels: {}, enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true }, onboardingComplete: true, persona: "general", language: "en", saveHistory: true, consentGranted: false })) } as never,
     });
     const payload = { service: "claude" as const, sourceUrl: "https://claude.ai", originalText: "private", applied: false, createdAt: 1 };
     await expect(handleRuntimeRequest({ type: "history_add", payload }, deps)).resolves.toEqual({ ok: true, data: 0 });

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatGptAdapter } from "../src/adapters/chatgpt.adapter";
 import { ClaudeAdapter } from "../src/adapters/claude.adapter";
 import { GeminiAdapter } from "../src/adapters/gemini.adapter";
+import { GrokAdapter } from "../src/adapters/grok.adapter";
 import { PerplexityAdapter } from "../src/adapters/perplexity.adapter";
 import { AdapterRegistry } from "../src/core/adapter-registry";
 import { findComposerAnchor, writeEditable } from "../src/adapters/site-adapter";
@@ -29,6 +30,8 @@ describe("site adapter URL matching", () => {
     expect(new GeminiAdapter().matches("https://google.com/?gemini.google.com")).toBe(false);
     expect(new PerplexityAdapter().matches("https://www.perplexity.ai/search/abc")).toBe(true);
     expect(new PerplexityAdapter().matches("https://perplexity.ai/")).toBe(true);
+    expect(new GrokAdapter().matches("https://grok.com/")).toBe(true);
+    expect(new GrokAdapter().matches("https://evil.example/?grok.com")).toBe(false);
     expect(new ClaudeAdapter().matches("not-a-url")).toBe(false);
   });
 
@@ -37,12 +40,21 @@ describe("site adapter URL matching", () => {
     expect(registry.resolve("https://claude.ai/chat/1")?.id).toBe("claude");
     expect(registry.resolve("https://gemini.google.com/app")?.id).toBe("gemini");
     expect(registry.resolve("https://www.perplexity.ai/")?.id).toBe("perplexity");
+    expect(registry.resolve("https://grok.com/")?.id).toBe("grok");
     expect(registry.resolve("https://example.com")).toBeNull();
   });
 
   it("reads and applies Gemini contenteditable prompts", () => {
     document.body.innerHTML = '<rich-textarea><div class="ql-editor" contenteditable="true" role="textbox">draft</div></rich-textarea>';
     const adapter = new GeminiAdapter();
+    expect(adapter.getPromptText()).toBe("draft");
+    adapter.setPromptText("improved");
+    expect(adapter.getPromptText()).toBe("improved");
+  });
+
+  it("reads and applies Grok contenteditable prompts", () => {
+    document.body.innerHTML = '<form><div contenteditable="true" role="textbox" aria-label="Ask Grok anything">draft</div></form>';
+    const adapter = new GrokAdapter();
     expect(adapter.getPromptText()).toBe("draft");
     adapter.setPromptText("improved");
     expect(adapter.getPromptText()).toBe("improved");
