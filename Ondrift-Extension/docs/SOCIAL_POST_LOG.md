@@ -9,4 +9,3 @@ Record every published Ondrift social/community post here. Use ISO 8601 timestam
 
 | Target | Working topic | Status | Notes |
 | --- | --- | --- | --- |
-| Threads | Click-to-expand removed, right-click only (minimized widget) | Drafted, awaiting review | See SOCIAL_POST_DRAFTS.md |
