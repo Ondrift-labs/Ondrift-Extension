@@ -25,7 +25,7 @@ service worker 使用你自己提供的 API 密钥直接调用。Free MVP 版本
 如果你想手动安装某个特定版本,例如在 Chrome 网上应用店更新之前先体验新版本,
 也可以通过公开发布的 ZIP 包安装。
 
-1. 从[最新发布版本](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)下载 `ondrift-0.1.24.zip`。
+1. 从[最新发布版本](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)下载 `ondrift-0.1.26.zip`。
 2. 完整解压该 ZIP 文件到一个文件夹。
 3. 在 Chrome 中打开 `chrome://extensions`。
 4. 打开右上角的**开发者模式**。

@@ -23,7 +23,7 @@ Gemini를 직접 호출하며, Free MVP에는 Ondrift 백엔드, 계정, 클라�
 Chrome 웹스토어에 반영되기 전의 빌드를 미리 테스트하는 등, 특정 릴리스를 직접
 설치하고 싶을 때는 공개 릴리스 ZIP을 사용할 수도 있습니다.
 
-1. [최신 릴리스](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)에서 `ondrift-0.1.24.zip`을 다운로드합니다.
+1. [최신 릴리스](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)에서 `ondrift-0.1.26.zip`을 다운로드합니다.
 2. ZIP을 원하는 폴더에 완전히 압축 해제합니다.
 3. Chrome에서 `chrome://extensions`를 엽니다.
 4. 오른쪽 위의 **개발자 모드**를 켭니다.
