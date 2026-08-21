@@ -1,7 +1,7 @@
 import type { LanguageId } from '../../shared/types';
 
 export type InlineWidgetState =
-  | { status: 'ready'; promptLength: number }
+  | { status: 'ready'; promptLength?: number }
   | { status: 'loading' }
   | { status: 'result'; score: number; previousScore: number; rationale: string; improvedText: string }
   | { status: 'applied'; score: number; previousScore: number; improvedText: string }

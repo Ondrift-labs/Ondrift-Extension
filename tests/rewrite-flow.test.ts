@@ -16,7 +16,10 @@ function adapter(setPromptText: (text: string) => void, getPromptText: () => str
 }
 
 describe("RewriteSession apply", () => {
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
 
   it("reports success only after the site editor contains the rewrite", async () => {
     let prompt = "original prompt";
@@ -100,5 +103,153 @@ describe("RewriteSession apply", () => {
       type: "history_add",
       payload: { previousScore: 52, score: 86 },
     });
+  });
+
+  it("does not store an ordinary submission when no rewrite completed", async () => {
+    vi.useFakeTimers();
+    let submit: ((text: string) => void) | undefined;
+    const onSubmit = vi.fn((listener: (text: string) => void) => { submit = listener; return () => undefined; });
+    const sendMessage = vi.fn(async () => ({ ok: true, data: 1 }));
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+    const historyAdapter: SiteAdapter = {
+      ...adapter(() => undefined, () => "ordinary prompt"),
+      onSubmit,
+    };
+    const session = new RewriteSession(historyAdapter);
+
+    session.startHistoryCapture();
+    submit?.("ordinary prompt");
+    await vi.advanceTimersByTimeAsync(500);
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(sendMessage).not.toHaveBeenCalled();
+  });
+
+  it("stores a completed rewrite exactly once when duplicate submit events fire", async () => {
+    vi.useFakeTimers();
+    let submit: ((text: string) => void) | undefined;
+    const sendMessage = vi.fn(async (message: { type: string }) => message.type === "rewrite"
+      ? { ok: true, data: { improvedText: "improved prompt", previousScore: 52, score: 86, rationale: "clearer" } }
+      : { ok: true, data: 1 });
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+    const historyAdapter: SiteAdapter = {
+      ...adapter(() => undefined, () => "original prompt"),
+      onSubmit(listener) { submit = listener; return () => undefined; },
+    };
+    const session = new RewriteSession(historyAdapter);
+
+    session.startHistoryCapture();
+    await session.rewrite();
+    submit?.("improved prompt");
+    submit?.("improved prompt");
+    await vi.advanceTimersByTimeAsync(500);
+
+    expect(sendMessage.mock.calls.filter(([message]) => message.type === "history_add")).toHaveLength(1);
+  });
+
+  it("keeps the submitted conversation URL when navigation occurs before capture", async () => {
+    vi.useFakeTimers();
+    let submit: ((text: string) => void) | undefined;
+    let conversationUrl = "https://chatgpt.com/c/submitted";
+    const sendMessage = vi.fn(async (message: { type: string }) => message.type === "rewrite"
+      ? { ok: true, data: { improvedText: "improved prompt", previousScore: 52, score: 86, rationale: "clearer" } }
+      : { ok: true, data: 1 });
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+    const historyAdapter: SiteAdapter = {
+      ...adapter(() => undefined, () => "original prompt"),
+      id: "chatgpt",
+      getConversationUrl: () => conversationUrl,
+      onSubmit(listener) { submit = listener; return () => undefined; },
+    };
+    const session = new RewriteSession(historyAdapter);
+
+    session.startHistoryCapture();
+    await session.rewrite();
+    submit?.("improved prompt");
+    conversationUrl = "https://chatgpt.com/c/different";
+    await vi.advanceTimersByTimeAsync(500);
+
+    expect(sendMessage.mock.calls[1]?.[0]).toMatchObject({
+      type: "history_add",
+      payload: { sourceUrl: "https://chatgpt.com/c/submitted" },
+    });
+  });
+
+  it("captures the routed conversation URL after submitting from a new-chat page", async () => {
+    vi.useFakeTimers();
+    let submit: ((text: string) => void) | undefined;
+    let conversationUrl = "https://chatgpt.com/";
+    const sendMessage = vi.fn(async (message: { type: string }) => message.type === "rewrite"
+      ? { ok: true, data: { improvedText: "improved prompt", previousScore: 52, score: 86, rationale: "clearer" } }
+      : { ok: true, data: 1 });
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+    const historyAdapter: SiteAdapter = {
+      ...adapter(() => undefined, () => "original prompt"),
+      id: "chatgpt",
+      getConversationUrl: () => conversationUrl,
+      onSubmit(listener) { submit = listener; return () => undefined; },
+    };
+    const session = new RewriteSession(historyAdapter);
+
+    session.startHistoryCapture();
+    await session.rewrite();
+    submit?.("improved prompt");
+    conversationUrl = "https://chatgpt.com/c/created";
+    await vi.advanceTimersByTimeAsync(500);
+
+    expect(sendMessage.mock.calls[1]?.[0]).toMatchObject({
+      type: "history_add",
+      payload: { sourceUrl: "https://chatgpt.com/c/created" },
+    });
+  });
+
+  it("does not replace a new-chat URL with an unrelated fast navigation", async () => {
+    vi.useFakeTimers();
+    let submit: ((text: string) => void) | undefined;
+    let conversationUrl = "https://chatgpt.com/";
+    const sendMessage = vi.fn(async (message: { type: string }) => message.type === "rewrite"
+      ? { ok: true, data: { improvedText: "improved prompt", previousScore: 52, score: 86, rationale: "clearer" } }
+      : { ok: true, data: 1 });
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+    const historyAdapter: SiteAdapter = {
+      ...adapter(() => undefined, () => "original prompt"),
+      id: "chatgpt",
+      getConversationUrl: () => conversationUrl,
+      onSubmit(listener) { submit = listener; return () => undefined; },
+    };
+    const session = new RewriteSession(historyAdapter);
+
+    session.startHistoryCapture();
+    await session.rewrite();
+    submit?.("improved prompt");
+    conversationUrl = "https://chatgpt.com/gpts";
+    await vi.advanceTimersByTimeAsync(500);
+
+    expect(sendMessage.mock.calls[1]?.[0]).toMatchObject({
+      type: "history_add",
+      payload: { sourceUrl: "https://chatgpt.com/" },
+    });
+  });
+
+  it("cancels a pending history capture when the session is stopped", async () => {
+    vi.useFakeTimers();
+    let submit: ((text: string) => void) | undefined;
+    const sendMessage = vi.fn(async (message: { type: string }) => message.type === "rewrite"
+      ? { ok: true, data: { improvedText: "improved prompt", previousScore: 52, score: 86, rationale: "clearer" } }
+      : { ok: true, data: 1 });
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+    const historyAdapter: SiteAdapter = {
+      ...adapter(() => undefined, () => "original prompt"),
+      onSubmit(listener) { submit = listener; return () => undefined; },
+    };
+    const session = new RewriteSession(historyAdapter);
+
+    const stop = session.startHistoryCapture();
+    await session.rewrite();
+    submit?.("improved prompt");
+    stop();
+    await vi.advanceTimersByTimeAsync(500);
+
+    expect(sendMessage.mock.calls.filter(([message]) => message.type === "history_add")).toHaveLength(0);
   });
 });

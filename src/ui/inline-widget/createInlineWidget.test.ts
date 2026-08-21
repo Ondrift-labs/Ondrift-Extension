@@ -4,6 +4,16 @@ import { createInlineWidget } from './createInlineWidget';
 describe('createInlineWidget', () => {
   const handlers = () => ({ onRewrite: vi.fn(), onApply: vi.fn(), onRetry: vi.fn(), onOpenSettings: vi.fn(), onReloadPage: vi.fn() });
 
+  it('starts ready to rewrite without requiring a pre-read prompt length', () => {
+    const onRewrite = vi.fn();
+    const widget = createInlineWidget({ ...handlers(), onRewrite });
+    const rewrite = widget.element.shadowRoot?.querySelector<HTMLButtonElement>('.od-button');
+
+    expect(rewrite).toBeEnabled();
+    rewrite?.click();
+    expect(onRewrite).toHaveBeenCalledOnce();
+  });
+
   it('emits rewrite and apply actions', () => {
     const onRewrite = vi.fn();
     const onApply = vi.fn();
@@ -93,7 +103,7 @@ describe('createInlineWidget', () => {
     expect(root.querySelector('style')?.textContent).toContain(':host([hidden])');
   });
 
-  it('minimizes to the logo via the menu, and only restores through the right-click menu', () => {
+  it('minimizes to an accessible button and restores on click', () => {
     const onMinimizedChange = vi.fn();
     const widget = createInlineWidget({ ...handlers(), onMinimizedChange });
     const root = widget.element.shadowRoot;
@@ -105,23 +115,23 @@ describe('createInlineWidget', () => {
     root.querySelector<HTMLButtonElement>('[data-menu-hide]')?.click();
     expect(shell).toHaveClass('od-shell--minimized');
     expect(onMinimizedChange).toHaveBeenLastCalledWith(true);
+    expect(header).toHaveAttribute('role', 'button');
+    expect(header).toHaveAttribute('tabindex', '0');
+    expect(header).toHaveAttribute('aria-expanded', 'false');
+    expect(header).toHaveAttribute('aria-label', 'Expand Ondrift');
 
     // A prompt edit while minimized re-renders the widget's body -- it must not undo the
     // collapsed state (that was the original bug with the plain dismiss button).
     widget.setState({ status: 'ready', promptLength: 40 });
     expect(shell).toHaveClass('od-shell--minimized');
 
-    // A plain click must NOT expand it: the header doubles as the drag handle, and a
-    // click also fires on pointerup after a drag -- if a click expanded the bubble,
-    // every drag-to-reposition would immediately pop it back open.
     header?.click();
-    expect(shell).toHaveClass('od-shell--minimized');
-    expect(onMinimizedChange).toHaveBeenLastCalledWith(true);
-
-    header?.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, composed: true }));
-    root.querySelector<HTMLButtonElement>('[data-expand-item]')?.click();
     expect(shell).not.toHaveClass('od-shell--minimized');
     expect(onMinimizedChange).toHaveBeenLastCalledWith(false);
+    expect(header).not.toHaveAttribute('role');
+    expect(header).not.toHaveAttribute('tabindex');
+    expect(header).not.toHaveAttribute('aria-expanded');
+    expect(header).not.toHaveAttribute('aria-label');
   });
 
   it('offers an explicit "Expand" item on right-click while minimized, and leaves the native menu alone otherwise', () => {
@@ -143,6 +153,47 @@ describe('createInlineWidget', () => {
     root.querySelector<HTMLButtonElement>('[data-expand-item]')?.click();
     expect(root.querySelector('.od-shell')).not.toHaveClass('od-shell--minimized');
     expect(expandMenu?.hidden).toBe(true);
+  });
+
+  it('flips and clamps the minimized expand menu inside the viewport', () => {
+    const widget = createInlineWidget(handlers());
+    const root = widget.element.shadowRoot;
+    if (!root) throw new Error('Widget shadow root is missing.');
+    const header = root.querySelector<HTMLElement>('.od-header')!;
+    const expandMenu = root.querySelector<HTMLElement>('[data-expand-menu]')!;
+    vi.spyOn(header, 'getBoundingClientRect').mockReturnValue({
+      top: 750, right: 54, bottom: 792, left: 12, width: 42, height: 42,
+      x: 12, y: 750, toJSON: () => undefined,
+    });
+    Object.defineProperty(expandMenu, 'offsetWidth', { configurable: true, value: 132 });
+    Object.defineProperty(expandMenu, 'offsetHeight', { configurable: true, value: 42 });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 400 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+
+    root.querySelector<HTMLButtonElement>('[data-settings]')?.click();
+    root.querySelector<HTMLButtonElement>('[data-menu-hide]')?.click();
+    header.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, composed: true }));
+
+    expect(expandMenu.hidden).toBe(false);
+    expect(expandMenu.style.left).toBe('12px');
+    expect(expandMenu.style.top).toBe('702px');
+  });
+
+  it.each(['Enter', ' '])('restores a minimized widget with the %s key', (key) => {
+    const onMinimizedChange = vi.fn();
+    const widget = createInlineWidget({ ...handlers(), onMinimizedChange });
+    const root = widget.element.shadowRoot;
+    if (!root) throw new Error('Widget shadow root is missing.');
+    const header = root.querySelector<HTMLElement>('.od-header')!;
+
+    root.querySelector<HTMLButtonElement>('[data-settings]')?.click();
+    root.querySelector<HTMLButtonElement>('[data-menu-hide]')?.click();
+    const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+    header.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(root.querySelector('.od-shell')).not.toHaveClass('od-shell--minimized');
+    expect(onMinimizedChange).toHaveBeenLastCalledWith(false);
   });
 
   it('switches the inline interface between Korean, English, Japanese, and Simplified Chinese', () => {

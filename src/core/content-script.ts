@@ -49,7 +49,10 @@ function showReady(): void {
   // rewrite fire on the same session -- see runRewrite(). Once the in-flight request
   // settles it renders its own "result"/"error" state, so there's nothing to restore here.
   if (rewriteInFlight) return;
-  widget.setState({ status: "ready", promptLength: promptLength() });
+  // Do not inspect the draft just to update UI state. The privacy contract permits reading
+  // prompt text only after an explicit Rewrite request; runRewrite() performs the short-text
+  // check inside that authorized action.
+  widget.setState({ status: "ready" });
   floatingPlacement?.update();
 }
 
@@ -84,6 +87,12 @@ async function runRewrite(): Promise<void> {
   // onRewrite/onRetry both call this; a click while a request is already pending would
   // otherwise start a second, overlapping rewrite on the same session (see showReady()).
   if (rewriteInFlight) return;
+  const length = promptLength();
+  if (length < 12) {
+    widget.setState({ status: "ready", promptLength: length });
+    floatingPlacement?.update();
+    return;
+  }
   rewriteInFlight = true;
   widget.setState({ status: "loading" });
   floatingPlacement?.update();
@@ -173,17 +182,29 @@ contentController.subscribe(({ input }) => {
 });
 
 const SETTINGS_RETRY_DELAY_MS = 300;
+const SETTINGS_BOOT_RETRY_LIMIT = 4;
+let settingsBootRetryCount = 0;
+let bootGeneration = 0;
+const settingsBootRetryTimers = new Set<ReturnType<typeof setTimeout>>();
 
-async function fetchSettings(): Promise<ExtensionSettings | null> {
+function clearSettingsBootRetries(): void {
+  for (const timer of settingsBootRetryTimers) clearTimeout(timer);
+  settingsBootRetryTimers.clear();
+}
+
+async function fetchSettings(generation: number): Promise<ExtensionSettings | null> {
   try {
     return await sendRuntimeMessage<ExtensionSettings>({ type: "settings_get" });
   } catch (error) {
-    // A stale tab whose extension context is gone can't recover without a reload, so
-    // there's nothing worth retrying. Otherwise this is most likely a startup race with
-    // the background registering its listener -- worth one short retry, since starting
-    // the widget anyway on a permanent failure would bypass a site the user disabled.
+    // A stale tab whose extension context is gone can't recover without a reload, so skip
+    // this function's immediate retry. boot() still owns the bounded outer retry budget;
+    // those attempts remain gated on real settings and therefore cannot enable a disabled
+    // site. Other failures are commonly the background registering its listener late, so
+    // make one short retry before returning control to that outer recovery loop.
     if (isExtensionContextInvalidated(error)) return null;
+    if (generation !== bootGeneration) return null;
     await new Promise((resolve) => { setTimeout(resolve, SETTINGS_RETRY_DELAY_MS); });
+    if (generation !== bootGeneration) return null;
     try {
       return await sendRuntimeMessage<ExtensionSettings>({ type: "settings_get" });
     } catch {
@@ -192,14 +213,28 @@ async function fetchSettings(): Promise<ExtensionSettings | null> {
   }
 }
 
-async function boot(): Promise<void> {
+async function boot(generation = bootGeneration): Promise<void> {
+  if (generation !== bootGeneration) return;
   const adapter = adapterRegistry.resolve();
   if (!adapter) return;
-  const settings = await fetchSettings();
-  // Settings stayed unreachable after the retry: don't guess -- leave the widget off
-  // rather than risk activating on a site the user explicitly disabled. A later storage
-  // change or navigation triggers boot() again.
-  if (!settings) return;
+  const settings = await fetchSettings(generation);
+  if (generation !== bootGeneration) return;
+  // Never guess the site's enabled state. Retry the complete settings gate a bounded
+  // number of times so a slow background startup can recover without ever starting the
+  // widget from defaults. A full navigation re-injects this script, and a bfcache restore
+  // explicitly calls boot() below, giving later page lifecycles a fresh retry budget.
+  if (!settings) {
+    if (settingsBootRetryCount >= SETTINGS_BOOT_RETRY_LIMIT) return;
+    settingsBootRetryCount += 1;
+    const timer = setTimeout(() => {
+      settingsBootRetryTimers.delete(timer);
+      if (generation === bootGeneration) void boot(generation);
+    }, SETTINGS_RETRY_DELAY_MS);
+    settingsBootRetryTimers.add(timer);
+    return;
+  }
+  settingsBootRetryCount = 0;
+  clearSettingsBootRetries();
   widget.setLanguage(settings.language);
   if (!settings.enabledSites[adapter.id]) return;
   contentController.start();
@@ -220,6 +255,9 @@ function onStorageChanged(changes: Record<string, chrome.storage.StorageChange>,
 chrome.storage?.onChanged?.addListener(onStorageChanged);
 
 function teardown(): void {
+  bootGeneration += 1;
+  settingsBootRetryCount = 0;
+  clearSettingsBootRetries();
   chrome.storage?.onChanged?.removeListener(onStorageChanged);
   removeInputListener?.();
   floatingPlacement?.destroy();

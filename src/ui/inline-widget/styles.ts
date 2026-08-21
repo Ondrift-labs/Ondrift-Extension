@@ -38,13 +38,13 @@ button:focus-visible { outline:2px solid var(--od-accent); outline-offset:2px; }
    hanging further left than the header's actual edge, overlapping the ready-state
    button sitting underneath instead of clearing it. */
 .od-settings-menu { top:calc(100% + 6px); right:10px; }
-/* The minimized bubble's right-click menu -- centered under it regardless of the
-   bubble's own (fixed, small) width. */
-.od-expand-menu { top:100%; left:50%; transform:translateX(-50%); margin-top:6px; }
+/* The minimized bubble's optional context menu is viewport-positioned in
+   createInlineWidget.ts so it can flip above and clamp horizontally at screen edges. */
+.od-expand-menu { position:fixed; }
 .od-body { padding:12px; }
 /* Collapsed to just the logo (the "Hide" menu action) -- everything else in the header,
    the body, and the resize handle disappear so the bubble stops covering the page, and
-   the shell itself becomes a small round tap target that expands back on click. */
+   the shell becomes a small round click, touch, and keyboard target. */
 .od-shell--minimized { width:42px !important; border-radius:50%; cursor:pointer; }
 .od-shell--minimized .od-header { min-height:42px; justify-content:center; padding:0; border-bottom:0; cursor:pointer; }
 .od-shell--minimized .od-title,

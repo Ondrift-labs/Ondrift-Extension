@@ -21,6 +21,12 @@ const ERROR_COPY: Record<ErrorKind, { title: StringMessageKey; detail: StringMes
   parse: { title: 'rewriteUnavailable', detail: 'unknownDetail' },
   unknown: { title: 'rewriteUnavailable', detail: 'unknownDetail' },
 };
+const MENU_GAP = 6;
+const VIEWPORT_MARGIN = 12;
+
+function clamp(value: number, minimum: number, maximum: number) {
+  return Math.min(Math.max(value, minimum), Math.max(minimum, maximum));
+}
 
 const icon = (path: string) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>`;
 const icons = {
@@ -52,7 +58,7 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
   const menuHide = root.querySelector<HTMLButtonElement>('[data-menu-hide]')!;
   const expandMenu = root.querySelector<HTMLElement>('[data-expand-menu]')!;
   const expandMenuItem = root.querySelector<HTMLButtonElement>('[data-expand-item]')!;
-  let currentState: InlineWidgetState = { status: 'ready', promptLength: 0 };
+  let currentState: InlineWidgetState = { status: 'ready' };
   let currentLanguage: LanguageId = 'en';
   let minimized = false;
 
@@ -74,10 +80,41 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     syncMenuOpenClass();
   }
 
+  function positionExpandMenu() {
+    const anchorRect = header.getBoundingClientRect();
+    const width = expandMenu.offsetWidth;
+    const height = expandMenu.offsetHeight;
+    const left = clamp(
+      anchorRect.left + (anchorRect.width - width) / 2,
+      VIEWPORT_MARGIN,
+      window.innerWidth - width - VIEWPORT_MARGIN,
+    );
+    const below = anchorRect.bottom + MENU_GAP;
+    const above = anchorRect.top - MENU_GAP - height;
+    const top = below + height <= window.innerHeight - VIEWPORT_MARGIN ? below : above;
+    expandMenu.style.left = `${left}px`;
+    expandMenu.style.top = `${clamp(top, VIEWPORT_MARGIN, window.innerHeight - height - VIEWPORT_MARGIN)}px`;
+  }
+
+  function syncMinimizedAccessibility() {
+    if (minimized) {
+      header.setAttribute('role', 'button');
+      header.tabIndex = 0;
+      header.setAttribute('aria-expanded', 'false');
+      header.setAttribute('aria-label', inlineMessages[currentLanguage].expand);
+      return;
+    }
+    header.removeAttribute('role');
+    header.removeAttribute('tabindex');
+    header.removeAttribute('aria-expanded');
+    header.removeAttribute('aria-label');
+  }
+
   function setMinimized(next: boolean) {
     if (minimized === next) return;
     minimized = next;
     shell.classList.toggle('od-shell--minimized', minimized);
+    syncMinimizedAccessibility();
     closeMenu();
     closeExpandMenu();
     handlers.onMinimizedChange?.(minimized);
@@ -103,17 +140,23 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     if (!expandMenu.hidden && !path.includes(expandMenu)) closeExpandMenu();
   };
   document.addEventListener('click', onDocumentClick);
-  // Right-clicking the collapsed bubble opens an explicit "Expand" menu item instead of
-  // the browser's own context menu -- this is the *only* way to expand it again. A plain
-  // click used to do it too, but the header also doubles as the drag handle (see
-  // floating-widget-position.ts): releasing a drag fires a click on the same element, so
-  // every drag-to-reposition was immediately re-expanding the bubble it just finished
-  // moving. Only intercepted while minimized: an expanded widget has nothing this needs
-  // to replace, so its native context menu still works.
+  header.addEventListener('click', () => {
+    if (minimized) setMinimized(false);
+  });
+  header.addEventListener('keydown', (event) => {
+    if (!minimized || (event.key !== 'Enter' && event.key !== ' ')) return;
+    event.preventDefault();
+    setMinimized(false);
+  });
+  // Right-clicking the collapsed bubble remains an optional explicit path to Expand.
+  // Normal click and keyboard activation restore it directly; the placement layer uses
+  // a movement threshold and suppresses only the synthetic click after an actual drag.
+  // Expanded widgets keep the page's native context menu.
   header.addEventListener('contextmenu', (event) => {
     if (!minimized) return;
     event.preventDefault(); event.stopPropagation();
     expandMenu.hidden = false;
+    positionExpandMenu();
     syncMenuOpenClass();
   });
   dismissButton.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); host.hidden = true; handlers.onDismiss?.(); });
@@ -142,17 +185,20 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     menuOpenSettings.textContent = messages.openSettings;
     menuHide.textContent = messages.hide;
     expandMenuItem.textContent = messages.expandAction;
-    if (minimized) header.setAttribute('aria-label', messages.expand);
-    else header.removeAttribute('aria-label');
+    syncMinimizedAccessibility();
     host.hidden = false;
     shell.classList.toggle('od-shell--loading', state.status === 'loading');
     body.replaceChildren();
     status.textContent = state.status === 'result' || state.status === 'applied' ? `${messages.score} ${state.previousScore} → ${state.score}` : '';
     if (state.status === 'ready') {
       const wrap = document.createElement('div'); wrap.className = 'od-ready';
-      const isHint = state.promptLength < 12;
+      // Until the user explicitly requests a rewrite, promptLength stays undefined so the
+      // content script never reads draft text merely to render the widget. A concrete short
+      // length is supplied only after the user clicks Rewrite and that authorized read finds
+      // too little text.
+      const isHint = state.promptLength !== undefined && state.promptLength < 12;
       const description = document.createElement('p'); if (isHint) description.className = 'od-hint'; description.textContent = isHint ? messages.shortPrompt : messages.ready;
-      const rewrite = button(messages.rewrite, 'od-button', handlers.onRewrite, icons.spark); if (state.promptLength < 12) rewrite.disabled = true;
+      const rewrite = button(messages.rewrite, 'od-button', handlers.onRewrite, icons.spark); if (isHint) rewrite.disabled = true;
       wrap.append(description, rewrite); body.append(wrap); return;
     }
     if (state.status === 'loading') {
