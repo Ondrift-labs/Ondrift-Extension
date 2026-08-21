@@ -196,6 +196,11 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     setState: render,
     setLanguage(language) { currentLanguage = language; render(currentState); },
     setRepositioned(repositioned) { resetButton.hidden = !repositioned; },
+    // Re-adds the document-level "click outside closes menu" listener `destroy()` removed.
+    // Needed after a bfcache restore: the widget itself is a page-lifetime singleton that
+    // survives the freeze, but destroy() (called from pagehide teardown) tore this listener
+    // down, and re-adding the same function reference is a no-op if it's already attached.
+    reattach() { document.addEventListener('click', onDocumentClick); },
     destroy() { document.removeEventListener('click', onDocumentClick); host.remove(); },
   };
 }

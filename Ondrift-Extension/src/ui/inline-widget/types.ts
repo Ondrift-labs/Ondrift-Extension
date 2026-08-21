@@ -40,5 +40,10 @@ export interface InlineWidgetController {
    * supports dragging calls this once the widget has been moved away from its
    * auto-computed spot, and again with `false` after it snaps back. */
   setRepositioned(repositioned: boolean): void;
+  /** Re-adds the document-level "click outside closes menu" listener that `destroy()`
+   * removed. Needed after a bfcache restore: the widget is a page-lifetime singleton
+   * that survives the freeze, but its pagehide-triggered `destroy()` tore this listener
+   * down, and there's no other point where it gets attached again. */
+  reattach(): void;
   destroy(): void;
 }

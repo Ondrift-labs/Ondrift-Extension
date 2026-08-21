@@ -213,16 +213,32 @@ export function installSubmitListener(
   const keydown = (event: KeyboardEvent) => {
     const input = getInput();
     const target = event.target instanceof Node ? event.target : null;
-    if (input && target && (target === input || input.contains(target)) && event.key === "Enter" && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) emit();
+    // isComposing is true while an IME composition is still open, e.g. the Enter a
+    // Korean/Japanese/Chinese IME user presses to commit a composed character rather than
+    // to send -- without this check that keystroke reads as a real submission.
+    if (input && target && (target === input || input.contains(target)) && event.key === "Enter" && !event.isComposing && !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) emit();
   };
   const click = (event: MouseEvent) => {
     const target = event.target instanceof Element ? event.target : null;
     if (target && submitSelectors.some((selector) => target.closest(selector))) emit();
   };
+  // The dedupe window above exists to collapse two events firing for the *same* physical
+  // submission (e.g. an Enter keydown and the send button's own click both landing on one
+  // Enter press), not to reject a genuinely new submission that happens to repeat the last
+  // text. Any real input in the composer since the last emit means the user is actively
+  // composing again, so it's safe -- and necessary -- to let the next matching submission
+  // through even if the text ends up identical.
+  const input = (event: Event) => {
+    const composer = getInput();
+    const target = event.target instanceof Node ? event.target : null;
+    if (composer && target && (target === composer || composer.contains(target))) { lastPrompt = ""; lastAt = 0; }
+  };
   document.addEventListener("keydown", keydown, true);
   document.addEventListener("click", click, true);
+  document.addEventListener("input", input, true);
   return () => {
     document.removeEventListener("keydown", keydown, true);
     document.removeEventListener("click", click, true);
+    document.removeEventListener("input", input, true);
   };
 }

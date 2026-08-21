@@ -226,7 +226,10 @@ export class GeminiProvider implements LLMProvider {
 
     // Try the user's chosen model first (e.g. a cheaper, higher-quota tier); fall back to
     // the built-in list if it's rejected outright or its own quota is exhausted.
-    const modelsToTry = request.model?.trim() ? [request.model.trim(), ...this.models] : this.models;
+    const chosenModel = request.model?.trim();
+    const modelsToTry = chosenModel
+      ? [chosenModel, ...this.models.filter((model) => model !== chosenModel)]
+      : this.models;
     let response: Response | undefined;
     let lastError: ProviderError | undefined;
     for (const model of modelsToTry) {
