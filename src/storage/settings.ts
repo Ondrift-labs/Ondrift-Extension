@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   saveHistory: true,
   consentGranted: false,
   apiKeyStatus: null,
+  installId: "",
 };
 
 export interface LocalStorageArea {
@@ -37,7 +38,7 @@ export class SettingsStore {
   // before it reads, so no update's read can ever be stale relative to one already in flight.
   private queue: Promise<unknown> = Promise.resolve();
 
-  async get(): Promise<ExtensionSettings> {
+  private async read(): Promise<ExtensionSettings> {
     const result = await (this.area ?? localArea()).get(STORAGE_KEY);
     const stored = result[STORAGE_KEY] as Partial<ExtensionSettings> | undefined;
     const language = stored?.language;
@@ -51,12 +52,36 @@ export class SettingsStore {
     };
   }
 
+  async get(): Promise<ExtensionSettings> {
+    const current = await this.read();
+    if (current.installId) return current;
+
+    // Serialize first-run ID creation with every other settings write. Concurrent initial
+    // reads re-check storage inside the queue, so exactly one UUID is generated and all
+    // callers observe the same persisted value.
+    const ensureInstallId = async (): Promise<ExtensionSettings> => {
+      const latest = await this.read();
+      if (latest.installId) return latest;
+      const next = { ...latest, installId: crypto.randomUUID() };
+      await (this.area ?? localArea()).set({ [STORAGE_KEY]: next });
+      return next;
+    };
+    const result = this.queue.then(ensureInstallId, ensureInstallId);
+    this.queue = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  }
+
   async update(patch: Partial<ExtensionSettings>): Promise<ExtensionSettings> {
     const run = async (): Promise<ExtensionSettings> => {
-      const current = await this.get();
+      const current = await this.read();
+      const installId = current.installId || patch.installId || crypto.randomUUID();
       const next: ExtensionSettings = {
         ...current,
         ...patch,
+        installId,
         apiKeys: { ...current.apiKeys, ...patch.apiKeys },
         apiModels: { ...current.apiModels, ...patch.apiModels },
         enabledSites: { ...current.enabledSites, ...patch.enabledSites },

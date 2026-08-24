@@ -32,6 +32,7 @@ describe("extension manifest", () => {
       "https://perplexity.ai/*",
       "https://grok.com/*",
       "https://generativelanguage.googleapis.com/*",
+      "https://ondrift.pages.dev/*",
     ]);
     expect(manifest.host_permissions).not.toContain("<all_urls>");
     expect(manifest.content_scripts[0].matches).toEqual([

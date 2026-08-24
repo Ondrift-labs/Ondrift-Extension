@@ -3,13 +3,14 @@ import { SettingsStore, type LocalStorageArea } from "../src/storage/settings";
 
 class MemoryStorage implements LocalStorageArea {
   values: Record<string, unknown> = {};
+  setCount = 0;
   async get(): Promise<Record<string, unknown>> { return this.values; }
-  async set(items: Record<string, unknown>): Promise<void> { Object.assign(this.values, items); }
+  async set(items: Record<string, unknown>): Promise<void> { this.setCount += 1; Object.assign(this.values, items); }
 }
 
 describe("SettingsStore", () => {
   it("returns safe local defaults", async () => {
-    await expect(new SettingsStore(new MemoryStorage()).get()).resolves.toEqual({
+    await expect(new SettingsStore(new MemoryStorage()).get()).resolves.toMatchObject({
       provider: "gemini",
       apiKeys: {},
       apiModels: {},
@@ -20,7 +21,20 @@ describe("SettingsStore", () => {
       saveHistory: true,
       consentGranted: false,
       apiKeyStatus: null,
+      installId: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
     });
+  });
+
+  it("generates and persists one stable install ID across repeated reads", async () => {
+    const storage = new MemoryStorage();
+    const store = new SettingsStore(storage);
+
+    const first = await store.get();
+    const second = await store.get();
+
+    expect(second.installId).toBe(first.installId);
+    expect((storage.values["ondrift.settings"] as { installId: string }).installId).toBe(first.installId);
+    expect(storage.setCount).toBe(1);
   });
 
   it("deep-merges API keys and site toggles without losing prior values", async () => {

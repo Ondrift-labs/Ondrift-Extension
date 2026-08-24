@@ -4,9 +4,10 @@
 
 Ondrift는 ChatGPT, Claude, Gemini, Perplexity, Grok에서 프롬프트를 전송하기 전에
 더 명확하게 다듬고 점수화하는 로컬 우선 Manifest V3 Chrome 확장 프로그램입니다.
-사용자가 등록한 Gemini API 키로 브라우저의 확장 프로그램 서비스 워커에서
-Gemini를 직접 호출하며, Free MVP에는 Ondrift 백엔드, 계정, 클라우드 동기화가
-없습니다.
+API 키가 없으면 Ondrift의 Cloudflare 프록시를 통해 하루 3회 무료로 다시 쓸 수
+있습니다. 자신의 Gemini 키를 추가한 사용자는 Ondrift 백엔드를 전혀 거치지 않고
+확장 프로그램에서 Gemini로 직접 무제한 요청합니다. 계정이나 클라우드 동기화는
+필요하지 않습니다.
 
 설정 화면과 인라인 위젯은 한국어, 영어, 일본어, 중국어(간체)를 지원합니다. 선택한 언어는
 재작성된 프롬프트와 개선 근거에도 적용됩니다.
@@ -23,7 +24,7 @@ Gemini를 직접 호출하며, Free MVP에는 Ondrift 백엔드, 계정, 클라�
 Chrome 웹스토어에 반영되기 전의 빌드를 미리 테스트하는 등, 특정 릴리스를 직접
 설치하고 싶을 때는 공개 릴리스 ZIP을 사용할 수도 있습니다.
 
-1. [최신 릴리스](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)에서 `ondrift-0.1.27.zip`을 다운로드합니다.
+1. [최신 릴리스](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)에서 `ondrift-0.2.1.zip`을 다운로드합니다.
 2. ZIP을 원하는 폴더에 완전히 압축 해제합니다.
 3. Chrome에서 `chrome://extensions`를 엽니다.
 4. 오른쪽 위의 **개발자 모드**를 켭니다.

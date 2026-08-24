@@ -123,6 +123,23 @@ describe('OnboardingApp localization', () => {
     expect(screen.getByText('Create an API key')).toBeInTheDocument();
   });
 
+  it('lets users continue to privacy with the free tier without validating or saving a key', async () => {
+    const validateApiKey = vi.fn(async () => ({ ok: true as const }));
+    const saveSettings = vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch }));
+    render(<OnboardingApp bridge={createBridge({ validateApiKey, saveSettings })} />);
+
+    await userEvent.click(screen.getByRole('button', { name: /Set up Gemini/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByRole('button', { name: /Continue/ })).toBeDisabled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Skip — try 3 free rewrites/day' }));
+
+    expect(await screen.findByRole('heading', { name: 'Local by design, explicit by default.' })).toBeInTheDocument();
+    expect(validateApiKey).not.toHaveBeenCalled();
+    expect(saveSettings).not.toHaveBeenCalled();
+  });
+
   it('shows the AI Studio screenshots by default, but lets a developer hide them across every slide', async () => {
     render(<OnboardingApp bridge={createBridge()} />);
     await userEvent.click(screen.getByRole('button', { name: /Set up Gemini/ }));

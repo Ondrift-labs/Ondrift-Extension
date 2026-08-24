@@ -14,6 +14,7 @@ type StringMessageKey = { [K in keyof InlineMessages]: InlineMessages[K] extends
  */
 const ERROR_COPY: Record<ErrorKind, { title: StringMessageKey; detail: StringMessageKey }> = {
   quota: { title: 'quotaTitle', detail: 'quotaDetail' },
+  daily_limit: { title: 'dailyLimitTitle', detail: 'dailyLimitDetail' },
   network: { title: 'networkTitle', detail: 'networkDetail' },
   invalid_key: { title: 'invalidKeyTitle', detail: 'invalidKeyDetail' },
   request: { title: 'requestTitle', detail: 'requestDetail' },

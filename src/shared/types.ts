@@ -32,6 +32,7 @@ export interface RewriteRequest {
 export type ProviderErrorCode =
   | "invalid_key"
   | "quota_exceeded"
+  | "daily_limit_reached"
   | "network"
   | "request_rejected"
   | "model_unavailable"
@@ -63,6 +64,10 @@ export interface ExtensionSettings {
    * happens instead of only after the user re-verifies the key. Null once a use succeeds.
    */
   apiKeyStatus: ProviderErrorCode | null;
+  /** Stable anonymous identifier used only to enforce the no-key free-tier quota. */
+  installId: string;
+  /** Last server-reported free rewrites remaining today. Informational only. */
+  freeTierRemaining?: number;
 }
 
 export interface HistoryEntry {

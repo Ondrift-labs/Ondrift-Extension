@@ -9,11 +9,18 @@ import type { ExtensionSettings, HistoryEntry, ProviderId } from "../shared/type
 import { ProviderError, providerErrorReason } from "../providers/errors";
 import { sendRuntimeMessage } from "./rewrite-client";
 
+function apiKeyErrorReason(code: ExtensionSettings["apiKeyStatus"]): ApiKeyValidationResult["reason"] {
+  if (!code) return undefined;
+  const reason = providerErrorReason(code);
+  return reason === "daily_limit" ? "unknown" : reason;
+}
+
 function toUiSettings(settings: ExtensionSettings): UiSettings {
   return {
     provider: settings.provider,
     apiKeyConfigured: Boolean(settings.apiKeys[settings.provider]?.trim()),
-    apiKeyStatus: settings.apiKeyStatus ? providerErrorReason(settings.apiKeyStatus) : undefined,
+    apiKeyStatus: apiKeyErrorReason(settings.apiKeyStatus),
+    freeTierRemaining: settings.freeTierRemaining,
     model: settings.apiModels[settings.provider],
     persona: (settings.persona || "general") as PersonaId,
     language: settings.language || "en",
@@ -41,7 +48,7 @@ function toHistoryItem(entry: HistoryEntry): HistoryItem {
 
 function validationFailure(error: unknown): ApiKeyValidationResult {
   if (!(error instanceof ProviderError)) return { ok: false, reason: "unknown" };
-  return { ok: false, reason: providerErrorReason(error.code) };
+  return { ok: false, reason: apiKeyErrorReason(error.code) };
 }
 
 export const uiBridge: UiBridge = {
