@@ -30,7 +30,7 @@ It updates automatically and is the easiest way to get started.
 You can also install a specific release manually from its public ZIP, for
 example to test a build before it reaches the Chrome Web Store.
 
-1. Download `ondrift-0.1.26.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
+1. Download `ondrift-0.1.27.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
 2. Fully extract the ZIP to a folder.
 3. Open `chrome://extensions` in Chrome.
 4. Turn on **Developer mode** in the upper-right corner.
@@ -45,7 +45,7 @@ replace the extracted folder, and reload Ondrift from `chrome://extensions`.
 
 ## Development
 
-Node.js 20.19 or newer is required.
+Use Node.js 22.22.2–22.x, 24.15.0–24.x, or 26.0.0 or newer.
 
 ```sh
 npm install

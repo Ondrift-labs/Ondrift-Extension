@@ -1,6 +1,6 @@
 {
   "name": "ondrift-extension",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "private": true,
   "type": "module",
   "description": "Local-first prompt rewriting and scoring for ChatGPT, Claude, Gemini, Perplexity, and Grok.",
@@ -20,7 +20,7 @@
     "package:release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-release.ps1"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "dependencies": {
     "ondrift-i18n": "git+https://github.com/Ondrift-labs/ondrift-i18n.git#v0.1.0",

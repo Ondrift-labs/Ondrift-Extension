@@ -5,6 +5,9 @@ const WIDGET_WIDTH = 430;
  * without wrapping, wide enough that a bigger pick doesn't dwarf the composer beside it. */
 const MIN_WIDGET_WIDTH = 320;
 const MAX_WIDGET_WIDTH = 640;
+/** Pointer travel required before a press becomes a drag. This keeps ordinary clicks
+ * and small hand jitter available for activating the minimized widget. */
+const DRAG_THRESHOLD = 5;
 /** Width used while the widget is minimized to just its logo (see setCompact()) --
  * matches the circular ".od-shell--minimized" size in inline-widget's styles.ts. Without
  * this the host element would keep its full inline width even though the shell inside
@@ -153,30 +156,41 @@ export function placeFloatingWidget(
   }
 
   const handle = options.dragHandle;
-  let dragOrigin: { pointerX: number; pointerY: number; left: number; top: number } | null = null;
+  let dragOrigin: { pointerX: number; pointerY: number; left: number; top: number; activated: boolean } | null = null;
+  let suppressNextClick = false;
 
   const onPointerDown = (event: PointerEvent) => {
     if (event.button !== 0 && event.pointerType === "mouse") return;
     if ((event.target as HTMLElement | null)?.closest("button")) return;
+    suppressNextClick = false;
     const rect = widget.getBoundingClientRect();
-    dragOrigin = { pointerX: event.clientX, pointerY: event.clientY, left: rect.left, top: rect.top };
+    dragOrigin = { pointerX: event.clientX, pointerY: event.clientY, left: rect.left, top: rect.top, activated: false };
     handle!.setPointerCapture(event.pointerId);
-    handle!.setAttribute("data-dragging", "");
     event.preventDefault();
   };
   const onPointerMove = (event: PointerEvent) => {
     if (!dragOrigin) return;
+    const dx = event.clientX - dragOrigin.pointerX;
+    const dy = event.clientY - dragOrigin.pointerY;
+    if (!dragOrigin.activated) {
+      if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+      dragOrigin.activated = true;
+      handle!.setAttribute("data-dragging", "");
+    }
     const widgetRect = widget.getBoundingClientRect();
-    const left = clamp(dragOrigin.left + (event.clientX - dragOrigin.pointerX), VIEWPORT_MARGIN, window.innerWidth - widgetRect.width - VIEWPORT_MARGIN);
-    const top = clamp(dragOrigin.top + (event.clientY - dragOrigin.pointerY), VIEWPORT_MARGIN, window.innerHeight - widgetRect.height - VIEWPORT_MARGIN);
+    const left = clamp(dragOrigin.left + dx, VIEWPORT_MARGIN, window.innerWidth - widgetRect.width - VIEWPORT_MARGIN);
+    const top = clamp(dragOrigin.top + dy, VIEWPORT_MARGIN, window.innerHeight - widgetRect.height - VIEWPORT_MARGIN);
     widget.style.left = `${left}px`;
     widget.style.top = `${top}px`;
   };
-  const endDrag = (event: PointerEvent) => {
+  const endDrag = (event: PointerEvent, suppressSyntheticClick: boolean) => {
     if (!dragOrigin) return;
+    const wasActivated = dragOrigin.activated;
     dragOrigin = null;
     handle!.removeAttribute("data-dragging");
     if (handle!.hasPointerCapture(event.pointerId)) handle!.releasePointerCapture(event.pointerId);
+    if (!wasActivated) return;
+    suppressNextClick = suppressSyntheticClick;
     const widgetRect = widget.getBoundingClientRect();
     const anchorRect = anchor.getBoundingClientRect();
     const viewport = { width: window.innerWidth, height: window.innerHeight };
@@ -184,13 +198,22 @@ export function placeFloatingWidget(
     manualOffset = { dx: widgetRect.left - auto.left, dy: widgetRect.top - auto.top };
     options.onRepositionedChange?.(true);
   };
+  const onPointerUp = (event: PointerEvent) => endDrag(event, true);
+  const onPointerCancel = (event: PointerEvent) => endDrag(event, false);
+  const onClickAfterDrag = (event: MouseEvent) => {
+    if (!suppressNextClick) return;
+    suppressNextClick = false;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  };
 
   if (handle) {
     handle.setAttribute("data-draggable", "");
     handle.addEventListener("pointerdown", onPointerDown);
     handle.addEventListener("pointermove", onPointerMove);
-    handle.addEventListener("pointerup", endDrag);
-    handle.addEventListener("pointercancel", endDrag);
+    handle.addEventListener("pointerup", onPointerUp);
+    handle.addEventListener("pointercancel", onPointerCancel);
+    handle.addEventListener("click", onClickAfterDrag, true);
   }
 
   const resizeHandle = options.resizeHandle;
@@ -246,8 +269,9 @@ export function placeFloatingWidget(
       if (handle) {
         handle.removeEventListener("pointerdown", onPointerDown);
         handle.removeEventListener("pointermove", onPointerMove);
-        handle.removeEventListener("pointerup", endDrag);
-        handle.removeEventListener("pointercancel", endDrag);
+        handle.removeEventListener("pointerup", onPointerUp);
+        handle.removeEventListener("pointercancel", onPointerCancel);
+        handle.removeEventListener("click", onClickAfterDrag, true);
         handle.removeAttribute("data-draggable");
         handle.removeAttribute("data-dragging");
       }

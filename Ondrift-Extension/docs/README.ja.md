@@ -26,7 +26,7 @@ Gemini を呼び出します。Free MVP には Ondrift バックエンド、ア�
 Chrome ウェブストアに反映される前のビルドを試すなど、特定のリリースを手動で
 インストールしたい場合は、公開リリース ZIP からインストールすることもできます。
 
-1. [最新リリース](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest) から `ondrift-0.1.26.zip` をダウンロードします。
+1. [最新リリース](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest) から `ondrift-0.1.27.zip` をダウンロードします。
 2. ZIP を完全に解凍します。
 3. Chrome で `chrome://extensions` を開きます。
 4. 右上の **デベロッパーモード** を有効にします。
@@ -42,7 +42,7 @@ GitHub からインストールした場合は自動更新されません。新�
 
 ## 開発
 
-Node.js 20.19 以降が必要です。
+Node.js 22.22.2–22.x、24.15.0–24.x、または 26.0.0 以降を使用してください。
 
 ```sh
 npm install

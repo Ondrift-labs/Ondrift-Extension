@@ -77,14 +77,17 @@ describe("Gemini floating widget placement", () => {
     handle.hasPointerCapture = vi.fn().mockReturnValue(true);
 
     const onRepositionedChange = vi.fn();
+    const onClick = vi.fn();
+    handle.addEventListener("click", onClick);
     const placement = placeFloatingWidget(widget, anchor, { dragHandle: handle, onRepositionedChange });
 
     expect(handle.getAttribute("data-draggable")).toBe("");
     expect(placement.isRepositioned()).toBe(false);
 
     handle.dispatchEvent(new PointerEvent("pointerdown", { clientX: 210, clientY: 320, pointerId: 1 }));
-    expect(handle.getAttribute("data-dragging")).toBe("");
+    expect(handle.getAttribute("data-dragging")).toBeNull();
     handle.dispatchEvent(new PointerEvent("pointermove", { clientX: 260, clientY: 370, pointerId: 1 }));
+    expect(handle.getAttribute("data-dragging")).toBe("");
     expect(widget.style.left).toBe("250px");
     expect(widget.style.top).toBe("358px");
     handle.dispatchEvent(new PointerEvent("pointerup", { clientX: 260, clientY: 370, pointerId: 1 }));
@@ -92,6 +95,8 @@ describe("Gemini floating widget placement", () => {
     expect(handle.hasAttribute("data-dragging")).toBe(false);
     expect(placement.isRepositioned()).toBe(true);
     expect(onRepositionedChange).toHaveBeenCalledWith(true);
+    handle.click();
+    expect(onClick).not.toHaveBeenCalled();
 
     placement.resetPosition();
     expect(placement.isRepositioned()).toBe(false);
@@ -101,6 +106,76 @@ describe("Gemini floating widget placement", () => {
 
     placement.destroy();
     expect(handle.getAttribute("data-draggable")).toBeNull();
+  });
+
+  it("keeps a press with sub-threshold movement as a click instead of a drag", () => {
+    document.body.innerHTML = '<main><div id="composer"></div></main>';
+    const anchor = document.querySelector<HTMLElement>("#composer")!;
+    const widget = document.createElement("aside");
+    const handle = document.createElement("header");
+    widget.append(handle);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue({
+      top: 200, right: 800, bottom: 300, left: 200, width: 600, height: 100,
+      x: 200, y: 200, toJSON: () => undefined,
+    });
+    vi.spyOn(widget, "getBoundingClientRect").mockReturnValue({
+      top: 308, right: 590, bottom: 428, left: 200, width: 390, height: 120,
+      x: 200, y: 308, toJSON: () => undefined,
+    });
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1200 });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 });
+    handle.setPointerCapture = vi.fn();
+    handle.releasePointerCapture = vi.fn();
+    handle.hasPointerCapture = vi.fn().mockReturnValue(true);
+    const onRepositionedChange = vi.fn();
+    const onClick = vi.fn();
+    handle.addEventListener("click", onClick);
+
+    const placement = placeFloatingWidget(widget, anchor, { dragHandle: handle, onRepositionedChange });
+    handle.dispatchEvent(new PointerEvent("pointerdown", { clientX: 210, clientY: 320, pointerId: 1 }));
+    handle.dispatchEvent(new PointerEvent("pointermove", { clientX: 213, clientY: 323, pointerId: 1 }));
+    handle.dispatchEvent(new PointerEvent("pointerup", { clientX: 213, clientY: 323, pointerId: 1 }));
+    handle.click();
+
+    expect(handle).not.toHaveAttribute("data-dragging");
+    expect(widget.style.left).toBe("200px");
+    expect(widget.style.top).toBe("308px");
+    expect(placement.isRepositioned()).toBe(false);
+    expect(onRepositionedChange).not.toHaveBeenCalled();
+    expect(onClick).toHaveBeenCalledOnce();
+    placement.destroy();
+  });
+
+  it("does not suppress the next real click after an activated drag is cancelled", () => {
+    document.body.innerHTML = '<main><div id="composer"></div></main>';
+    const anchor = document.querySelector<HTMLElement>("#composer")!;
+    const widget = document.createElement("aside");
+    const handle = document.createElement("header");
+    widget.append(handle);
+    vi.spyOn(anchor, "getBoundingClientRect").mockReturnValue({
+      top: 200, right: 800, bottom: 300, left: 200, width: 600, height: 100,
+      x: 200, y: 200, toJSON: () => undefined,
+    });
+    vi.spyOn(widget, "getBoundingClientRect").mockReturnValue({
+      top: 308, right: 590, bottom: 428, left: 200, width: 390, height: 120,
+      x: 200, y: 308, toJSON: () => undefined,
+    });
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 1200 });
+    Object.defineProperty(window, "innerHeight", { configurable: true, value: 800 });
+    handle.setPointerCapture = vi.fn();
+    handle.releasePointerCapture = vi.fn();
+    handle.hasPointerCapture = vi.fn().mockReturnValue(true);
+    const onClick = vi.fn();
+    handle.addEventListener("click", onClick);
+
+    const placement = placeFloatingWidget(widget, anchor, { dragHandle: handle });
+    handle.dispatchEvent(new PointerEvent("pointerdown", { clientX: 210, clientY: 320, pointerId: 1 }));
+    handle.dispatchEvent(new PointerEvent("pointermove", { clientX: 260, clientY: 370, pointerId: 1 }));
+    handle.dispatchEvent(new PointerEvent("pointercancel", { clientX: 260, clientY: 370, pointerId: 1 }));
+    handle.click();
+
+    expect(onClick).toHaveBeenCalledOnce();
+    placement.destroy();
   });
 
   it("resizes the widget by its handle and reports the repositioned state", () => {
