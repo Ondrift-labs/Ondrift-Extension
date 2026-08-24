@@ -7,9 +7,11 @@
 English | [한국어](docs/README.ko.md) | [日本語](docs/README.ja.md) | [简体中文](docs/README.zh.md)
 
 Ondrift is a local-first Manifest V3 Chrome extension that rewrites and scores
-prompts before they are sent on ChatGPT, Claude, Gemini, Perplexity, and Grok. Gemini
-is called directly from the extension service worker with an API key supplied
-by the user. The Free MVP has no Ondrift backend, account, or cloud sync.
+prompts before they are sent on ChatGPT, Claude, Gemini, Perplexity, and Grok.
+Without an API key, Ondrift provides three free rewrites per day through its
+Cloudflare proxy. Users who add their own Gemini key get unlimited direct
+extension-to-Gemini rewrites with no Ondrift backend involvement. No account or
+cloud sync is required.
 
 Visit the official [Ondrift website](https://ondrift.pages.dev/) for the product
 overview, privacy model, and latest installation entry point.
@@ -30,7 +32,7 @@ It updates automatically and is the easiest way to get started.
 You can also install a specific release manually from its public ZIP, for
 example to test a build before it reaches the Chrome Web Store.
 
-1. Download `ondrift-0.1.27.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
+1. Download `ondrift-0.2.1.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
 2. Fully extract the ZIP to a folder.
 3. Open `chrome://extensions` in Chrome.
 4. Turn on **Developer mode** in the upper-right corner.

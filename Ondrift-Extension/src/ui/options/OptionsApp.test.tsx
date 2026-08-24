@@ -107,6 +107,22 @@ describe('OptionsApp localization', () => {
     expect(await screen.findByText('This key is valid, but its quota is currently exhausted.')).toBeInTheDocument();
   });
 
+  it('shows cached free-tier usage when no BYOK key is configured', async () => {
+    const bridge = createBridge({ getSettings: async () => ({ ...DEFAULT_SETTINGS, freeTierRemaining: 2 }) });
+    render(<OptionsApp bridge={bridge} />);
+
+    expect(await screen.findByText('Free tier: 2/3 rewrites left today')).toBeInTheDocument();
+    expect(screen.getByLabelText('API key')).toBeInTheDocument();
+  });
+
+  it('does not show free-tier status when a BYOK key is configured', async () => {
+    const bridge = createBridge({ getSettings: async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: true, freeTierRemaining: 1 }) });
+    render(<OptionsApp bridge={bridge} />);
+
+    await screen.findByRole('heading', { name: 'Settings' });
+    expect(screen.queryByText(/Free tier:/)).not.toBeInTheDocument();
+  });
+
   it('prefills the saved model and lets it be re-verified without re-entering the API key', async () => {
     const validateApiKey = vi.fn(async () => ({ ok: true }));
     const bridge = createBridge({

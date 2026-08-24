@@ -1,6 +1,7 @@
 import type { ExtensionSettings, ProviderErrorCode, ProviderId, RuntimeRequest, RuntimeResponse } from "../shared/types";
 import { getProvider } from "../providers/registry";
 import { ProviderError, serializeProviderError } from "../providers/errors";
+import { rewriteViaFreeTier } from "../providers/free-tier.provider";
 import { settingsStore, type SettingsStore } from "../storage/settings";
 import { historyStore, type HistoryStore } from "../storage/history";
 
@@ -46,6 +47,7 @@ export interface MessageHandlerDependencies {
   settings: SettingsStore;
   history: HistoryStore;
   provider: typeof getProvider;
+  freeTierRewrite: typeof rewriteViaFreeTier;
   openOptions: () => Promise<void>;
 }
 
@@ -53,6 +55,7 @@ const defaults: MessageHandlerDependencies = {
   settings: settingsStore,
   history: historyStore,
   provider: getProvider,
+  freeTierRewrite: rewriteViaFreeTier,
   openOptions: () => chrome.runtime.openOptionsPage(),
 };
 
@@ -68,7 +71,16 @@ export async function handleRuntimeRequest(
           throw new ProviderError("not_configured", `Ondrift is disabled on ${message.payload.service}.`);
         }
         const apiKey = apiKeyFor(settings, settings.provider);
-        if (!apiKey) throw new ProviderError("not_configured", MISSING_API_KEY_MESSAGE);
+        if (!apiKey) {
+          const installId = settings.installId || crypto.randomUUID();
+          if (!settings.installId) await dependencies.settings.update({ installId });
+          const result = await dependencies.freeTierRewrite(
+            { ...message.payload, language: settings.language },
+            installId,
+          );
+          await dependencies.settings.update({ freeTierRemaining: result.remaining });
+          return { ok: true, data: result };
+        }
         const result = await withApiKeyStatusTracking(dependencies.settings, () =>
           dependencies.provider(settings.provider).rewrite(
             { ...message.payload, language: settings.language, model: settings.apiModels[settings.provider] },

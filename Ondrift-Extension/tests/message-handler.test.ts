@@ -15,6 +15,8 @@ function dependencies(overrides: Partial<MessageHandlerDependencies> = {}): Mess
         language: "en" as const,
         saveHistory: true,
         consentGranted: true,
+        apiKeyStatus: null,
+        installId: "00000000-0000-4000-8000-000000000001",
       })),
       update: vi.fn(async (patch) => patch),
     } as never,
@@ -26,6 +28,7 @@ function dependencies(overrides: Partial<MessageHandlerDependencies> = {}): Mess
       rewrite: vi.fn(async () => ({ improvedText: "better", previousScore: 50, score: 90, rationale: "clear" })),
       validateKey: vi.fn(async () => undefined),
     })),
+    freeTierRewrite: vi.fn(async () => ({ improvedText: "free better", previousScore: 45, score: 85, rationale: "clearer", remaining: 2 })),
     openOptions: vi.fn(async () => undefined),
     ...overrides,
   };
@@ -37,6 +40,60 @@ describe("handleRuntimeRequest", () => {
     const result = await handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "chatgpt" } }, deps);
     expect(result).toEqual({ ok: true, data: { improvedText: "better", previousScore: 50, score: 90, rationale: "clear" } });
     expect(deps.provider).toHaveBeenCalledWith("gemini");
+    expect(deps.freeTierRewrite).not.toHaveBeenCalled();
+  });
+
+  it("uses the free-tier path when no BYOK key is configured and caches the remaining count", async () => {
+    const freeTierRewrite = vi.fn(async () => ({ improvedText: "free better", previousScore: 45, score: 85, rationale: "clearer", remaining: 2 }));
+    const deps = dependencies({
+      settings: {
+        get: vi.fn(async () => ({
+          provider: "gemini", apiKeys: {}, apiModels: { gemini: "must-not-be-sent" },
+          enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true },
+          onboardingComplete: true, persona: "general", language: "ko", saveHistory: true,
+          consentGranted: true, apiKeyStatus: null, installId: "00000000-0000-4000-8000-000000000002",
+        })),
+        update: vi.fn(async (patch: unknown) => patch),
+      } as never,
+      freeTierRewrite,
+    });
+
+    await expect(handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "chatgpt", persona: "writer" } }, deps))
+      .resolves.toEqual({ ok: true, data: { improvedText: "free better", previousScore: 45, score: 85, rationale: "clearer", remaining: 2 } });
+    expect(freeTierRewrite).toHaveBeenCalledWith(
+      { prompt: "hello", service: "chatgpt", persona: "writer", language: "ko" },
+      "00000000-0000-4000-8000-000000000002",
+    );
+    expect(deps.provider).not.toHaveBeenCalled();
+    expect(deps.settings.update).toHaveBeenCalledWith({ freeTierRemaining: 2 });
+  });
+
+  it("never calls the free-tier path when a BYOK key is present", async () => {
+    const deps = dependencies();
+
+    await handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "gemini" } }, deps);
+
+    expect(deps.freeTierRewrite).not.toHaveBeenCalled();
+    expect(deps.provider).toHaveBeenCalledWith("gemini");
+  });
+
+  it("surfaces a free-tier 429 as daily_limit_reached", async () => {
+    const deps = dependencies({
+      settings: {
+        get: vi.fn(async () => ({
+          provider: "gemini", apiKeys: {}, apiModels: {},
+          enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true },
+          onboardingComplete: true, persona: "general", language: "en", saveHistory: true,
+          consentGranted: true, apiKeyStatus: null, installId: "00000000-0000-4000-8000-000000000003",
+        })),
+        update: vi.fn(async (patch: unknown) => patch),
+      } as never,
+      freeTierRewrite: vi.fn(async () => { throw new ProviderError("daily_limit_reached", "Daily limit reached"); }),
+    });
+
+    await expect(handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "claude" } }, deps))
+      .resolves.toEqual({ ok: false, error: { code: "daily_limit_reached", message: "Daily limit reached", retryable: false } });
+    expect(deps.provider).not.toHaveBeenCalled();
   });
 
   it("rejects disabled sites before calling a provider", async () => {

@@ -4,10 +4,10 @@ export const manifest = {
   manifest_version: 3,
   name: "Ondrift",
   short_name: "Ondrift",
-  version: "0.1.27",
+  version: "0.2.1",
   minimum_chrome_version: "116",
   description:
-    "Rewrite and score prompts on ChatGPT, Claude, Gemini, Perplexity, and Grok with your own Gemini API key.",
+    "Rewrite and score prompts on ChatGPT, Claude, Gemini, Perplexity, and Grok with 3 free rewrites daily or your own Gemini key.",
   homepage_url: "https://ondrift.pages.dev/",
   icons: {
     16: "icons/ondrift-16.png",
@@ -23,7 +23,8 @@ export const manifest = {
     "https://www.perplexity.ai/*",
     "https://perplexity.ai/*",
     "https://grok.com/*",
-    "https://generativelanguage.googleapis.com/*"
+    "https://generativelanguage.googleapis.com/*",
+    "https://ondrift.pages.dev/*"
   ],
   action: {
     default_title: "Open Ondrift",
