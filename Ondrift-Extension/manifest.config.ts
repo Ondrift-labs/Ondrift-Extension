@@ -4,6 +4,11 @@ export const manifest = {
   manifest_version: 3,
   name: "Ondrift",
   short_name: "Ondrift",
+  // Pins the extension id (see manifest_key_notes.md next to this file) so a locally
+  // loaded unpacked build keeps a stable chrome-extension:// origin across releases,
+  // regardless of which Downloads folder it's unpacked into. Chrome Web Store uploads
+  // keep their own already-assigned id and ignore this field for that purpose.
+  key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAlXQhrqYdPRfDArp9pwwBu9qvnVsz2n8pGvE+bOTjvtmsMyDRF8sEkQmNNcu/MNPC/GUlBUDEppO1L+XI9vKyde30wL7ZLQQ3VoGUn5yI0sacAWffDYpvMJ5iz0TN02G2vHN9Q/d1qUTHNg818YE4b71kJNEeUATgI0kAfn00amK3I4OPF6ZZb02nhfyT0z1HxA+AjheCkCZAKgyxJKhXb1heJ9LxBSmqrOLUpXpqVdIgDo6TAGNAEsnxbzhsKG+xdjfqE+GIs+ZD/sS0HybPPYYA0sjcPiuGamOkYHR0XHhwK+jIYxABfOEfnSQw/HVtrtc1yHZ+awVvnigSnEkgSwIDAQAB",
   version: "0.2.1",
   minimum_chrome_version: "116",
   description:
