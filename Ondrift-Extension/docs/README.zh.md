@@ -3,9 +3,10 @@
 [English](../README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | 简体中文
 
 Ondrift 是一款本地优先的 Manifest V3 Chrome 扩展程序,可在你于 ChatGPT、Claude、
-Gemini、Perplexity、Grok 发送提示词之前对其进行改写和评分。Gemini 由扩展程序的
-service worker 使用你自己提供的 API 密钥直接调用。Free MVP 版本没有 Ondrift
-后端、账户或云同步功能。
+Gemini、Perplexity、Grok 发送提示词之前对其进行改写和评分。没有 API 密钥时,
+可通过 Ondrift 的 Cloudflare 代理每天免费改写 3 次。添加自己的 Gemini 密钥后,
+扩展程序会直接且不限次数地调用 Gemini,完全不经过 Ondrift 后端。无需账户或
+云同步功能。
 
 访问官方网站 [Ondrift website](https://ondrift.pages.dev/) 了解产品概览、隐私模型
 以及最新的安装入口。
@@ -25,7 +26,7 @@ service worker 使用你自己提供的 API 密钥直接调用。Free MVP 版本
 如果你想手动安装某个特定版本,例如在 Chrome 网上应用店更新之前先体验新版本,
 也可以通过公开发布的 ZIP 包安装。
 
-1. 从[最新发布版本](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)下载 `ondrift-0.1.27.zip`。
+1. 从[最新发布版本](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)下载 `ondrift-0.2.1.zip`。
 2. 完整解压该 ZIP 文件到一个文件夹。
 3. 在 Chrome 中打开 `chrome://extensions`。
 4. 打开右上角的**开发者模式**。

@@ -66,6 +66,7 @@ export interface OnboardingCopy {
     keySuccess: string;
     validation: ApiKeyValidationCopy;
     continueCta: string;
+    skipCta: string;
   };
   privacy: {
     eyebrow: string;
@@ -105,6 +106,7 @@ export interface OptionsCopy {
     apiKeyPlaceholderEmpty: string;
     verifyCta: string;
     apiKeyHelp: string;
+    freeTierStatus(remaining?: number): string;
     getKeyCta: string;
     keySuccess: string;
     removeKeyCta: string;
@@ -226,7 +228,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         promises: [
           { title: '이미 사용하는 곳에서 그대로', body: '지원되는 AI 사이트 전체에서 동일한 워크플로를 사용하세요.' },
           { title: '내 키는 내 브라우저에만', body: 'Gemini API 키는 브라우저 로컬 저장소에만 보관됩니다.' },
-          { title: '별도 서버 없음', body: '프롬프트는 Gemini로 직접 전송되며 기록은 이 기기에만 남습니다.' },
+          { title: '키 없이도 무료로', body: '키가 없으면 프롬프트가 Ondrift의 Cloudflare 프록시를 거쳐 Gemini로 전송됩니다. 기록은 이 기기에만 남습니다.' },
         ],
         cta: 'Gemini 설정하기',
       },
@@ -258,13 +260,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           unknown: '이 키를 확인할 수 없습니다. 저장되지 않았으니 다시 시도해 주세요.',
         },
         continueCta: '계속',
+        skipCta: '건너뛰기 — 하루 3회 무료로 사용',
       },
       privacy: {
         eyebrow: '개인정보 선택',
         title: '기본은 로컬 저장, 선택은 명확하게.',
         routeAria: '데이터가 이동하는 방식',
         routePrompt: { title: '내 프롬프트', detail: '지원되는 AI 사이트' },
-        routeApi: { title: 'Gemini API', detail: '내 키로 요청' },
+        routeApi: { title: 'Gemini 다시 쓰기', detail: '내 키는 직접, 키가 없으면 Ondrift 경유' },
         routeHistory: { title: '로컬 기록', detail: '이 브라우저에만 저장' },
         notes: [
           { lead: 'Ondrift가 읽는 정보:', rest: ' 다시 쓰기를 요청한 텍스트, 지원 사이트, 점수, 제안 적용 여부입니다.' },
@@ -285,12 +288,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     options: {
       sidebar: {
         nav: { provider: '제공자', persona: '다시 쓰기 스타일', sites: '사이트', privacy: '개인정보', support: '문의 및 지원' },
-        version: '버전 0.1 · 무료 MVP',
+        version: '버전 0.2 · 무료 요금제',
       },
       header: { eyebrow: '확장 프로그램 환경설정', title: '설정', lead: 'Ondrift가 어떻게 다시 쓰고 브라우저에 무엇을 남길지 선택하세요.' },
       provider: {
         sectionTitle: '제공자 및 API 키',
-        sectionLead: '다시 쓰기 요청은 확장 프로그램에서 선택한 제공자로 직접 전송됩니다.',
+        sectionLead: '내 API 키가 있으면 Gemini로 직접 전송되며, 키가 없으면 하루 3회 무료 요금제에 Ondrift 프록시를 사용합니다.',
         providerLabel: '제공자',
         providerGemini: 'Google Gemini · 권장',
         providerOpenAi: 'OpenAI · 추후 지원',
@@ -300,6 +303,9 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyPlaceholderEmpty: 'Gemini API 키를 붙여넣으세요',
         verifyCta: '확인 및 저장',
         apiKeyHelp: 'chrome.storage.local에만 저장되며 동기화 저장소는 사용하지 않습니다.',
+        freeTierStatus: (remaining) => remaining === undefined
+          ? '무료 요금제를 사용 중입니다(하루 3회). 위에서 내 Gemini 키를 추가하면 제한 없이 사용할 수 있습니다.'
+          : `무료 요금제: 오늘 3회 중 ${remaining}회 남음`,
         getKeyCta: '키 발급받기',
         keySuccess: '키가 확인되어 사용할 준비가 되었습니다.',
         removeKeyCta: '키 삭제',
@@ -352,7 +358,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       privacy: {
         sectionTitle: '개인정보 및 로컬 데이터',
-        sectionLead: '이 버전에서는 클라우드 계정, 동기화, 운영사 서버를 사용하지 않습니다.',
+        sectionLead: '계정이나 동기화는 사용하지 않습니다. 키가 없는 무료 다시 쓰기만 Ondrift의 Cloudflare 프록시를 사용합니다.',
         historyToggleTitle: '로컬 프롬프트 기록 저장',
         historyToggleDetail: '원본과 개선된 프롬프트, 점수, 사이트, 타임스탬프를 이 브라우저에 저장합니다.',
         responsesTitle: 'AI 응답은 저장되지 않습니다',
@@ -445,7 +451,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         promises: [
           { title: 'Works where you already write', body: 'Use the same focused workflow across supported AI sites.' },
           { title: 'Your key, your browser', body: 'Your Gemini API key stays in local extension storage.' },
-          { title: 'No developer server', body: 'Prompts go directly to Gemini and history remains on this device.' },
+          { title: 'Free without a key', body: 'Without a key, prompts go to Gemini through Ondrift’s Cloudflare proxy. History remains on this device.' },
         ],
         cta: 'Set up Gemini',
       },
@@ -477,13 +483,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           unknown: 'We could not verify this key. Nothing was saved; please try again.',
         },
         continueCta: 'Continue',
+        skipCta: 'Skip — try 3 free rewrites/day',
       },
       privacy: {
         eyebrow: 'Privacy choice',
         title: 'Local by design, explicit by default.',
         routeAria: 'How your data moves',
         routePrompt: { title: 'Your prompt', detail: 'Supported AI site' },
-        routeApi: { title: 'Gemini API', detail: 'Using your key' },
+        routeApi: { title: 'Gemini rewrite', detail: 'Direct with your key; via Ondrift without one' },
         routeHistory: { title: 'Local history', detail: 'This browser only' },
         notes: [
           { lead: 'Ondrift reads', rest: ' the text you ask it to rewrite, the supported site, score, and whether you applied the suggestion.' },
@@ -504,12 +511,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     options: {
       sidebar: {
         nav: { provider: 'Provider', persona: 'Rewrite style', sites: 'Sites', privacy: 'Privacy', support: 'Contact & support' },
-        version: 'Version 0.1 · Free MVP',
+        version: 'Version 0.2 · Free tier',
       },
       header: { eyebrow: 'Extension preferences', title: 'Settings', lead: 'Choose how Ondrift rewrites and what stays in your browser.' },
       provider: {
         sectionTitle: 'Provider & API key',
-        sectionLead: 'Rewrite requests go directly from the extension to your selected provider.',
+        sectionLead: 'With your API key, rewrites go directly to Gemini. Without one, Ondrift’s proxy provides 3 free rewrites per day.',
         providerLabel: 'Provider',
         providerGemini: 'Google Gemini · recommended',
         providerOpenAi: 'OpenAI · coming later',
@@ -519,6 +526,9 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyPlaceholderEmpty: 'Paste your Gemini API key',
         verifyCta: 'Verify & save',
         apiKeyHelp: 'Stored with chrome.storage.local, never sync storage.',
+        freeTierStatus: (remaining) => remaining === undefined
+          ? 'You’re using the free tier (3/day). Add your own Gemini key above for unlimited use.'
+          : `Free tier: ${remaining}/3 rewrites left today`,
         getKeyCta: 'Get a key',
         keySuccess: 'Key verified and ready to use.',
         removeKeyCta: 'Remove key',
@@ -571,7 +581,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       privacy: {
         sectionTitle: 'Privacy & local data',
-        sectionLead: 'No cloud account, sync, or developer-operated server is used in this version.',
+        sectionLead: 'No account or sync is used. Only free rewrites without a key use Ondrift’s Cloudflare proxy.',
         historyToggleTitle: 'Save local prompt history',
         historyToggleDetail: 'Store original and improved prompts, score, site, and timestamp in this browser.',
         responsesTitle: 'AI responses are never saved',
@@ -664,7 +674,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         promises: [
           { title: 'すでに使っている場所で', body: '対応する AI サイト全体で同じワークフローを使えます。' },
           { title: 'キーはこのブラウザだけに', body: 'Gemini API キーはこの拡張機能のローカルストレージに保存されます。' },
-          { title: '開発者サーバーは不要', body: 'プロンプトは直接 Gemini に送信され、履歴はこの端末にのみ残ります。' },
+          { title: 'キーなしでも無料', body: 'キーがない場合、プロンプトは Ondrift の Cloudflare プロキシを経由して Gemini に送信されます。履歴はこの端末にのみ残ります。' },
         ],
         cta: 'Gemini を設定する',
       },
@@ -696,13 +706,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           unknown: 'このキーを確認できませんでした。保存されていないので再試行してください。',
         },
         continueCta: '続ける',
+        skipCta: 'スキップ — 1日3回無料で試す',
       },
       privacy: {
         eyebrow: 'プライバシーの選択',
         title: '既定はローカル保存、選択は明確に。',
         routeAria: 'データがどのように移動するか',
         routePrompt: { title: 'あなたのプロンプト', detail: '対応する AI サイト' },
-        routeApi: { title: 'Gemini API', detail: 'あなたのキーを使用' },
+        routeApi: { title: 'Gemini リライト', detail: '自分のキーなら直接、キーなしなら Ondrift 経由' },
         routeHistory: { title: 'ローカル履歴', detail: 'このブラウザのみ' },
         notes: [
           { lead: 'Ondrift が読み取る情報:', rest: ' 改善を依頼したテキスト、対応サイト、スコア、提案を適用したかどうかです。' },
@@ -723,12 +734,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     options: {
       sidebar: {
         nav: { provider: 'プロバイダー', persona: 'リライトスタイル', sites: 'サイト', privacy: 'プライバシー', support: 'お問い合わせ' },
-        version: 'バージョン 0.1 · 無料 MVP',
+        version: 'バージョン 0.2 · 無料プラン',
       },
       header: { eyebrow: '拡張機能の環境設定', title: '設定', lead: 'Ondrift のリライト方法とブラウザに残すデータを選択してください。' },
       provider: {
         sectionTitle: 'プロバイダーと API キー',
-        sectionLead: 'リライトのリクエストは拡張機能から選択したプロバイダーへ直接送信されます。',
+        sectionLead: '自分の API キーがあれば Gemini に直接送信し、キーがなければ Ondrift のプロキシで1日3回無料で利用できます。',
         providerLabel: 'プロバイダー',
         providerGemini: 'Google Gemini · おすすめ',
         providerOpenAi: 'OpenAI · 近日対応',
@@ -738,6 +749,9 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyPlaceholderEmpty: 'Gemini API キーを貼り付けてください',
         verifyCta: '確認して保存',
         apiKeyHelp: 'chrome.storage.local にのみ保存され、同期ストレージは使用しません。',
+        freeTierStatus: (remaining) => remaining === undefined
+          ? '無料プランを利用中です（1日3回）。無制限で使うには、上で自分の Gemini キーを追加してください。'
+          : `無料プラン: 本日は3回中あと${remaining}回`,
         getKeyCta: 'キーを取得',
         keySuccess: 'キーを確認しました。利用できます。',
         removeKeyCta: 'キーを削除',
@@ -790,7 +804,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       privacy: {
         sectionTitle: 'プライバシーとローカルデータ',
-        sectionLead: 'このバージョンではクラウドアカウント、同期、開発者運用サーバーは使用しません。',
+        sectionLead: 'アカウントや同期は使用しません。キーなしの無料リライトのみ Ondrift の Cloudflare プロキシを使用します。',
         historyToggleTitle: 'ローカルのプロンプト履歴を保存',
         historyToggleDetail: '元のプロンプトと改善後のプロンプト、スコア、サイト、タイムスタンプをこのブラウザに保存します。',
         responsesTitle: 'AI の応答は保存されません',
@@ -883,7 +897,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         promises: [
           { title: '就在你常用的地方使用', body: '在支持的 AI 网站中使用同一套专注的工作流。' },
           { title: '你的密钥，只留在浏览器里', body: '你的 Gemini API 密钥只保存在扩展的本地存储中。' },
-          { title: '没有开发者服务器', body: '提示词会直接发送到 Gemini，历史记录只保留在这台设备上。' },
+          { title: '无需密钥也可免费使用', body: '没有密钥时，提示词会通过 Ondrift 的 Cloudflare 代理发送到 Gemini。历史记录仍只保留在此设备上。' },
         ],
         cta: '设置 Gemini',
       },
@@ -915,13 +929,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           unknown: '无法验证此密钥。没有保存任何内容，请重试。',
         },
         continueCta: '继续',
+        skipCta: '跳过 — 每天免费改写 3 次',
       },
       privacy: {
         eyebrow: '隐私选择',
         title: '默认本地保存，选择清晰明确。',
         routeAria: '你的数据如何流动',
         routePrompt: { title: '你的提示词', detail: '支持的 AI 网站' },
-        routeApi: { title: 'Gemini API', detail: '使用你的密钥' },
+        routeApi: { title: 'Gemini 改写', detail: '有自己的密钥时直连；没有时经 Ondrift 转发' },
         routeHistory: { title: '本地历史记录', detail: '仅限此浏览器' },
         notes: [
           { lead: 'Ondrift 会读取:', rest: ' 你要求改写的文本、支持的网站、评分，以及你是否应用了建议。' },
@@ -942,12 +957,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     options: {
       sidebar: {
         nav: { provider: '服务提供方', persona: '改写风格', sites: '网站', privacy: '隐私', support: '联系与支持' },
-        version: '版本 0.1 · 免费 MVP',
+        version: '版本 0.2 · 免费版',
       },
       header: { eyebrow: '扩展偏好设置', title: '设置', lead: '选择 Ondrift 如何改写，以及哪些内容保留在你的浏览器中。' },
       provider: {
         sectionTitle: '服务提供方与 API 密钥',
-        sectionLead: '改写请求会从扩展直接发送到你选择的服务提供方。',
+        sectionLead: '使用自己的 API 密钥时会直连 Gemini；没有密钥时通过 Ondrift 代理每天免费改写 3 次。',
         providerLabel: '服务提供方',
         providerGemini: 'Google Gemini · 推荐',
         providerOpenAi: 'OpenAI · 即将支持',
@@ -957,6 +972,9 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         apiKeyPlaceholderEmpty: '粘贴你的 Gemini API 密钥',
         verifyCta: '验证并保存',
         apiKeyHelp: '仅保存在 chrome.storage.local 中，不使用同步存储。',
+        freeTierStatus: (remaining) => remaining === undefined
+          ? '你正在使用免费版（每天 3 次）。在上方添加自己的 Gemini 密钥即可不限次数使用。'
+          : `免费版：今天还剩 ${remaining}/3 次改写`,
         getKeyCta: '获取密钥',
         keySuccess: '密钥已验证，可以使用。',
         removeKeyCta: '删除密钥',
@@ -1009,7 +1027,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       privacy: {
         sectionTitle: '隐私与本地数据',
-        sectionLead: '此版本不使用云账号、同步功能或开发者运营的服务器。',
+        sectionLead: '不使用账号或同步功能。只有未设置密钥的免费改写会使用 Ondrift 的 Cloudflare 代理。',
         historyToggleTitle: '保存本地提示词历史',
         historyToggleDetail: '在此浏览器中保存原始提示词、改写后提示词、评分、网站和时间戳。',
         responsesTitle: '不会保存 AI 回复',

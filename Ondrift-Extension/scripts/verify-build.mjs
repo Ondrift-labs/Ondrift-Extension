@@ -24,8 +24,9 @@ invariant(
     "https://perplexity.ai/*",
     "https://grok.com/*",
     "https://generativelanguage.googleapis.com/*",
+    "https://ondrift.pages.dev/*",
   ]),
-  "host access must be limited to supported AI sites and the Gemini API",
+  "host access must be limited to supported AI sites, Gemini, and the Ondrift free-tier proxy",
 );
 invariant(
   JSON.stringify(manifest.content_scripts?.[0]?.matches) === JSON.stringify([
@@ -66,7 +67,7 @@ const textOutput = (
 ).join("\n");
 invariant(
   !/(?:localhost|127\.0\.0\.1|\/api\/v1|supabase|cloud sync)/i.test(textOutput),
-  "production bundle must not contain backend or dashboard integration",
+  "production bundle must not contain legacy backend or dashboard integration",
 );
 
 console.log(`Verified ${emittedEntries.length} MV3 build entrypoints.`);

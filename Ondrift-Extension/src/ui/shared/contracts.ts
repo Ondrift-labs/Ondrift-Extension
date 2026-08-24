@@ -8,6 +8,8 @@ export type PersonaId = 'general' | 'developer' | 'writer' | 'student' | 'transl
 export interface UiSettings {
   provider: ProviderId;
   apiKeyConfigured: boolean;
+  /** Last server-reported free rewrites remaining today. Informational only. */
+  freeTierRemaining?: number;
   /** Set from the most recent real use of the key (a rewrite or an explicit verify), so a
    * problem like an exhausted quota shows up as soon as it happens, not just after the
    * user re-verifies the key by hand. Absent when the last use succeeded. */

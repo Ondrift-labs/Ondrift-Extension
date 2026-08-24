@@ -69,6 +69,14 @@ describe('createInlineWidget', () => {
     expect(widget.element.shadowRoot?.textContent).not.toContain('The site did not accept');
   });
 
+  it('renders the daily free-tier limit as its own existing error-state kind', () => {
+    const widget = createInlineWidget(handlers());
+    widget.setState({ status: 'error', kind: 'daily_limit' });
+
+    expect(widget.element.shadowRoot?.textContent).toContain("Today's free rewrites are used");
+    expect(widget.element.shadowRoot?.textContent).toContain('3 rewrites per day');
+  });
+
   it('routes missing-key users to settings', () => {
     const onOpenSettings = vi.fn();
     const widget = createInlineWidget({ ...handlers(), onOpenSettings });

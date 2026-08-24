@@ -174,7 +174,7 @@ export function OnboardingApp({ bridge }: { bridge: UiBridge }) {
         {phase === 'intro' && <button className="ui-button ui-button--primary" onClick={() => setPhase('key')}>{copy.intro.cta} <Icon name="arrow" /></button>}
         {phase === 'key' && (keyStep < 2
           ? <button className="ui-button ui-button--primary" onClick={() => setKeyStep((keyStep + 1) as 1 | 2)}>{copy.key.nextCta} <Icon name="arrow" /></button>
-          : <button className="ui-button ui-button--primary" disabled={validation !== 'valid'} onClick={() => setPhase('privacy')}>{copy.key.continueCta} <Icon name="arrow" /></button>)}
+          : <><button className="ui-button ui-button--quiet" onClick={() => setPhase('privacy')}>{copy.key.skipCta}</button><button className="ui-button ui-button--primary" disabled={validation !== 'valid'} onClick={() => setPhase('privacy')}>{copy.key.continueCta} <Icon name="arrow" /></button></>)}
         {phase === 'privacy' && <button className="ui-button ui-button--primary" disabled={!consent} onClick={finish}>{copy.privacy.enableCta} <Icon name="check" /></button>}
       </div>
     </div>}

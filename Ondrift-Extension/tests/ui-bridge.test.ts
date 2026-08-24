@@ -33,6 +33,19 @@ describe("uiBridge.saveSettings", () => {
   });
 });
 
+describe("uiBridge.getSettings", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("threads the cached free-tier remaining count into UI settings", async () => {
+    const sendMessage = vi.fn(async () => ({ ok: true, data: { ...DEFAULT_SETTINGS, freeTierRemaining: 2 } }));
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+
+    await expect(uiBridge.getSettings()).resolves.toMatchObject({ apiKeyConfigured: false, freeTierRemaining: 2 });
+  });
+});
+
 describe("uiBridge.removeApiKey", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
