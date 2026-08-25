@@ -1,6 +1,6 @@
 # Ondrift 退款政策
 
-[English](../REFUND.md) | [한국어](REFUND.ko.md) | [日本語](REFUND.ja.md) | 简体中文
+[English](../../REFUND.md) | [한국어](REFUND.ko.md) | [日本語](REFUND.ja.md) | 简体中文
 
 生效日期:2026 年 8 月 25 日
 

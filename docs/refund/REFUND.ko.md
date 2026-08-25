@@ -1,6 +1,6 @@
 # Ondrift 환불 정책
 
-[English](../REFUND.md) | 한국어 | [日本語](REFUND.ja.md) | [简体中文](REFUND.zh.md)
+[English](../../REFUND.md) | 한국어 | [日本語](REFUND.ja.md) | [简体中文](REFUND.zh.md)
 
 발효일: 2026년 8월 25일
 

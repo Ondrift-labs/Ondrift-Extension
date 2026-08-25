@@ -1,6 +1,6 @@
 # Ondrift privacy policy
 
-English | [한국어](docs/PRIVACY.ko.md) | [日本語](docs/PRIVACY.ja.md) | [简体中文](docs/PRIVACY.zh.md)
+English | [한국어](docs/privacy/PRIVACY.ko.md) | [日本語](docs/privacy/PRIVACY.ja.md) | [简体中文](docs/privacy/PRIVACY.zh.md)
 
 Effective date: August 24, 2026
 

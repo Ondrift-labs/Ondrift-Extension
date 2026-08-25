@@ -1,6 +1,6 @@
 # Ondrift Chrome 확장 프로그램
 
-[English](../README.md) | 한국어 | [日本語](README.ja.md) | [简体中文](README.zh.md)
+[English](../../README.md) | 한국어 | [日本語](README.ja.md) | [简体中文](README.zh.md)
 
 Ondrift는 ChatGPT, Claude, Gemini, Perplexity, Grok에서 프롬프트를 전송하기 전에
 더 명확하게 다듬고 점수화하는 로컬 우선 Manifest V3 Chrome 확장 프로그램입니다.

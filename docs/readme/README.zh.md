@@ -1,6 +1,6 @@
 # Ondrift Chrome 扩展程序
 
-[English](../README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | 简体中文
+[English](../../README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | 简体中文
 
 Ondrift 是一款本地优先的 Manifest V3 Chrome 扩展程序,可在你于 ChatGPT、Claude、
 Gemini、Perplexity、Grok 发送提示词之前对其进行改写和评分。没有 API 密钥时,

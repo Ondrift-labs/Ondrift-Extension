@@ -1,6 +1,6 @@
 # Ondrift refund policy
 
-English | [한국어](docs/REFUND.ko.md) | [日本語](docs/REFUND.ja.md) | [简体中文](docs/REFUND.zh.md)
+English | [한국어](docs/refund/REFUND.ko.md) | [日本語](docs/refund/REFUND.ja.md) | [简体中文](docs/refund/REFUND.zh.md)
 
 Effective date: August 25, 2026
 
