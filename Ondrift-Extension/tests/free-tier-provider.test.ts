@@ -31,6 +31,34 @@ describe("rewriteViaFreeTier", () => {
     });
   });
 
+  it("includes a Pro license only when one is present", async () => {
+    const fetcher = vi.fn<(_input: RequestInfo | URL, _init?: RequestInit) => Promise<Response>>(async () => successResponse());
+
+    await rewriteViaFreeTier(
+      { prompt: "hello", service: "chatgpt" },
+      "install-id",
+      fetcher as typeof fetch,
+      vi.fn(),
+      " ONDR-ABCD-1234 ",
+    );
+
+    expect(JSON.parse(String(fetcher.mock.calls[0]?.[1]?.body))).toEqual({
+      prompt: "hello",
+      service: "chatgpt",
+      installId: "install-id",
+      licenseKey: "ONDR-ABCD-1234",
+    });
+  });
+
+  it("classifies an explicit license rejection separately from the daily limit", async () => {
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ code: "license_invalid" }), { status: 402 }));
+
+    await expect(rewriteViaFreeTier({ prompt: "hello", service: "chatgpt" }, "id", fetcher as typeof fetch, vi.fn(), "ONDR-BAD0-0000"))
+      .rejects.toMatchObject({ code: "license_invalid", retryable: false });
+    expect(providerErrorReason("license_invalid")).toBe("license_invalid");
+    expect(fetcher).toHaveBeenCalledOnce();
+  });
+
   it("does not retry a daily-limit response", async () => {
     const fetcher = vi.fn(async () => new Response(JSON.stringify({
       code: "daily_limit_reached", resetAt: "2026-08-25T00:00:00.000Z",

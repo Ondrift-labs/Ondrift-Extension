@@ -33,6 +33,7 @@ export type ProviderErrorCode =
   | "invalid_key"
   | "quota_exceeded"
   | "daily_limit_reached"
+  | "license_invalid"
   | "network"
   | "request_rejected"
   | "model_unavailable"
@@ -68,6 +69,10 @@ export interface ExtensionSettings {
   installId: string;
   /** Last server-reported free rewrites remaining today. Informational only. */
   freeTierRemaining?: number;
+  /** Pro license code, stored locally after successful verification. */
+  licenseKey?: string;
+  /** Last definitive Pro license state. Null until a license has been checked. */
+  licenseStatus?: "active" | "invalid" | "expired" | null;
 }
 
 export interface HistoryEntry {
@@ -103,6 +108,7 @@ export interface HistoryAggregates {
 export type RuntimeRequest =
   | { type: "rewrite"; payload: RewriteRequest }
   | { type: "validate_api_key"; payload: { provider: ProviderId; apiKey?: string; model?: string } }
+  | { type: "verify_license"; payload: { licenseKey: string } }
   | { type: "settings_get" }
   | { type: "settings_set"; payload: Partial<ExtensionSettings> }
   | { type: "history_add"; payload: HistoryEntry }

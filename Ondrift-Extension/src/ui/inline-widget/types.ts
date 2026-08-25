@@ -7,7 +7,7 @@ export type InlineWidgetState =
   | { status: 'applied'; score: number; previousScore: number; improvedText: string }
   | { status: 'missing_key' }
   | { status: 'reload_required' }
-  | { status: 'error'; kind: 'quota' | 'daily_limit' | 'network' | 'invalid_key' | 'request' | 'unavailable' | 'parse' | 'unknown'; message?: string };
+  | { status: 'error'; kind: 'quota' | 'daily_limit' | 'license_invalid' | 'network' | 'invalid_key' | 'request' | 'unavailable' | 'parse' | 'unknown'; message?: string };
 
 export interface InlineWidgetHandlers {
   onRewrite(): void;

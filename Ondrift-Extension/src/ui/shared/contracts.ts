@@ -10,6 +10,9 @@ export interface UiSettings {
   apiKeyConfigured: boolean;
   /** Last server-reported free rewrites remaining today. Informational only. */
   freeTierRemaining?: number;
+  /** Locally stored Pro license code, present only after successful verification. */
+  licenseKey?: string;
+  licenseStatus?: 'active' | 'invalid' | 'expired' | null;
   /** Set from the most recent real use of the key (a rewrite or an explicit verify), so a
    * problem like an exhausted quota shows up as soon as it happens, not just after the
    * user re-verifies the key by hand. Absent when the last use succeeded. */
@@ -26,6 +29,11 @@ export interface UiSettings {
 export interface ApiKeyValidationResult {
   ok: boolean;
   reason?: 'invalid_key' | 'quota' | 'network' | 'request' | 'unavailable' | 'unknown';
+}
+
+export interface LicenseVerificationResult {
+  status: 'active';
+  expiresAt: string;
 }
 
 /** The states a "validate this API key" flow moves through in the UI (Onboarding and Options both use this). */
@@ -63,6 +71,7 @@ export interface UiBridge {
   getSettings(): Promise<UiSettings>;
   saveSettings(patch: Partial<UiSettings>): Promise<UiSettings>;
   validateApiKey(provider: ProviderId, apiKey: string, model?: string): Promise<ApiKeyValidationResult>;
+  verifyLicense(licenseKey: string): Promise<LicenseVerificationResult>;
   /** Clears the saved key for `provider` (and its health status), leaving the provider/model
    * choice untouched so re-adding a key later doesn't lose those preferences. */
   removeApiKey(provider: ProviderId): Promise<UiSettings>;
@@ -76,6 +85,8 @@ export interface UiBridge {
 export const DEFAULT_SETTINGS: UiSettings = {
   provider: 'gemini',
   apiKeyConfigured: false,
+  licenseKey: '',
+  licenseStatus: null,
   persona: 'general',
   language: 'en',
   siteAccess: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true },
@@ -84,6 +95,7 @@ export const DEFAULT_SETTINGS: UiSettings = {
 };
 
 export const AI_STUDIO_API_KEY_URL = 'https://aistudio.google.com/apikey';
+export const PRO_UPGRADE_URL = 'https://ondrift.pages.dev/upgrade';
 export const GITHUB_REPO_URL = 'https://github.com/Ondrift-labs/Ondrift-Extension';
 export const GITHUB_BUG_REPORT_URL = `${GITHUB_REPO_URL}/issues/new?template=bug_report.yml`;
 export const GITHUB_FEATURE_REQUEST_URL = `${GITHUB_REPO_URL}/issues/new?template=feature_request.yml`;

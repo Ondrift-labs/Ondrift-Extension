@@ -23,13 +23,14 @@ export function serializeProviderError(error: unknown): SerializedProviderError 
   };
 }
 
-export type ProviderErrorReason = "quota" | "daily_limit" | "invalid_key" | "network" | "request" | "unavailable" | "unknown";
+export type ProviderErrorReason = "quota" | "daily_limit" | "license_invalid" | "invalid_key" | "network" | "request" | "unavailable" | "unknown";
 
 /** Maps a provider error code to the coarser reason category the UI surfaces to the user. */
 export function providerErrorReason(code: ProviderErrorCode): ProviderErrorReason {
   switch (code) {
     case "quota_exceeded": return "quota";
     case "daily_limit_reached": return "daily_limit";
+    case "license_invalid": return "license_invalid";
     case "invalid_key": return "invalid_key";
     case "network": return "network";
     case "request_rejected": return "request";

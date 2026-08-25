@@ -107,6 +107,14 @@ export interface OptionsCopy {
     verifyCta: string;
     apiKeyHelp: string;
     freeTierStatus(remaining?: number): string;
+    upgradeProCta: string;
+    licenseKeyLabel: string;
+    licenseKeyPlaceholder: string;
+    licenseApplyCta: string;
+    licenseSuccess: string;
+    licenseError: string;
+    proActive: string;
+    removeLicenseCta: string;
     getKeyCta: string;
     keySuccess: string;
     removeKeyCta: string;
@@ -288,12 +296,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     options: {
       sidebar: {
         nav: { provider: '제공자', persona: '다시 쓰기 스타일', sites: '사이트', privacy: '개인정보', support: '문의 및 지원' },
-        version: '버전 0.2 · 무료 요금제',
+        version: '버전 0.2 · 무료 및 Pro',
       },
       header: { eyebrow: '확장 프로그램 환경설정', title: '설정', lead: 'Ondrift가 어떻게 다시 쓰고 브라우저에 무엇을 남길지 선택하세요.' },
       provider: {
         sectionTitle: '제공자 및 API 키',
-        sectionLead: '내 API 키가 있으면 Gemini로 직접 전송되며, 키가 없으면 하루 3회 무료 요금제에 Ondrift 프록시를 사용합니다.',
+        sectionLead: '내 API 키가 있으면 Gemini로 직접 전송됩니다. 키가 없으면 Ondrift 프록시로 무료 하루 3회 또는 Pro 하루 100회를 이용할 수 있습니다.',
         providerLabel: '제공자',
         providerGemini: 'Google Gemini · 권장',
         providerOpenAi: 'OpenAI · 추후 지원',
@@ -306,6 +314,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         freeTierStatus: (remaining) => remaining === undefined
           ? '무료 요금제를 사용 중입니다(하루 3회). 위에서 내 Gemini 키를 추가하면 제한 없이 사용할 수 있습니다.'
           : `무료 요금제: 오늘 3회 중 ${remaining}회 남음`,
+        upgradeProCta: 'Pro로 업그레이드 — 월 $2.99',
+        licenseKeyLabel: 'Pro 라이선스 코드',
+        licenseKeyPlaceholder: 'ONDR-XXXX-XXXX',
+        licenseApplyCta: '적용',
+        licenseSuccess: 'Pro 라이선스가 확인되어 적용되었습니다.',
+        licenseError: '라이선스를 확인하지 못했습니다. 코드와 네트워크 연결을 확인한 뒤 다시 시도해 주세요.',
+        proActive: 'Ondrift Pro 사용 중 · 하루 100회',
+        removeLicenseCta: '라이선스 삭제',
         getKeyCta: '키 발급받기',
         keySuccess: '키가 확인되어 사용할 준비가 되었습니다.',
         removeKeyCta: '키 삭제',
@@ -358,7 +374,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       privacy: {
         sectionTitle: '개인정보 및 로컬 데이터',
-        sectionLead: '계정이나 동기화는 사용하지 않습니다. 키가 없는 무료 다시 쓰기만 Ondrift의 Cloudflare 프록시를 사용합니다.',
+        sectionLead: '계정이나 동기화는 사용하지 않습니다. 키가 없는 무료 및 Pro 다시 쓰기만 Ondrift의 Cloudflare 프록시를 사용합니다.',
         historyToggleTitle: '로컬 프롬프트 기록 저장',
         historyToggleDetail: '원본과 개선된 프롬프트, 점수, 사이트, 타임스탬프를 이 브라우저에 저장합니다.',
         responsesTitle: 'AI 응답은 저장되지 않습니다',
@@ -511,12 +527,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     options: {
       sidebar: {
         nav: { provider: 'Provider', persona: 'Rewrite style', sites: 'Sites', privacy: 'Privacy', support: 'Contact & support' },
-        version: 'Version 0.2 · Free tier',
+        version: 'Version 0.2 · Free & Pro',
       },
       header: { eyebrow: 'Extension preferences', title: 'Settings', lead: 'Choose how Ondrift rewrites and what stays in your browser.' },
       provider: {
         sectionTitle: 'Provider & API key',
-        sectionLead: 'With your API key, rewrites go directly to Gemini. Without one, Ondrift’s proxy provides 3 free rewrites per day.',
+        sectionLead: 'With your API key, rewrites go directly to Gemini. Without one, Ondrift’s proxy provides 3 free or 100 Pro rewrites per day.',
         providerLabel: 'Provider',
         providerGemini: 'Google Gemini · recommended',
         providerOpenAi: 'OpenAI · coming later',
@@ -529,6 +545,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         freeTierStatus: (remaining) => remaining === undefined
           ? 'You’re using the free tier (3/day). Add your own Gemini key above for unlimited use.'
           : `Free tier: ${remaining}/3 rewrites left today`,
+        upgradeProCta: 'Upgrade to Pro — $2.99/mo',
+        licenseKeyLabel: 'Pro license code',
+        licenseKeyPlaceholder: 'ONDR-XXXX-XXXX',
+        licenseApplyCta: 'Apply',
+        licenseSuccess: 'Pro license verified and applied.',
+        licenseError: 'The license could not be verified. Check the code and your connection, then try again.',
+        proActive: 'Ondrift Pro active · 100 rewrites/day',
+        removeLicenseCta: 'Remove license',
         getKeyCta: 'Get a key',
         keySuccess: 'Key verified and ready to use.',
         removeKeyCta: 'Remove key',
@@ -581,7 +605,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       privacy: {
         sectionTitle: 'Privacy & local data',
-        sectionLead: 'No account or sync is used. Only free rewrites without a key use Ondrift’s Cloudflare proxy.',
+        sectionLead: 'No account or sync is used. Only free and Pro rewrites without a key use Ondrift’s Cloudflare proxy.',
         historyToggleTitle: 'Save local prompt history',
         historyToggleDetail: 'Store original and improved prompts, score, site, and timestamp in this browser.',
         responsesTitle: 'AI responses are never saved',
@@ -734,12 +758,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     options: {
       sidebar: {
         nav: { provider: 'プロバイダー', persona: 'リライトスタイル', sites: 'サイト', privacy: 'プライバシー', support: 'お問い合わせ' },
-        version: 'バージョン 0.2 · 無料プラン',
+        version: 'バージョン 0.2 · 無料 / Pro',
       },
       header: { eyebrow: '拡張機能の環境設定', title: '設定', lead: 'Ondrift のリライト方法とブラウザに残すデータを選択してください。' },
       provider: {
         sectionTitle: 'プロバイダーと API キー',
-        sectionLead: '自分の API キーがあれば Gemini に直接送信し、キーがなければ Ondrift のプロキシで1日3回無料で利用できます。',
+        sectionLead: '自分の API キーがあれば Gemini に直接送信します。キーがなければ Ondrift のプロキシで無料は1日3回、Pro は1日100回利用できます。',
         providerLabel: 'プロバイダー',
         providerGemini: 'Google Gemini · おすすめ',
         providerOpenAi: 'OpenAI · 近日対応',
@@ -752,6 +776,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         freeTierStatus: (remaining) => remaining === undefined
           ? '無料プランを利用中です（1日3回）。無制限で使うには、上で自分の Gemini キーを追加してください。'
           : `無料プラン: 本日は3回中あと${remaining}回`,
+        upgradeProCta: 'Pro にアップグレード — 月額 $2.99',
+        licenseKeyLabel: 'Pro ライセンスコード',
+        licenseKeyPlaceholder: 'ONDR-XXXX-XXXX',
+        licenseApplyCta: '適用',
+        licenseSuccess: 'Pro ライセンスを確認し、適用しました。',
+        licenseError: 'ライセンスを確認できませんでした。コードと接続を確認して再試行してください。',
+        proActive: 'Ondrift Pro 利用中 · 1日100回',
+        removeLicenseCta: 'ライセンスを削除',
         getKeyCta: 'キーを取得',
         keySuccess: 'キーを確認しました。利用できます。',
         removeKeyCta: 'キーを削除',
@@ -804,7 +836,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       privacy: {
         sectionTitle: 'プライバシーとローカルデータ',
-        sectionLead: 'アカウントや同期は使用しません。キーなしの無料リライトのみ Ondrift の Cloudflare プロキシを使用します。',
+        sectionLead: 'アカウントや同期は使用しません。キーなしの無料および Pro リライトのみ Ondrift の Cloudflare プロキシを使用します。',
         historyToggleTitle: 'ローカルのプロンプト履歴を保存',
         historyToggleDetail: '元のプロンプトと改善後のプロンプト、スコア、サイト、タイムスタンプをこのブラウザに保存します。',
         responsesTitle: 'AI の応答は保存されません',
@@ -957,12 +989,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
     options: {
       sidebar: {
         nav: { provider: '服务提供方', persona: '改写风格', sites: '网站', privacy: '隐私', support: '联系与支持' },
-        version: '版本 0.2 · 免费版',
+        version: '版本 0.2 · 免费版与 Pro',
       },
       header: { eyebrow: '扩展偏好设置', title: '设置', lead: '选择 Ondrift 如何改写，以及哪些内容保留在你的浏览器中。' },
       provider: {
         sectionTitle: '服务提供方与 API 密钥',
-        sectionLead: '使用自己的 API 密钥时会直连 Gemini；没有密钥时通过 Ondrift 代理每天免费改写 3 次。',
+        sectionLead: '使用自己的 API 密钥时会直连 Gemini；没有密钥时可通过 Ondrift 代理每天免费改写 3 次，Pro 每天改写 100 次。',
         providerLabel: '服务提供方',
         providerGemini: 'Google Gemini · 推荐',
         providerOpenAi: 'OpenAI · 即将支持',
@@ -975,6 +1007,14 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         freeTierStatus: (remaining) => remaining === undefined
           ? '你正在使用免费版（每天 3 次）。在上方添加自己的 Gemini 密钥即可不限次数使用。'
           : `免费版：今天还剩 ${remaining}/3 次改写`,
+        upgradeProCta: '升级到 Pro — 每月 $2.99',
+        licenseKeyLabel: 'Pro 许可证代码',
+        licenseKeyPlaceholder: 'ONDR-XXXX-XXXX',
+        licenseApplyCta: '应用',
+        licenseSuccess: 'Pro 许可证已验证并启用。',
+        licenseError: '无法验证许可证。请检查代码和网络连接后重试。',
+        proActive: 'Ondrift Pro 已启用 · 每天 100 次',
+        removeLicenseCta: '移除许可证',
         getKeyCta: '获取密钥',
         keySuccess: '密钥已验证，可以使用。',
         removeKeyCta: '删除密钥',
@@ -1027,7 +1067,7 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
       },
       privacy: {
         sectionTitle: '隐私与本地数据',
-        sectionLead: '不使用账号或同步功能。只有未设置密钥的免费改写会使用 Ondrift 的 Cloudflare 代理。',
+        sectionLead: '不使用账号或同步功能。只有未设置密钥的免费版和 Pro 改写会使用 Ondrift 的 Cloudflare 代理。',
         historyToggleTitle: '保存本地提示词历史',
         historyToggleDetail: '在此浏览器中保存原始提示词、改写后提示词、评分、网站和时间戳。',
         responsesTitle: '不会保存 AI 回复',

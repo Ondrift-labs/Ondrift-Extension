@@ -77,6 +77,17 @@ describe('createInlineWidget', () => {
     expect(widget.element.shadowRoot?.textContent).toContain('3 rewrites per day');
   });
 
+  it('routes an invalid Pro license to settings instead of presenting it as a daily limit', () => {
+    const onOpenSettings = vi.fn();
+    const widget = createInlineWidget({ ...handlers(), onOpenSettings });
+    widget.setState({ status: 'error', kind: 'license_invalid' });
+
+    expect(widget.element.shadowRoot?.textContent).toContain('Pro license needs attention');
+    expect(widget.element.shadowRoot?.textContent).not.toContain("Today's free rewrites are used");
+    widget.element.shadowRoot?.querySelector<HTMLButtonElement>('.od-actions button')?.click();
+    expect(onOpenSettings).toHaveBeenCalledOnce();
+  });
+
   it('routes missing-key users to settings', () => {
     const onOpenSettings = vi.fn();
     const widget = createInlineWidget({ ...handlers(), onOpenSettings });
