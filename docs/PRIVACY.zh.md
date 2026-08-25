@@ -34,8 +34,8 @@ Function。该函数使用 Ondrift 的 API 密钥将改写请求转发给 Google
 结果。此路径仅用于提供每天 3 次的免费改写,并执行按安装或按 IP 计算的限额。
 
 当用户应用或使用 Ondrift Pro 许可证时,许可证代码会通过 HTTPS 发送到
-`ondrift.pages.dev`,用于验证并应用 Pro 每日限额。付款完全由 Stripe 处理;
-扩展程序不会发送付款信息,Ondrift 也不会收到银行卡数据。除上述代理改写数据外,
+`ondrift.pages.dev`,用于验证并应用 Pro 每日限额。付款完全由授权经销商
+Paddle.com Market Limited 处理;扩展程序不会发送付款信息,Ondrift 也不会收到银行卡数据。除上述代理改写数据外,
 Pro 不会带来任何其他新的数据收集。
 
 Ondrift 不会出售用户数据、不将其用于广告用途、不进行跨站点跟踪,也不允许人工

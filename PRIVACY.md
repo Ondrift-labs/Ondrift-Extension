@@ -46,9 +46,9 @@ three rewrites per day and to enforce its per-installation or per-IP quota.
 When a user applies or uses an Ondrift Pro license, the license code is sent
 over HTTPS to `ondrift.pages.dev` for verification and with proxy rewrite
 requests so the Pro daily limit can be applied. Payment is handled entirely by
-Stripe; no payment details are sent by the extension, and Ondrift never
-receives card data. Pro introduces no other data collection beyond the proxy
-rewrite data described above.
+Paddle.com Market Limited, our authorized reseller; no payment details are
+sent by the extension, and Ondrift never receives card data. Pro introduces no
+other data collection beyond the proxy rewrite data described above.
 
 Ondrift does not sell user data, use it for advertising, perform cross-site
 tracking, or allow humans to read it. Local history is not sent to Ondrift's
