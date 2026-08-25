@@ -18,12 +18,13 @@ this policy.
 
 ## Refund eligibility
 
-We will issue a full refund if you request one within 7 days of a charge,
-for either your first payment or a renewal, no questions asked.
+We will issue a full refund, no questions asked, if you request one within 7
+days of your **first** Ondrift Pro payment.
 
-Outside that window, refunds are considered case by case — for example, if
-Ondrift Pro was charged but never issued a working license, or a renewal
-charge went through after you had already cancelled.
+Refund requests for a renewal charge, or for a first payment made outside the
+7-day window, are considered case by case — for example, if Ondrift Pro was
+charged but never issued a working license, or a renewal charge went through
+after you had already cancelled.
 
 ## How to request a refund
 
