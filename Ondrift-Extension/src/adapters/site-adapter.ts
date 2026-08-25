@@ -169,32 +169,56 @@ export function firstVisible(selectors: readonly string[]): HTMLElement | null {
 
 const MAX_ANCHOR_WALK_DEPTH = 10;
 
+function hasVisibleBorder(element: HTMLElement, style: CSSStyleDeclaration): boolean {
+  return [
+    style.borderTopWidth,
+    style.borderRightWidth,
+    style.borderBottomWidth,
+    style.borderLeftWidth,
+    element.style.border,
+    element.style.borderTop,
+    element.style.borderRight,
+    element.style.borderBottom,
+    element.style.borderLeft,
+  ].some((width) => Number.parseFloat(width) > 0);
+}
+
+function isSolidColor(color: string): boolean {
+  // "transparent", "rgba(0, 0, 0, 0)" (any zero alpha), and "" (unset) all mean the
+  // element has no visible fill of its own.
+  if (!color || color === "transparent") return false;
+  const alpha = color.match(/rgba?\([^)]*[,\s]([\d.]+)\)/)?.[1];
+  return alpha === undefined || Number.parseFloat(alpha) > 0;
+}
+
+/**
+ * Many composers wrap their input, leading icon, and trailing controls (send button,
+ * model picker, mic, ...) in a single rounded "pill" that has a background fill and
+ * border-radius but no real CSS border -- e.g. Grok's. `hasVisibleBorder` alone never
+ * matches that, so anchoring fell through to `input` itself, which is narrower than the
+ * pill (it excludes the leading icon) and often shorter (it excludes the icon row's
+ * extra padding), visibly misaligning and overlapping the widget under it.
+ */
+function looksLikeComposerPill(style: CSSStyleDeclaration): boolean {
+  const radius = Number.parseFloat(style.borderTopLeftRadius || style.borderRadius || "0");
+  return radius > 0 && isSolidColor(style.backgroundColor);
+}
+
 export function findComposerAnchor(input: HTMLElement): HTMLElement {
   let element = input.parentElement;
   let depth = 0;
   while (element && element !== document.body && depth < MAX_ANCHOR_WALK_DEPTH) {
     const style = getComputedStyle(element);
-    const hasVisibleBorder = [
-      style.borderTopWidth,
-      style.borderRightWidth,
-      style.borderBottomWidth,
-      style.borderLeftWidth,
-      element.style.border,
-      element.style.borderTop,
-      element.style.borderRight,
-      element.style.borderBottom,
-      element.style.borderLeft,
-    ].some((width) => Number.parseFloat(width) > 0);
-    if (hasVisibleBorder) return element;
+    if (hasVisibleBorder(element, style) || looksLikeComposerPill(style)) return element;
     element = element.parentElement;
     depth += 1;
   }
-  // No bordered ancestor within the walk depth (composers styled with box-shadow/
-  // background instead of a real CSS border, e.g. Grok's, never match above). Falling
-  // back to a wide ancestor like `form.parentElement` used to anchor the widget to
-  // whatever full-bleed container happened to wrap the input, landing it far from the
-  // actual composer. The input's own rect is always exactly where the composer visually
-  // is, so it's the only fallback guaranteed not to misplace the widget.
+  // Nothing in the walk looked like a composer box. Falling back to a wide ancestor like
+  // `form.parentElement` used to anchor the widget to whatever full-bleed container
+  // happened to wrap the input, landing it far from the actual composer. The input's own
+  // rect is always exactly where the composer visually is, so it's the fallback
+  // guaranteed not to misplace the widget, even though it can undershoot the full visual
+  // bounds (leading icon, padding) that a matched ancestor above would have covered.
   return input;
 }
 
