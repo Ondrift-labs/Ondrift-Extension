@@ -44,6 +44,40 @@ describe("uiBridge.getSettings", () => {
 
     await expect(uiBridge.getSettings()).resolves.toMatchObject({ apiKeyConfigured: false, freeTierRemaining: 2 });
   });
+
+  it("threads the Pro license fields into UI settings", async () => {
+    const sendMessage = vi.fn(async () => ({ ok: true, data: { ...DEFAULT_SETTINGS, licenseKey: "ONDR-ABCD-1234", licenseStatus: "active" } }));
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+
+    await expect(uiBridge.getSettings()).resolves.toMatchObject({ licenseKey: "ONDR-ABCD-1234", licenseStatus: "active" });
+  });
+
+  it("writes license removal fields through to the serialized settings path", async () => {
+    const sendMessage = vi.fn(async () => ({ ok: true, data: { ...DEFAULT_SETTINGS } }));
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+
+    await uiBridge.saveSettings({ licenseKey: "", licenseStatus: null });
+
+    expect(sendMessage).toHaveBeenCalledWith({
+      type: "settings_set",
+      payload: { licenseKey: "", licenseStatus: null },
+    });
+  });
+});
+
+describe("uiBridge.verifyLicense", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("sends the verify_license runtime request", async () => {
+    const data = { status: "active", expiresAt: "2027-08-25T00:00:00.000Z" };
+    const sendMessage = vi.fn(async () => ({ ok: true, data }));
+    vi.stubGlobal("chrome", { runtime: { sendMessage } });
+
+    await expect(uiBridge.verifyLicense("ONDR-ABCD-1234")).resolves.toEqual(data);
+    expect(sendMessage).toHaveBeenCalledWith({ type: "verify_license", payload: { licenseKey: "ONDR-ABCD-1234" } });
+  });
 });
 
 describe("uiBridge.removeApiKey", () => {

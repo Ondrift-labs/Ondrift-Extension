@@ -2,6 +2,7 @@ import type { ExtensionSettings, ProviderErrorCode, ProviderId, RuntimeRequest, 
 import { getProvider } from "../providers/registry";
 import { ProviderError, serializeProviderError } from "../providers/errors";
 import { rewriteViaFreeTier } from "../providers/free-tier.provider";
+import { LicenseProviderError, verifyLicense } from "../providers/license.provider";
 import { settingsStore, type SettingsStore } from "../storage/settings";
 import { historyStore, type HistoryStore } from "../storage/history";
 
@@ -43,11 +44,35 @@ async function withApiKeyStatusTracking<T>(settings: SettingsStore, action: () =
   }
 }
 
+function rejectedLicenseStatus(error: unknown): "invalid" | "expired" | undefined {
+  if (error instanceof LicenseProviderError) return error.licenseStatus;
+  if (error instanceof ProviderError && error.code === "license_invalid") return "invalid";
+  return undefined;
+}
+
+/** Verifies and persists a license without downgrading an active license on transient failures. */
+async function withLicenseStatusTracking<T>(
+  settings: SettingsStore,
+  licenseKey: string,
+  action: () => Promise<T>,
+): Promise<T> {
+  try {
+    const result = await action();
+    await settings.update({ licenseKey, licenseStatus: "active" });
+    return result;
+  } catch (error) {
+    const licenseStatus = rejectedLicenseStatus(error);
+    if (licenseStatus) await settings.update({ licenseKey: "", licenseStatus });
+    throw error;
+  }
+}
+
 export interface MessageHandlerDependencies {
   settings: SettingsStore;
   history: HistoryStore;
   provider: typeof getProvider;
   freeTierRewrite: typeof rewriteViaFreeTier;
+  verifyLicense: typeof verifyLicense;
   openOptions: () => Promise<void>;
 }
 
@@ -56,6 +81,7 @@ const defaults: MessageHandlerDependencies = {
   history: historyStore,
   provider: getProvider,
   freeTierRewrite: rewriteViaFreeTier,
+  verifyLicense,
   openOptions: () => chrome.runtime.openOptionsPage(),
 };
 
@@ -74,10 +100,21 @@ export async function handleRuntimeRequest(
         if (!apiKey) {
           const installId = settings.installId || crypto.randomUUID();
           if (!settings.installId) await dependencies.settings.update({ installId });
-          const result = await dependencies.freeTierRewrite(
-            { ...message.payload, language: settings.language },
-            installId,
-          );
+          let result;
+          try {
+            result = await dependencies.freeTierRewrite(
+              { ...message.payload, language: settings.language },
+              installId,
+              undefined,
+              undefined,
+              settings.licenseKey?.trim() || undefined,
+            );
+          } catch (error) {
+            if (rejectedLicenseStatus(error)) {
+              await dependencies.settings.update({ licenseKey: "", licenseStatus: "invalid" });
+            }
+            throw error;
+          }
           await dependencies.settings.update({ freeTierRemaining: result.remaining });
           return { ok: true, data: result };
         }
@@ -97,6 +134,16 @@ export async function handleRuntimeRequest(
         await withApiKeyStatusTracking(dependencies.settings, () =>
           dependencies.provider(message.payload.provider).validateKey(apiKey, message.payload.model));
         return { ok: true, data: undefined };
+      }
+      case "verify_license": {
+        const licenseKey = message.payload.licenseKey.trim();
+        if (!licenseKey) throw new ProviderError("request_rejected", "Enter an Ondrift Pro license code.");
+        const result = await withLicenseStatusTracking(
+          dependencies.settings,
+          licenseKey,
+          () => dependencies.verifyLicense(licenseKey),
+        );
+        return { ok: true, data: result };
       }
       case "settings_get":
         return { ok: true, data: await dependencies.settings.get() };

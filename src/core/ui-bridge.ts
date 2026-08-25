@@ -1,6 +1,7 @@
 import type {
   ApiKeyValidationResult,
   HistoryItem,
+  LicenseVerificationResult,
   PersonaId,
   UiBridge,
   UiSettings,
@@ -12,7 +13,7 @@ import { sendRuntimeMessage } from "./rewrite-client";
 function apiKeyErrorReason(code: ExtensionSettings["apiKeyStatus"]): ApiKeyValidationResult["reason"] {
   if (!code) return undefined;
   const reason = providerErrorReason(code);
-  return reason === "daily_limit" ? "unknown" : reason;
+  return reason === "daily_limit" || reason === "license_invalid" ? "unknown" : reason;
 }
 
 function toUiSettings(settings: ExtensionSettings): UiSettings {
@@ -21,6 +22,8 @@ function toUiSettings(settings: ExtensionSettings): UiSettings {
     apiKeyConfigured: Boolean(settings.apiKeys[settings.provider]?.trim()),
     apiKeyStatus: apiKeyErrorReason(settings.apiKeyStatus),
     freeTierRemaining: settings.freeTierRemaining,
+    licenseKey: settings.licenseKey,
+    licenseStatus: settings.licenseStatus,
     model: settings.apiModels[settings.provider],
     persona: (settings.persona || "general") as PersonaId,
     language: settings.language || "en",
@@ -62,6 +65,8 @@ export const uiBridge: UiBridge = {
     if (patch.language !== undefined) runtimePatch.language = patch.language;
     if (patch.siteAccess !== undefined) runtimePatch.enabledSites = patch.siteAccess;
     if (patch.saveHistory !== undefined) runtimePatch.saveHistory = patch.saveHistory;
+    if (patch.licenseKey !== undefined) runtimePatch.licenseKey = patch.licenseKey;
+    if (patch.licenseStatus !== undefined) runtimePatch.licenseStatus = patch.licenseStatus;
     if (patch.consentGranted !== undefined) {
       runtimePatch.consentGranted = patch.consentGranted;
       runtimePatch.onboardingComplete = patch.consentGranted;
@@ -94,6 +99,9 @@ export const uiBridge: UiBridge = {
     } catch (error) {
       return validationFailure(error);
     }
+  },
+  verifyLicense(licenseKey) {
+    return sendRuntimeMessage<LicenseVerificationResult>({ type: "verify_license", payload: { licenseKey } });
   },
   async removeApiKey(provider) {
     const patch: Partial<ExtensionSettings> = { apiKeys: { [provider]: "" } as Partial<Record<ProviderId, string>>, apiKeyStatus: null };

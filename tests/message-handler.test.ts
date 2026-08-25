@@ -17,6 +17,8 @@ function dependencies(overrides: Partial<MessageHandlerDependencies> = {}): Mess
         consentGranted: true,
         apiKeyStatus: null,
         installId: "00000000-0000-4000-8000-000000000001",
+        licenseKey: "",
+        licenseStatus: null,
       })),
       update: vi.fn(async (patch) => patch),
     } as never,
@@ -29,6 +31,7 @@ function dependencies(overrides: Partial<MessageHandlerDependencies> = {}): Mess
       validateKey: vi.fn(async () => undefined),
     })),
     freeTierRewrite: vi.fn(async () => ({ improvedText: "free better", previousScore: 45, score: 85, rationale: "clearer", remaining: 2 })),
+    verifyLicense: vi.fn(async () => ({ status: "active" as const, expiresAt: "2027-08-25T00:00:00.000Z" })),
     openOptions: vi.fn(async () => undefined),
     ...overrides,
   };
@@ -63,6 +66,9 @@ describe("handleRuntimeRequest", () => {
     expect(freeTierRewrite).toHaveBeenCalledWith(
       { prompt: "hello", service: "chatgpt", persona: "writer", language: "ko" },
       "00000000-0000-4000-8000-000000000002",
+      undefined,
+      undefined,
+      undefined,
     );
     expect(deps.provider).not.toHaveBeenCalled();
     expect(deps.settings.update).toHaveBeenCalledWith({ freeTierRemaining: 2 });
@@ -75,6 +81,62 @@ describe("handleRuntimeRequest", () => {
 
     expect(deps.freeTierRewrite).not.toHaveBeenCalled();
     expect(deps.provider).toHaveBeenCalledWith("gemini");
+  });
+
+  it("passes a verified Pro license through the free-tier rewrite path", async () => {
+    const freeTierRewrite = vi.fn(async () => ({ improvedText: "pro better", previousScore: 45, score: 90, rationale: "clearer", remaining: 99 }));
+    const deps = dependencies({
+      settings: {
+        get: vi.fn(async () => ({
+          provider: "gemini", apiKeys: {}, apiModels: {},
+          enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true },
+          onboardingComplete: true, persona: "general", language: "en", saveHistory: true,
+          consentGranted: true, apiKeyStatus: null, installId: "install-id",
+          licenseKey: "ONDR-ABCD-1234", licenseStatus: "active",
+        })),
+        update: vi.fn(async (patch: unknown) => patch),
+      } as never,
+      freeTierRewrite,
+    });
+
+    await handleRuntimeRequest({ type: "rewrite", payload: { prompt: "hello", service: "chatgpt" } }, deps);
+
+    expect(freeTierRewrite).toHaveBeenCalledWith(
+      { prompt: "hello", service: "chatgpt", language: "en" },
+      "install-id",
+      undefined,
+      undefined,
+      "ONDR-ABCD-1234",
+    );
+  });
+
+  it("verifies a Pro license, persists it through settings.update, and returns its expiry", async () => {
+    const deps = dependencies();
+
+    await expect(handleRuntimeRequest({ type: "verify_license", payload: { licenseKey: " ONDR-ABCD-1234 " } }, deps))
+      .resolves.toEqual({ ok: true, data: { status: "active", expiresAt: "2027-08-25T00:00:00.000Z" } });
+    expect(deps.verifyLicense).toHaveBeenCalledWith("ONDR-ABCD-1234");
+    expect(deps.settings.update).toHaveBeenCalledWith({ licenseKey: "ONDR-ABCD-1234", licenseStatus: "active" });
+  });
+
+  it("does not clobber a previously valid license when verification fails transiently", async () => {
+    const deps = dependencies({
+      verifyLicense: vi.fn(async () => { throw new ProviderError("network", "Offline", true); }),
+    });
+
+    await expect(handleRuntimeRequest({ type: "verify_license", payload: { licenseKey: "ONDR-ABCD-1234" } }, deps))
+      .resolves.toEqual({ ok: false, error: { code: "network", message: "Offline", retryable: true } });
+    expect(deps.settings.update).not.toHaveBeenCalled();
+  });
+
+  it("clears and marks a license invalid only after an explicit rejection", async () => {
+    const deps = dependencies({
+      verifyLicense: vi.fn(async () => { throw new ProviderError("license_invalid", "Revoked"); }),
+    });
+
+    await handleRuntimeRequest({ type: "verify_license", payload: { licenseKey: "ONDR-REVOKED-0000" } }, deps);
+
+    expect(deps.settings.update).toHaveBeenCalledWith({ licenseKey: "", licenseStatus: "invalid" });
   });
 
   it("surfaces a free-tier 429 as daily_limit_reached", async () => {

@@ -6,7 +6,7 @@ Effective date: August 24, 2026
 
 Ondrift is a Chrome extension published by Ondrift Labs. It helps users rewrite
 and score prompts before sending them on ChatGPT, Claude, Gemini, Perplexity,
-and Grok. This policy describes the data handled by the Ondrift Free MVP.
+and Grok. This policy describes the data handled by the Ondrift extension.
 
 ## Data Ondrift handles
 
@@ -43,6 +43,13 @@ function forwards the rewrite request to Google Gemini using Ondrift's API key
 and returns the result. This path is used solely to provide the free tier of
 three rewrites per day and to enforce its per-installation or per-IP quota.
 
+When a user applies or uses an Ondrift Pro license, the license code is sent
+over HTTPS to `ondrift.pages.dev` for verification and with proxy rewrite
+requests so the Pro daily limit can be applied. Payment is handled entirely by
+Stripe; no payment details are sent by the extension, and Ondrift never
+receives card data. Pro introduces no other data collection beyond the proxy
+rewrite data described above.
+
 Ondrift does not sell user data, use it for advertising, perform cross-site
 tracking, or allow humans to read it. Local history is not sent to Ondrift's
 service.
@@ -69,8 +76,9 @@ to Chrome's extension-data behavior.
   requests a rewrite, and apply an approved rewrite.
 - Access to `generativelanguage.googleapis.com` is used only to make the Gemini
   API request initiated by a user who supplied their own key.
-- Access to `ondrift.pages.dev` is used only for free-tier rewrite requests
-  when the user has not supplied a Gemini API key.
+- Access to `ondrift.pages.dev` is used only for free-tier or Pro rewrite
+  requests when the user has not supplied a Gemini API key, and for Pro license
+  verification.
 
 ## Security
 

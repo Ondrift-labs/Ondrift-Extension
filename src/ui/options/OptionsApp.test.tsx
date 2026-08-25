@@ -1,7 +1,7 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DEFAULT_SETTINGS, GITHUB_BUG_REPORT_URL, GITHUB_FEATURE_REQUEST_URL, GITHUB_QA_URL, type UiBridge, type UiSettings } from '../shared/contracts';
+import { DEFAULT_SETTINGS, GITHUB_BUG_REPORT_URL, GITHUB_FEATURE_REQUEST_URL, GITHUB_QA_URL, PRO_UPGRADE_URL, type UiBridge, type UiSettings } from '../shared/contracts';
 import { OptionsApp } from './OptionsApp';
 
 afterEach(cleanup);
@@ -11,6 +11,7 @@ function createBridge(overrides: Partial<UiBridge> = {}): UiBridge {
     getSettings: async () => DEFAULT_SETTINGS,
     saveSettings: vi.fn(async (patch) => ({ ...DEFAULT_SETTINGS, ...patch })),
     validateApiKey: async () => ({ ok: true }),
+    verifyLicense: async () => ({ status: 'active', expiresAt: '2027-08-25T00:00:00.000Z' }),
     removeApiKey: vi.fn(async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: false })),
     openExternal: vi.fn(),
     getHistory: async () => [],
@@ -108,11 +109,43 @@ describe('OptionsApp localization', () => {
   });
 
   it('shows cached free-tier usage when no BYOK key is configured', async () => {
-    const bridge = createBridge({ getSettings: async () => ({ ...DEFAULT_SETTINGS, freeTierRemaining: 2 }) });
+    const openExternal = vi.fn();
+    const bridge = createBridge({ getSettings: async () => ({ ...DEFAULT_SETTINGS, freeTierRemaining: 2 }), openExternal });
     render(<OptionsApp bridge={bridge} />);
 
     expect(await screen.findByText('Free tier: 2/3 rewrites left today')).toBeInTheDocument();
     expect(screen.getByLabelText('API key')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: /Upgrade to Pro/ }));
+    expect(openExternal).toHaveBeenCalledWith(PRO_UPGRADE_URL);
+    expect(screen.getByLabelText('Pro license code')).toBeInTheDocument();
+  });
+
+  it('applies a Pro license and shows the active status', async () => {
+    const verifyLicense = vi.fn(async () => ({ status: 'active' as const, expiresAt: '2027-08-25T00:00:00.000Z' }));
+    render(<OptionsApp bridge={createBridge({ verifyLicense })} />);
+
+    await userEvent.type(await screen.findByLabelText('Pro license code'), 'ONDR-ABCD-1234');
+    await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(verifyLicense).toHaveBeenCalledWith('ONDR-ABCD-1234');
+    expect(await screen.findByText('Ondrift Pro active · 100 rewrites/day')).toBeInTheDocument();
+    expect(screen.getByText('Pro license verified and applied.')).toBeInTheDocument();
+  });
+
+  it('shows an active Pro license and removes it without confirmation', async () => {
+    const saveSettings = vi.fn(async () => ({ ...DEFAULT_SETTINGS, licenseKey: '', licenseStatus: null }));
+    const bridge = createBridge({
+      getSettings: async () => ({ ...DEFAULT_SETTINGS, licenseKey: 'ONDR-ABCD-1234', licenseStatus: 'active' }),
+      saveSettings,
+    });
+    render(<OptionsApp bridge={bridge} />);
+
+    expect(await screen.findByText('Ondrift Pro active · 100 rewrites/day')).toBeInTheDocument();
+    expect(screen.queryByText(/Free tier:/)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Remove license' }));
+
+    expect(saveSettings).toHaveBeenCalledWith({ licenseKey: '', licenseStatus: null });
+    expect(await screen.findByLabelText('Pro license code')).toBeInTheDocument();
   });
 
   it('does not show free-tier status when a BYOK key is configured', async () => {
