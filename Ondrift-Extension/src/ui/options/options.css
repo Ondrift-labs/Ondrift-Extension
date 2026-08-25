@@ -29,6 +29,12 @@ html { scroll-behavior: smooth; }
 .pro-active-status { width: 100%; font-weight: 650; }
 .upgrade-pro { justify-self: start; }
 .remove-license { min-height: 30px; padding: 5px 8px; font-size: 11px; }
+.remove-license-dialog { width: min(420px, calc(100vw - 48px)); border: 1px solid var(--line); border-radius: 12px; padding: 20px; background: var(--paper); box-shadow: var(--shadow); }
+.remove-license-dialog::backdrop { background: rgb(32 33 30 / 45%); }
+.remove-license-dialog h3 { margin: 0 0 8px; font-size: 15px; }
+.remove-license-dialog p { margin: 0 0 10px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.remove-license-dialog input { width: 100%; margin-bottom: 14px; }
+.remove-license-dialog .clear-actions { justify-content: flex-end; }
 .ui-help code { border: 1px solid var(--line); border-radius: 3px; padding: 1px 3px; color: var(--ink); background: var(--canvas); font-size: 10px; }
 .text-button { display: inline-flex; align-items: center; gap: 3px; border: 0; padding: 0; color: var(--accent); background: transparent; cursor: pointer; font-size: 12px; }
 .text-button svg { width: 12px; }

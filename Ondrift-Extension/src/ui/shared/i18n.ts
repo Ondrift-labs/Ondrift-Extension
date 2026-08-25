@@ -115,6 +115,12 @@ export interface OptionsCopy {
     licenseError: string;
     proActive: string;
     removeLicenseCta: string;
+    removeLicenseConfirmTitle: string;
+    removeLicenseConfirmBody: string;
+    removeLicenseConfirmReassurance: string;
+    removeLicenseConfirmPlaceholder: string;
+    removeLicenseConfirmCta: string;
+    removeLicenseCancelCta: string;
     getKeyCta: string;
     keySuccess: string;
     removeKeyCta: string;
@@ -322,6 +328,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         licenseError: '라이선스를 확인하지 못했습니다. 코드와 네트워크 연결을 확인한 뒤 다시 시도해 주세요.',
         proActive: 'Ondrift Pro 사용 중 · 하루 100회',
         removeLicenseCta: '라이선스 삭제',
+        removeLicenseConfirmTitle: '라이선스를 삭제할까요?',
+        removeLicenseConfirmBody: '이 브라우저에서 Pro 라이선스가 제거됩니다. 계속하려면 아래에 정확히 "remove license"라고 입력하세요.',
+        removeLicenseConfirmReassurance: '구독 자체는 취소되지 않아요 — 나중에 같은 코드를 다시 입력하면 Pro가 그대로 복구됩니다.',
+        removeLicenseConfirmPlaceholder: 'remove license',
+        removeLicenseConfirmCta: '삭제',
+        removeLicenseCancelCta: '취소',
         getKeyCta: '키 발급받기',
         keySuccess: '키가 확인되어 사용할 준비가 되었습니다.',
         removeKeyCta: '키 삭제',
@@ -553,6 +565,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         licenseError: 'The license could not be verified. Check the code and your connection, then try again.',
         proActive: 'Ondrift Pro active · 100 rewrites/day',
         removeLicenseCta: 'Remove license',
+        removeLicenseConfirmTitle: 'Remove your Pro license?',
+        removeLicenseConfirmBody: 'This removes the Pro license from this browser. Type "remove license" exactly below to confirm.',
+        removeLicenseConfirmReassurance: 'Your subscription itself stays active — re-entering the same code later restores Pro instantly.',
+        removeLicenseConfirmPlaceholder: 'remove license',
+        removeLicenseConfirmCta: 'Remove',
+        removeLicenseCancelCta: 'Cancel',
         getKeyCta: 'Get a key',
         keySuccess: 'Key verified and ready to use.',
         removeKeyCta: 'Remove key',
@@ -784,6 +802,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         licenseError: 'ライセンスを確認できませんでした。コードと接続を確認して再試行してください。',
         proActive: 'Ondrift Pro 利用中 · 1日100回',
         removeLicenseCta: 'ライセンスを削除',
+        removeLicenseConfirmTitle: 'ライセンスを削除しますか?',
+        removeLicenseConfirmBody: 'このブラウザから Pro ライセンスが削除されます。続けるには下に正確に「remove license」と入力してください。',
+        removeLicenseConfirmReassurance: 'サブスクリプション自体はキャンセルされません — 同じコードを後で再入力すればすぐに Pro が復元されます。',
+        removeLicenseConfirmPlaceholder: 'remove license',
+        removeLicenseConfirmCta: '削除',
+        removeLicenseCancelCta: 'キャンセル',
         getKeyCta: 'キーを取得',
         keySuccess: 'キーを確認しました。利用できます。',
         removeKeyCta: 'キーを削除',
@@ -1015,6 +1039,12 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         licenseError: '无法验证许可证。请检查代码和网络连接后重试。',
         proActive: 'Ondrift Pro 已启用 · 每天 100 次',
         removeLicenseCta: '移除许可证',
+        removeLicenseConfirmTitle: '要移除许可证吗?',
+        removeLicenseConfirmBody: '这会从此浏览器中移除 Pro 许可证。请在下方准确输入 "remove license" 以确认。',
+        removeLicenseConfirmReassurance: '订阅本身不会被取消 — 之后重新输入相同的代码即可立即恢复 Pro。',
+        removeLicenseConfirmPlaceholder: 'remove license',
+        removeLicenseConfirmCta: '移除',
+        removeLicenseCancelCta: '取消',
         getKeyCta: '获取密钥',
         keySuccess: '密钥已验证，可以使用。',
         removeKeyCta: '删除密钥',

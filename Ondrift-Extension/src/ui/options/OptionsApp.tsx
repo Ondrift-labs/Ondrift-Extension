@@ -48,6 +48,8 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [confirmClear, setConfirmClear] = useState(false);
   const [confirmRemoveKey, setConfirmRemoveKey] = useState(false);
+  const [removeLicenseConfirmInput, setRemoveLicenseConfirmInput] = useState('');
+  const removeLicenseDialogRef = useRef<HTMLDialogElement>(null);
   const autosaveTimer = useRef<number | null>(null);
   const saveRequest = useRef(0);
   // 0 = save as soon as the pending-change effect below sees it (the default, for discrete
@@ -246,6 +248,29 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
     }
   }
 
+  function openRemoveLicenseDialog() {
+    setRemoveLicenseConfirmInput('');
+    const dialog = removeLicenseDialogRef.current;
+    // Falls back to the `open` attribute where `showModal` isn't implemented (e.g. jsdom in
+    // tests) -- real Chrome always supports it, so this only matters off the extension itself.
+    if (typeof dialog?.showModal === 'function') dialog.showModal();
+    else dialog?.setAttribute('open', '');
+  }
+
+  function closeRemoveLicenseDialog() {
+    const dialog = removeLicenseDialogRef.current;
+    if (typeof dialog?.close === 'function') dialog.close();
+    else dialog?.removeAttribute('open');
+    setRemoveLicenseConfirmInput('');
+  }
+
+  async function confirmRemoveLicense() {
+    await removeLicense();
+    closeRemoveLicenseDialog();
+  }
+
+  const removeLicenseConfirmMatches = removeLicenseConfirmInput.trim().toLowerCase() === 'remove license';
+
   return <main className="options-shell">
     <aside className="options-sidebar"><div className="options-sidebar-inner"><div className="options-brand"><img className="brand-logo" src="/icons/ondrift-32.png" alt="" /><span>Ondrift</span></div><nav aria-label={copy.header.title}><a href="#provider">{copy.sidebar.nav.provider}</a><a href="#persona">{copy.sidebar.nav.persona}</a><a href="#sites">{copy.sidebar.nav.sites}</a><a href="#privacy">{copy.sidebar.nav.privacy}</a><a href="#support">{copy.sidebar.nav.support}</a></nav><p>{copy.sidebar.version}</p></div></aside>
     <div className="options-content">
@@ -260,7 +285,26 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
                 ? <>
                   <div className="ui-status ui-status--success pro-active-status"><Icon name="check" />{copy.provider.proActive}</div>
                   {licenseValidation === 'valid' && <div className="ui-status ui-status--success" role="status"><Icon name="check" />{copy.provider.licenseSuccess}</div>}
-                  <button type="button" className="ui-button ui-button--quiet remove-license" onClick={removeLicense}>{copy.provider.removeLicenseCta}</button>
+                  <button type="button" className="ui-button ui-button--quiet remove-license" onClick={openRemoveLicenseDialog}>{copy.provider.removeLicenseCta}</button>
+                  <dialog ref={removeLicenseDialogRef} className="remove-license-dialog" onClose={() => setRemoveLicenseConfirmInput('')}>
+                    <h3>{copy.provider.removeLicenseConfirmTitle}</h3>
+                    <p>{copy.provider.removeLicenseConfirmBody}</p>
+                    <p className="ui-help">{copy.provider.removeLicenseConfirmReassurance}</p>
+                    <input
+                      className="ui-input"
+                      type="text"
+                      autoComplete="off"
+                      spellCheck={false}
+                      value={removeLicenseConfirmInput}
+                      onChange={(event) => setRemoveLicenseConfirmInput(event.target.value)}
+                      placeholder={copy.provider.removeLicenseConfirmPlaceholder}
+                      aria-label={copy.provider.removeLicenseConfirmPlaceholder}
+                    />
+                    <div className="clear-actions">
+                      <button type="button" className="ui-button ui-button--quiet" onClick={closeRemoveLicenseDialog}>{copy.provider.removeLicenseCancelCta}</button>
+                      <button type="button" className="ui-button danger-button" disabled={!removeLicenseConfirmMatches} onClick={confirmRemoveLicense}>{copy.provider.removeLicenseConfirmCta}</button>
+                    </div>
+                  </dialog>
                 </>
                 : <>
                   <p className="ui-help free-tier-status">{copy.provider.freeTierStatus(settings.freeTierRemaining)}</p>
