@@ -132,7 +132,7 @@ describe('OptionsApp localization', () => {
     expect(screen.getByText('Pro license verified and applied.')).toBeInTheDocument();
   });
 
-  it('shows an active Pro license and removes it without confirmation', async () => {
+  it('shows an active Pro license and requires typing "remove license" before removing it', async () => {
     const saveSettings = vi.fn(async () => ({ ...DEFAULT_SETTINGS, licenseKey: '', licenseStatus: null }));
     const bridge = createBridge({
       getSettings: async () => ({ ...DEFAULT_SETTINGS, licenseKey: 'ONDR-ABCD-1234', licenseStatus: 'active' }),
@@ -143,6 +143,17 @@ describe('OptionsApp localization', () => {
     expect(await screen.findByText('Ondrift Pro active · 100 rewrites/day')).toBeInTheDocument();
     expect(screen.queryByText(/Free tier:/)).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Remove license' }));
+
+    const confirmButton = screen.getByRole('button', { name: 'Remove', hidden: true });
+    expect(confirmButton).toBeDisabled();
+    await userEvent.type(screen.getByPlaceholderText('remove license'), 'not quite right');
+    expect(confirmButton).toBeDisabled();
+    expect(saveSettings).not.toHaveBeenCalled();
+
+    await userEvent.clear(screen.getByPlaceholderText('remove license'));
+    await userEvent.type(screen.getByPlaceholderText('remove license'), 'remove license');
+    expect(confirmButton).toBeEnabled();
+    await userEvent.click(confirmButton);
 
     expect(saveSettings).toHaveBeenCalledWith({ licenseKey: '', licenseStatus: null });
     expect(await screen.findByLabelText('Pro license code')).toBeInTheDocument();
