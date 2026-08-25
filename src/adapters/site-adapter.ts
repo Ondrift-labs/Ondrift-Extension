@@ -170,7 +170,6 @@ export function firstVisible(selectors: readonly string[]): HTMLElement | null {
 const MAX_ANCHOR_WALK_DEPTH = 10;
 
 export function findComposerAnchor(input: HTMLElement): HTMLElement {
-  const form = input.closest<HTMLElement>("form");
   let element = input.parentElement;
   let depth = 0;
   while (element && element !== document.body && depth < MAX_ANCHOR_WALK_DEPTH) {
@@ -190,7 +189,13 @@ export function findComposerAnchor(input: HTMLElement): HTMLElement {
     element = element.parentElement;
     depth += 1;
   }
-  return form?.parentElement ?? form ?? input.parentElement ?? input;
+  // No bordered ancestor within the walk depth (composers styled with box-shadow/
+  // background instead of a real CSS border, e.g. Grok's, never match above). Falling
+  // back to a wide ancestor like `form.parentElement` used to anchor the widget to
+  // whatever full-bleed container happened to wrap the input, landing it far from the
+  // actual composer. The input's own rect is always exactly where the composer visually
+  // is, so it's the only fallback guaranteed not to misplace the widget.
+  return input;
 }
 
 const DUPLICATE_SUBMIT_WINDOW_MS = 750;
