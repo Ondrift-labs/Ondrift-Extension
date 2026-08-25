@@ -1,5 +1,7 @@
 # Ondrift refund policy
 
+English | [한국어](docs/REFUND.ko.md) | [日本語](docs/REFUND.ja.md) | [简体中文](docs/REFUND.zh.md)
+
 Effective date: August 25, 2026
 
 This policy covers the Ondrift Pro subscription ($2.99/month), billed and
@@ -16,7 +18,7 @@ this policy.
 
 ## Refund eligibility
 
-We will issue a full refund if you request one within 14 days of a charge,
+We will issue a full refund if you request one within 7 days of a charge,
 for either your first payment or a renewal, no questions asked.
 
 Outside that window, refunds are considered case by case — for example, if
