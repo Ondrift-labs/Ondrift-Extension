@@ -4,7 +4,7 @@
 
 # Ondrift Chrome Extension
 
-English | [한국어](docs/README.ko.md) | [日本語](docs/README.ja.md) | [简体中文](docs/README.zh.md)
+English | [한국어](docs/readme/README.ko.md) | [日本語](docs/readme/README.ja.md) | [简体中文](docs/readme/README.zh.md)
 
 Ondrift is a local-first Manifest V3 Chrome extension that rewrites and scores
 prompts before they are sent on ChatGPT, Claude, Gemini, Perplexity, and Grok.

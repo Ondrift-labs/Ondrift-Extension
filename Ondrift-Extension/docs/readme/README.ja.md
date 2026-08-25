@@ -1,6 +1,6 @@
 # Ondrift Chrome 拡張機能
 
-[English](../README.md) | [한국어](README.ko.md) | 日本語 | [简体中文](README.zh.md)
+[English](../../README.md) | [한국어](README.ko.md) | 日本語 | [简体中文](README.zh.md)
 
 Ondrift は、ChatGPT、Claude、Gemini、Perplexity、Grok でプロンプトを送信する前に
 書き直してスコアリングする、ローカルファーストの Manifest V3 Chrome 拡張機能です。

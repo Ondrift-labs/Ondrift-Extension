@@ -1,6 +1,6 @@
 # Ondrift 개인정보처리방침
 
-[English](../PRIVACY.md) | 한국어 | [日本語](PRIVACY.ja.md) | [简体中文](PRIVACY.zh.md)
+[English](../../PRIVACY.md) | 한국어 | [日本語](PRIVACY.ja.md) | [简体中文](PRIVACY.zh.md)
 
 발효일: 2026년 8월 24일
 

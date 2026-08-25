@@ -1,6 +1,6 @@
 # Ondrift 隐私政策
 
-[English](../PRIVACY.md) | [한국어](PRIVACY.ko.md) | [日本語](PRIVACY.ja.md) | 简体中文
+[English](../../PRIVACY.md) | [한국어](PRIVACY.ko.md) | [日本語](PRIVACY.ja.md) | 简体中文
 
 生效日期:2026 年 8 月 24 日
 
