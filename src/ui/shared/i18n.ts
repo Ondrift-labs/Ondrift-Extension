@@ -121,6 +121,10 @@ export interface OptionsCopy {
     removeLicenseConfirmPlaceholder: string;
     removeLicenseConfirmCta: string;
     removeLicenseCancelCta: string;
+    changeLicenseCta: string;
+    changeLicenseConfirmTitle: string;
+    changeLicenseConfirmBody: string;
+    changeLicenseConfirmCta: string;
     getKeyCta: string;
     keySuccess: string;
     removeKeyCta: string;
@@ -334,6 +338,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         removeLicenseConfirmPlaceholder: 'remove license',
         removeLicenseConfirmCta: '삭제',
         removeLicenseCancelCta: '취소',
+        changeLicenseCta: '다른 라이선스 사용',
+        changeLicenseConfirmTitle: '다른 라이선스로 교체할까요?',
+        changeLicenseConfirmBody: '지금 활성화된 라이선스는 이 브라우저에서 제거되고 새로 입력한 코드가 적용됩니다. 기존 구독은 취소되지 않으니, 나중에 이전 코드를 다시 입력하면 그대로 복구할 수 있습니다.',
+        changeLicenseConfirmCta: '교체',
         getKeyCta: '키 발급받기',
         keySuccess: '키가 확인되어 사용할 준비가 되었습니다.',
         removeKeyCta: '키 삭제',
@@ -571,6 +579,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         removeLicenseConfirmPlaceholder: 'remove license',
         removeLicenseConfirmCta: 'Remove',
         removeLicenseCancelCta: 'Cancel',
+        changeLicenseCta: 'Use a different license',
+        changeLicenseConfirmTitle: 'Switch to a different license?',
+        changeLicenseConfirmBody: 'The license active now will be removed from this browser and the new code you entered will apply instead. Your existing subscription isn’t canceled -- re-entering the old code later restores it.',
+        changeLicenseConfirmCta: 'Switch',
         getKeyCta: 'Get a key',
         keySuccess: 'Key verified and ready to use.',
         removeKeyCta: 'Remove key',
@@ -808,6 +820,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         removeLicenseConfirmPlaceholder: 'remove license',
         removeLicenseConfirmCta: '削除',
         removeLicenseCancelCta: 'キャンセル',
+        changeLicenseCta: '別のライセンスを使う',
+        changeLicenseConfirmTitle: '別のライセンスに切り替えますか?',
+        changeLicenseConfirmBody: '現在有効なライセンスはこのブラウザから削除され、新しく入力したコードが適用されます。既存のサブスクリプションはキャンセルされないため、後で元のコードを再入力すれば復元できます。',
+        changeLicenseConfirmCta: '切り替え',
         getKeyCta: 'キーを取得',
         keySuccess: 'キーを確認しました。利用できます。',
         removeKeyCta: 'キーを削除',
@@ -1045,6 +1061,10 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
         removeLicenseConfirmPlaceholder: 'remove license',
         removeLicenseConfirmCta: '移除',
         removeLicenseCancelCta: '取消',
+        changeLicenseCta: '使用其他许可证',
+        changeLicenseConfirmTitle: '要切换到其他许可证吗?',
+        changeLicenseConfirmBody: '当前生效的许可证将从此浏览器中移除,新输入的代码将替代它。你现有的订阅不会被取消 —— 之后重新输入原来的代码即可恢复。',
+        changeLicenseConfirmCta: '切换',
         getKeyCta: '获取密钥',
         keySuccess: '密钥已验证，可以使用。',
         removeKeyCta: '删除密钥',

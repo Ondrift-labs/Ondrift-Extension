@@ -27,6 +27,19 @@ function editableSettingsMatch(current: UiSettings, saved: UiSettings) {
     && SITE_IDS.every((site) => current.siteAccess[site] === saved.siteAccess[site]);
 }
 
+// Falls back to toggling the `open` attribute where `showModal`/`close` aren't implemented
+// (e.g. jsdom in tests) -- real Chrome always supports the native <dialog> API, so this
+// only matters off the extension itself.
+function openDialog(dialog: HTMLDialogElement | null) {
+  if (typeof dialog?.showModal === 'function') dialog.showModal();
+  else dialog?.setAttribute('open', '');
+}
+
+function closeDialog(dialog: HTMLDialogElement | null) {
+  if (typeof dialog?.close === 'function') dialog.close();
+  else dialog?.removeAttribute('open');
+}
+
 function ToggleRow({ title, detail, checked, onChange }: { title: string; detail: string; checked: boolean; onChange(value: boolean): void }) {
   return <div className="toggle-row"><div><strong>{title}</strong><p>{detail}</p></div><label className="ui-switch"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} aria-label={title} /><span /></label></div>;
 }
@@ -49,7 +62,9 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   const [confirmClear, setConfirmClear] = useState(false);
   const [confirmRemoveKey, setConfirmRemoveKey] = useState(false);
   const [removeLicenseConfirmInput, setRemoveLicenseConfirmInput] = useState('');
+  const [showChangeLicense, setShowChangeLicense] = useState(false);
   const removeLicenseDialogRef = useRef<HTMLDialogElement>(null);
+  const changeLicenseDialogRef = useRef<HTMLDialogElement>(null);
   const autosaveTimer = useRef<number | null>(null);
   const saveRequest = useRef(0);
   // 0 = save as soon as the pending-change effect below sees it (the default, for discrete
@@ -221,9 +236,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
     setSaveState('saved');
   }
 
-  async function applyLicense() {
-    const nextLicenseKey = licenseKey.trim();
-    if (!nextLicenseKey) return;
+  async function performApplyLicense(nextLicenseKey: string) {
     setLicenseValidation('checking');
     try {
       await bridge.verifyLicense(nextLicenseKey);
@@ -231,9 +244,33 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
       setSavedSettings((current) => current && ({ ...current, licenseKey: nextLicenseKey, licenseStatus: 'active' }));
       setLicenseKey('');
       setLicenseValidation('valid');
+      setShowChangeLicense(false);
     } catch {
       setLicenseValidation('error');
     }
+  }
+
+  // A license is already active -- confirm before silently discarding it locally in favor
+  // of the newly typed code (the old subscription itself isn't affected, only which code
+  // this browser currently has applied).
+  function applyLicense() {
+    const nextLicenseKey = licenseKey.trim();
+    if (!nextLicenseKey) return;
+    if (settings.licenseStatus === 'active') {
+      openDialog(changeLicenseDialogRef.current);
+      return;
+    }
+    void performApplyLicense(nextLicenseKey);
+  }
+
+  function closeChangeLicenseDialog() {
+    closeDialog(changeLicenseDialogRef.current);
+  }
+
+  function confirmChangeLicense() {
+    const nextLicenseKey = licenseKey.trim();
+    closeChangeLicenseDialog();
+    if (nextLicenseKey) void performApplyLicense(nextLicenseKey);
   }
 
   async function removeLicense() {
@@ -250,17 +287,11 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
 
   function openRemoveLicenseDialog() {
     setRemoveLicenseConfirmInput('');
-    const dialog = removeLicenseDialogRef.current;
-    // Falls back to the `open` attribute where `showModal` isn't implemented (e.g. jsdom in
-    // tests) -- real Chrome always supports it, so this only matters off the extension itself.
-    if (typeof dialog?.showModal === 'function') dialog.showModal();
-    else dialog?.setAttribute('open', '');
+    openDialog(removeLicenseDialogRef.current);
   }
 
   function closeRemoveLicenseDialog() {
-    const dialog = removeLicenseDialogRef.current;
-    if (typeof dialog?.close === 'function') dialog.close();
-    else dialog?.removeAttribute('open');
+    closeDialog(removeLicenseDialogRef.current);
     setRemoveLicenseConfirmInput('');
   }
 
@@ -285,7 +316,20 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
                 ? <>
                   <div className="ui-status ui-status--success pro-active-status"><Icon name="check" />{copy.provider.proActive}</div>
                   {licenseValidation === 'valid' && <div className="ui-status ui-status--success" role="status"><Icon name="check" />{copy.provider.licenseSuccess}</div>}
-                  <button type="button" className="ui-button ui-button--quiet remove-license" onClick={openRemoveLicenseDialog}>{copy.provider.removeLicenseCta}</button>
+                  <div className="pro-active-actions">
+                    <button type="button" className="ui-button ui-button--quiet remove-license" onClick={openRemoveLicenseDialog}>{copy.provider.removeLicenseCta}</button>
+                    <button type="button" className="text-button" onClick={() => setShowChangeLicense((current) => !current)}>{copy.provider.changeLicenseCta}</button>
+                  </div>
+                  {showChangeLicense && <label className="ui-field" htmlFor="settings-license-change"><span className="ui-label">{copy.provider.licenseKeyLabel}</span><div className="settings-key-row"><input id="settings-license-change" className="ui-input" type="text" autoComplete="off" spellCheck={false} value={licenseKey} onChange={(event) => { setLicenseKey(event.target.value); setLicenseValidation('idle'); }} placeholder={copy.provider.licenseKeyPlaceholder} /><button type="button" className="ui-button ui-button--secondary" disabled={!licenseKey.trim() || licenseValidation === 'checking'} onClick={applyLicense}>{licenseValidation === 'checking' ? common.checking : copy.provider.licenseApplyCta}</button></div></label>}
+                  {licenseValidation === 'error' && <div className="ui-status ui-status--error" role="alert">{copy.provider.licenseError}</div>}
+                  <dialog ref={changeLicenseDialogRef} className="remove-license-dialog">
+                    <h3>{copy.provider.changeLicenseConfirmTitle}</h3>
+                    <p>{copy.provider.changeLicenseConfirmBody}</p>
+                    <div className="clear-actions">
+                      <button type="button" className="ui-button ui-button--quiet" onClick={closeChangeLicenseDialog}>{copy.provider.removeLicenseCancelCta}</button>
+                      <button type="button" className="ui-button danger-button" onClick={confirmChangeLicense}>{copy.provider.changeLicenseConfirmCta}</button>
+                    </div>
+                  </dialog>
                   <dialog ref={removeLicenseDialogRef} className="remove-license-dialog" onClose={() => setRemoveLicenseConfirmInput('')}>
                     <h3>{copy.provider.removeLicenseConfirmTitle}</h3>
                     <p>{copy.provider.removeLicenseConfirmBody}</p>

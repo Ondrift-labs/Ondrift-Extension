@@ -28,6 +28,7 @@ html { scroll-behavior: smooth; }
 .pro-tier > .ui-field { width: 100%; }
 .pro-active-status { width: 100%; font-weight: 650; }
 .upgrade-pro { justify-self: start; }
+.pro-active-actions { display: flex; align-items: center; gap: 12px; }
 .remove-license { min-height: 30px; padding: 5px 8px; font-size: 11px; }
 .remove-license-dialog { width: min(420px, calc(100vw - 48px)); border: 1px solid var(--line); border-radius: 12px; padding: 20px; background: var(--paper); box-shadow: var(--shadow); }
 .remove-license-dialog::backdrop { background: rgb(32 33 30 / 45%); }

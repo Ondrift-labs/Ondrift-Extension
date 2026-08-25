@@ -159,6 +159,29 @@ describe('OptionsApp localization', () => {
     expect(await screen.findByLabelText('Pro license code')).toBeInTheDocument();
   });
 
+  it('confirms before switching to a different license while one is already active', async () => {
+    const verifyLicense = vi.fn(async () => ({ status: 'active' as const, expiresAt: '2027-08-25T00:00:00.000Z' }));
+    const bridge = createBridge({
+      getSettings: async () => ({ ...DEFAULT_SETTINGS, licenseKey: 'ONDR-ABCD-1234', licenseStatus: 'active' }),
+      verifyLicense,
+    });
+    render(<OptionsApp bridge={bridge} />);
+
+    expect(await screen.findByText('Ondrift Pro active · 100 rewrites/day')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Use a different license' }));
+
+    await userEvent.type(await screen.findByLabelText('Pro license code'), 'ONDR-WXYZ-9999');
+    await userEvent.click(screen.getByRole('button', { name: 'Apply' }));
+
+    expect(verifyLicense).not.toHaveBeenCalled();
+    expect(screen.getByText(/Switch to a different license\?/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Switch', hidden: true }));
+
+    expect(verifyLicense).toHaveBeenCalledWith('ONDR-WXYZ-9999');
+    expect(await screen.findByText('Pro license verified and applied.')).toBeInTheDocument();
+  });
+
   it('does not show free-tier status when a BYOK key is configured', async () => {
     const bridge = createBridge({ getSettings: async () => ({ ...DEFAULT_SETTINGS, apiKeyConfigured: true, freeTierRemaining: 1 }) });
     render(<OptionsApp bridge={bridge} />);
