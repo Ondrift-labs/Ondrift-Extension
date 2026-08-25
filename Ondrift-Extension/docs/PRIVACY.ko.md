@@ -40,8 +40,8 @@ Cloudflare Pages Function으로 전송됩니다. 이 함수는 Ondrift의 API �
 
 사용자가 Ondrift Pro 라이선스를 적용하거나 사용할 때는 라이선스 코드가 검증 및
 Pro 일일 한도 적용을 위해 HTTPS를 통해 `ondrift.pages.dev`로 전송됩니다. 결제는
-전적으로 Stripe에서 처리되며 확장 프로그램은 결제 정보를 전송하지 않고 Ondrift는
-카드 정보를 수신하지 않습니다. Pro에서는 위에 설명한 프록시 다시 쓰기 데이터 외에
+전적으로 공인 재판매사인 Paddle.com Market Limited에서 처리되며 확장 프로그램은
+결제 정보를 전송하지 않고 Ondrift는 카드 정보를 수신하지 않습니다. Pro에서는 위에 설명한 프록시 다시 쓰기 데이터 외에
 다른 데이터를 새로 수집하지 않습니다.
 
 Ondrift는 사용자 데이터를 판매하거나 광고 목적으로 사용하거나 사이트 간 추적을
