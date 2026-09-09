@@ -43,16 +43,26 @@ function promptLength(): number {
     : currentInput.innerText || currentInput.textContent || "").trim().length;
 }
 
+// Keeps the widget hidden until the composer actually has text in it, so an empty
+// composer never sits under a floating widget covering the page. This only checks
+// emptiness locally to toggle visibility -- it never leaves the browser, and it's
+// separate from the short-prompt hint below, which still only reads exact text length
+// after an explicit Rewrite request.
+function syncVisibility(): void {
+  widget.element.hidden = promptLength() === 0;
+}
+
 function showReady(): void {
   // A prompt edit while a rewrite is in flight would otherwise flip the widget back to its
   // "ready" state (re-enabling the button) mid-request, letting a second, overlapping
   // rewrite fire on the same session -- see runRewrite(). Once the in-flight request
   // settles it renders its own "result"/"error" state, so there's nothing to restore here.
   if (rewriteInFlight) return;
-  // Do not inspect the draft just to update UI state. The privacy contract permits reading
-  // prompt text only after an explicit Rewrite request; runRewrite() performs the short-text
-  // check inside that authorized action.
+  // Do not inspect the draft just to update UI state beyond the emptiness check above.
+  // The privacy contract permits reading prompt text only after an explicit Rewrite
+  // request; runRewrite() performs the short-text check inside that authorized action.
   widget.setState({ status: "ready" });
+  syncVisibility();
   floatingPlacement?.update();
 }
 
@@ -90,6 +100,7 @@ async function runRewrite(): Promise<void> {
   const length = promptLength();
   if (length < 12) {
     widget.setState({ status: "ready", promptLength: length });
+    syncVisibility();
     floatingPlacement?.update();
     return;
   }
