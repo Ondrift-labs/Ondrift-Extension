@@ -28,7 +28,7 @@ API キーを追加すれば、1日の上限なしで使い続けられます。
 Chrome ウェブストアに反映される前のビルドを試すなど、特定のリリースを手動で
 インストールしたい場合は、公開リリース ZIP からインストールすることもできます。
 
-1. [最新リリース](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest) から `ondrift-0.2.5.zip` をダウンロードします。
+1. [最新リリース](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest) から ZIP ファイルをダウンロードします。
 2. ZIP を完全に解凍します。
 3. Chrome で `chrome://extensions` を開きます。
 4. 右上の **デベロッパーモード** を有効にします。
@@ -74,7 +74,7 @@ npm run package:release
 - `storage` 権限は設定をローカルに保存し、プロンプト履歴はローカルの IndexedDB に保存されます。
 - `chatgpt.com`、`claude.ai`、`gemini.google.com`、`perplexity.ai`、`grok.com` へのアクセスは、プロンプト入力欄の検出、書き直し UI の表示、ユーザーが承認した書き直し結果の適用にのみ使用されます。
 - `generativelanguage.googleapis.com` へのアクセスは、ユーザー自身の API キーで Gemini を呼び出すためだけに使用されます。
-- Ondrift は AI の応答本文を収集・保存せず、プロンプトを開発者運営のサーバーに送信しません。
+- Ondrift は AI の応答本文を収集・保存しません。自分の Gemini API キーを追加している場合、プロンプトは拡張機能から Google の Gemini API へ直接送信され、Ondrift のサーバーは関与しません。キーがない場合、無料プランは Ondrift の Cloudflare Pages Function を経由してプロンプトを転送します。
 
 詳しいプライバシーポリシーは [PRIVACY.md](../PRIVACY.md)、Chrome ウェブストア提出用の文言は
 [STORE_LISTING.md](../STORE_LISTING.md) を参照してください。

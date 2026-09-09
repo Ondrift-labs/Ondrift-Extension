@@ -33,7 +33,7 @@ It updates automatically and is the easiest way to get started.
 You can also install a specific release manually from its public ZIP, for
 example to test a build before it reaches the Chrome Web Store.
 
-1. Download `ondrift-0.2.5.zip` from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
+1. Download the release ZIP asset from the [latest release](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest).
 2. Fully extract the ZIP to a folder.
 3. Open `chrome://extensions` in Chrome.
 4. Turn on **Developer mode** in the upper-right corner.
@@ -78,7 +78,7 @@ The archive is written to `release/` with `manifest.json` at its root.
 - `storage` stores settings locally; prompt history uses local IndexedDB.
 - Access to `chatgpt.com`, `claude.ai`, `gemini.google.com`, `perplexity.ai`, and `grok.com` is used only to detect prompt editors, show the rewrite interface, and apply a user-approved rewrite.
 - Access to `generativelanguage.googleapis.com` is used only to call Gemini with the user's own API key.
-- Ondrift does not collect or store AI response bodies and does not send prompts to a developer-operated server.
+- Ondrift does not collect or store AI response bodies. With your own Gemini API key, prompts go directly from the extension to Google's Gemini API with no Ondrift server involved; without one, the free tier sends the prompt through Ondrift's own rate-limited Cloudflare Pages Function instead.
 
 See [PRIVACY.md](PRIVACY.md) for the full privacy policy and
 [STORE_LISTING.md](STORE_LISTING.md) for Chrome Web Store submission copy.

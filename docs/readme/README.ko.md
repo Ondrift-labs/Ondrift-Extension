@@ -25,7 +25,7 @@ Ondrift 백엔드를 전혀 거치지 않고 확장 프로그램에서 Gemini로
 Chrome 웹스토어에 반영되기 전의 빌드를 미리 테스트하는 등, 특정 릴리스를 직접
 설치하고 싶을 때는 공개 릴리스 ZIP을 사용할 수도 있습니다.
 
-1. [최신 릴리스](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)에서 `ondrift-0.2.5.zip`을 다운로드합니다.
+1. [최신 릴리스](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)에서 ZIP 파일을 다운로드합니다.
 2. ZIP을 원하는 폴더에 완전히 압축 해제합니다.
 3. Chrome에서 `chrome://extensions`를 엽니다.
 4. 오른쪽 위의 **개발자 모드**를 켭니다.
@@ -71,7 +71,7 @@ npm run package:release
 - `storage` 권한은 설정을 로컬에 저장하며 프롬프트 기록은 로컬 IndexedDB에 저장됩니다.
 - `chatgpt.com`, `claude.ai`, `gemini.google.com`, `perplexity.ai`, `grok.com` 접근 권한은 프롬프트 입력창 감지, 재작성 UI 표시, 사용자가 승인한 결과 적용에만 사용됩니다.
 - `generativelanguage.googleapis.com` 접근 권한은 사용자의 API 키로 Gemini를 호출하는 데만 사용됩니다.
-- Ondrift는 AI 응답 본문을 수집하거나 저장하지 않으며 프롬프트를 개발자 운영 서버로 전송하지 않습니다.
+- Ondrift는 AI 응답 본문을 수집하거나 저장하지 않습니다. 자신의 Gemini API 키를 추가한 경우 프롬프트는 확장 프로그램에서 Google Gemini API로 직접 전송되며 Ondrift 서버는 관여하지 않습니다. 키가 없으면 무료 요금제가 Ondrift의 Cloudflare Pages Function을 통해 프롬프트를 전달합니다.
 
 자세한 내용은 [PRIVACY.md](../PRIVACY.md), Chrome 웹스토어 제출 문구는
 [STORE_LISTING.md](../STORE_LISTING.md)를 참고하세요.

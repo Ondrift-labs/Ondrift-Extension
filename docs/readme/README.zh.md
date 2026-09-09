@@ -27,7 +27,7 @@ Gemini 密钥后,扩展程序会直接且不限次数地调用 Gemini,完全不�
 如果你想手动安装某个特定版本,例如在 Chrome 网上应用店更新之前先体验新版本,
 也可以通过公开发布的 ZIP 包安装。
 
-1. 从[最新发布版本](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)下载 `ondrift-0.2.5.zip`。
+1. 从[最新发布版本](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest)下载 ZIP 文件。
 2. 完整解压该 ZIP 文件到一个文件夹。
 3. 在 Chrome 中打开 `chrome://extensions`。
 4. 打开右上角的**开发者模式**。
@@ -71,7 +71,7 @@ npm run package:release
 - `storage` 权限用于在本地保存设置,提示词历史记录保存在本地的 IndexedDB 中。
 - 访问 `chatgpt.com`、`claude.ai`、`gemini.google.com`、`perplexity.ai`、`grok.com` 仅用于检测提示词输入框、显示改写界面,以及应用用户已确认的改写结果。
 - 访问 `generativelanguage.googleapis.com` 仅用于使用用户自己的 API 密钥调用 Gemini。
-- Ondrift 不会收集或存储 AI 的响应内容,也不会将提示词发送到开发者运营的服务器。
+- Ondrift 不会收集或存储 AI 的响应内容。添加了自己的 Gemini API 密钥时,提示词会直接从扩展程序发送到 Google 的 Gemini API,不经过 Ondrift 服务器;未添加密钥时,免费版会通过 Ondrift 的 Cloudflare Pages Function 转发提示词。
 
 完整隐私政策请参阅 [PRIVACY.md](../PRIVACY.md),Chrome 网上应用店提交文案请参阅
 [STORE_LISTING.md](../STORE_LISTING.md)。

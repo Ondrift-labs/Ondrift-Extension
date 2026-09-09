@@ -53,12 +53,12 @@ These claims may be used when they remain true in the current release:
 
 - Ondrift is a Chrome extension for ChatGPT, Claude, Gemini, Perplexity, and Grok.
 - It scores a draft prompt, explains missing context or constraints, and suggests a rewrite the user can apply.
-- It uses the user’s own Gemini API key.
-- There is no Ondrift account or Ondrift backend involved in prompt rewriting.
-- Only a prompt the user explicitly chooses to rewrite is sent directly to Gemini.
+- No account or sign-up is required. With your own Gemini API key, rewrites go directly from the extension to Google’s Gemini API, with no Ondrift backend involved.
+- Without a key, Ondrift offers 10 free rewrites a day through its own rate-limited Cloudflare Pages Function, which forwards the request to Gemini.
+- Only a prompt the user explicitly chooses to rewrite is ever sent anywhere.
 - Settings and optional history are stored locally in the browser.
-- The UI supports English, Korean, and Japanese.
-- The current MVP is free and distributed through GitHub releases until a store listing is available.
+- The UI supports English, Korean, Japanese, and Simplified Chinese.
+- Ondrift is free and available on the Chrome Web Store, with a manual-install GitHub release ZIP as an alternative.
 
 Re-check the repository and current release before posting version numbers, supported sites, pricing, store availability, privacy behavior, or installation steps. Do not claim that Ondrift is fully offline, encrypted end-to-end, unlimited, or guaranteed free to operate.
 
