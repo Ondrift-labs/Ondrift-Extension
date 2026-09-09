@@ -94,7 +94,10 @@ Data-use certifications:
 - Not used for personalized advertising or tracking.
 - Not made available for human reading.
 - Prompt and API-key transmission to Gemini uses HTTPS.
-- Data is not sent to a developer-operated server.
+- On the free tier, the selected prompt passes through Ondrift's own
+  Cloudflare Pages Function solely to call Gemini on the user's behalf, and is
+  never logged or stored; with the user's own Gemini API key, no Ondrift
+  server is involved.
 
 Do not select “does not handle user data.” Chrome requires disclosure even when
 data is processed or stored only on the user's device.

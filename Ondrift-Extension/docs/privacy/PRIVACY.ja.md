@@ -2,7 +2,7 @@
 
 [English](../../PRIVACY.md) | [한국어](PRIVACY.ko.md) | 日本語 | [简体中文](PRIVACY.zh.md)
 
-発効日: 2026年8月24日
+発効日: 2026年9月9日
 
 Ondrift は Ondrift Labs が公開する Chrome 拡張機能です。ChatGPT、Claude、
 Gemini、Perplexity、Grok でプロンプトを送信する前に、書き直しとスコアリングを

@@ -2,7 +2,7 @@
 
 English | [한국어](docs/privacy/PRIVACY.ko.md) | [日本語](docs/privacy/PRIVACY.ja.md) | [简体中文](docs/privacy/PRIVACY.zh.md)
 
-Effective date: August 24, 2026
+Effective date: September 9, 2026
 
 Ondrift is a Chrome extension published by Ondrift Labs. It helps users rewrite
 and score prompts before sending them on ChatGPT, Claude, Gemini, Perplexity,

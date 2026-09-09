@@ -2,7 +2,7 @@
 
 [English](../../PRIVACY.md) | 한국어 | [日本語](PRIVACY.ja.md) | [简体中文](PRIVACY.zh.md)
 
-발효일: 2026년 8월 24일
+발효일: 2026년 9월 9일
 
 Ondrift는 Ondrift Labs가 배포하는 Chrome 확장 프로그램입니다. ChatGPT, Claude,
 Gemini, Perplexity, Grok에서 프롬프트를 전송하기 전에 다시 작성하고 점수를 매기는 데

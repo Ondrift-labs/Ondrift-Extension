@@ -1,6 +1,6 @@
 # Ondrift terms of service
 
-Effective date: August 25, 2026
+Effective date: September 9, 2026
 
 These Terms of Service ("Terms") govern your use of the Ondrift Chrome
 extension ("Ondrift"), published by Ondrift Labs ("we", "us"). By installing

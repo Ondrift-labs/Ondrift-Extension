@@ -2,7 +2,7 @@
 
 [English](../../PRIVACY.md) | [한국어](PRIVACY.ko.md) | [日本語](PRIVACY.ja.md) | 简体中文
 
-生效日期:2026 年 8 月 24 日
+生效日期:2026 年 9 月 9 日
 
 Ondrift 是由 Ondrift Labs 发布的 Chrome 扩展程序。它可以在你于 ChatGPT、Claude、
 Gemini、Perplexity、Grok 发送提示词之前,帮助你改写并评分。本政策描述了 Ondrift
