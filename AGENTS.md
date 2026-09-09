@@ -23,6 +23,10 @@ saves/submits it themselves. List every entry newest-first in
 `docs/store-submissions/README.md`. Do this in the same task as identifying
 what needs to change, not as a follow-up.
 
+Tag every field's heading with its status: `(unchanged)` for a field left as
+verified-correct, or `(fixed YYYY-MM-DD)` for one whose content changed —
+never leave a heading untagged.
+
 ## Social/community posts
 
 Before drafting, reviewing, scheduling, or publishing any social/community post for Ondrift, read and follow:
