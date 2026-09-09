@@ -14,8 +14,6 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   consentGranted: false,
   apiKeyStatus: null,
   installId: "",
-  licenseKey: "",
-  licenseStatus: null,
 };
 
 export interface LocalStorageArea {

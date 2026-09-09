@@ -31,12 +31,9 @@ Ondrift 的服务器不会参与,也不会接收密钥、提示词或改写结�
 当用户没有添加 Gemini API 密钥时,所选提示词、支持的服务、角色设定、语言和随机
 安装标识符会通过 HTTPS 发送到 `ondrift.pages.dev` 上的 Ondrift Cloudflare Pages
 Function。该函数使用 Ondrift 的 API 密钥将改写请求转发给 Google Gemini,然后返回
-结果。此路径仅用于提供每天 3 次的免费改写,并执行按安装或按 IP 计算的限额。
-
-当用户应用或使用 Ondrift Pro 许可证时,许可证代码会通过 HTTPS 发送到
-`ondrift.pages.dev`,用于验证并应用 Pro 每日限额。付款完全由授权经销商
-Paddle.com Market Limited 处理;扩展程序不会发送付款信息,Ondrift 也不会收到银行卡数据。除上述代理改写数据外,
-Pro 不会带来任何其他新的数据收集。
+结果。此路径仅用于提供每天 10 次的免费改写,并执行按安装或按 IP 计算的限额。当用户
+达到此每日限额后,可在设置页面添加自己的免费 Gemini API 密钥,即可不受每日限额
+继续改写。
 
 Ondrift 不会出售用户数据、不将其用于广告用途、不进行跨站点跟踪,也不允许人工
 查看这些数据。本地历史记录不会发送到 Ondrift 的服务。
@@ -57,7 +54,7 @@ API 密钥和扩展程序设置通过 `chrome.storage.local` 保存在用户本�
 - `storage` 权限用于将用户的密钥、设置和偏好保存在本地 Chrome 配置文件中。
 - 访问 ChatGPT、Claude、Gemini、Perplexity、Grok 仅用于检测提示词输入框、显示 Ondrift 控件、在用户请求改写后读取提示词,以及应用已批准的改写结果。
 - 访问 `generativelanguage.googleapis.com` 仅用于执行由提供了自己密钥的用户所请求的 Gemini API 调用。
-- 访问 `ondrift.pages.dev` 仅用于用户未提供 Gemini API 密钥时的免费版或 Pro 改写请求,以及 Pro 许可证验证。
+- 访问 `ondrift.pages.dev` 仅用于用户未提供 Gemini API 密钥时的免费版改写请求。
 
 ## 安全性
 

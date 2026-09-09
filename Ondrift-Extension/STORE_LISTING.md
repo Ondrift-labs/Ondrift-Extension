@@ -7,7 +7,7 @@
 **Summary (132 characters or fewer):**
 
 Rewrite and score prompts on ChatGPT, Claude, Gemini, Perplexity, and Grok
-with 3 free daily rewrites, Pro, or your own Gemini key.
+with 10 free daily rewrites, or your own Gemini key.
 
 **Recommended category:** Workflow & Planning
 
@@ -25,12 +25,11 @@ Main features:
 - Works directly in the prompt editors of ChatGPT, Claude, Gemini, Perplexity,
   and Grok.
 - Rewrites and scores only when you request it.
-- Free: 3 rewrites a day at no cost and with no account, no API key, and no
+- Free: 10 rewrites a day at no cost and with no account, no API key, and no
   card required.
 - Bring your own Gemini API key for unlimited rewrites billed directly by
-  Google, with no Ondrift daily cap.
-- Ondrift Pro ($2.99/mo): 100 rewrites a day without needing your own API key,
-  unlocked with a license code after checkout.
+  Google, with no Ondrift daily cap — add it any time, including right after
+  you reach the free daily limit, to keep rewriting with no daily limit.
 - Stores settings and optional prompt history in your local Chrome profile.
 - Does not collect or store AI response bodies.
 - Supports Korean, English, Japanese, and Simplified Chinese in the extension
@@ -38,12 +37,11 @@ Main features:
 
 When you provide your own Gemini API key, prompt text is sent directly from
 the extension service worker to Google's Gemini API — Ondrift's servers are
-never involved. When you use the free tier or an Ondrift Pro license instead,
-the selected prompt is sent over HTTPS to Ondrift's Cloudflare Pages Function,
-which forwards it to Gemini using Ondrift's own key and enforces the free or
-Pro daily limit. Ondrift Pro is billed and processed by Paddle.com Market
-Limited, our authorized reseller; the extension never sends payment details
-and Ondrift never receives card data.
+never involved. When you use the free tier instead, the selected prompt is
+sent over HTTPS to Ondrift's Cloudflare Pages Function, which forwards it to
+Gemini using Ondrift's own key and enforces the free daily limit. Once you
+reach that limit, add your own free Gemini API key in the options page to
+keep rewriting with no daily limit.
 
 ## Single purpose
 
@@ -75,23 +73,19 @@ lets the user apply the improved text.
   user's own API key.
 - `https://ondrift.pages.dev/*`: Used only when the user has not supplied a
   Gemini API key, to send the user-requested free-tier rewrite (rate-limited
-  per install/IP) or an Ondrift Pro rewrite, and to verify an Ondrift Pro
-  license code.
+  per install/IP).
 
 ## Privacy-practices answers
 
 Declare the following data types if they are presented by the dashboard:
 
-- Authentication information: the user's Gemini API key, and the Ondrift Pro
-  license code when the user applies one.
+- Authentication information: the user's Gemini API key.
 - Website content, form data, or user-generated content: the prompt explicitly
   selected for rewriting and the returned rewrite.
 - Web browsing activity: the supported-site URL stored with local history when
   history is enabled.
-- Personally identifiable information: none collected by the extension itself.
-  Ondrift Pro payment is handled entirely by Paddle.com Market Limited on
-  Paddle's own checkout page; no payment or billing details pass through the
-  extension.
+- Personally identifiable information: none collected by the extension
+  itself.
 
 Data-use certifications:
 
@@ -120,9 +114,7 @@ data is processed or stored only on the user's device.
 
 No Ondrift account or reviewer credential is required. A reviewer must supply a
 valid Gemini API key because the extension uses the user's own key. Testing
-the free tier (steps 5-8 with no key added) and Ondrift Pro (an optional paid
-upgrade unlocked with a license code from `ondrift.pages.dev/upgrade`) is not
-required for review.
+the free tier (steps 5-8 with no key added) is not required for review.
 
 ## Listing assets
 

@@ -53,12 +53,9 @@ function parseSuccess(payload: unknown): RewriteResult & { remaining: number } {
 
 function classifyHttpError(status: number, payload: unknown): ProviderError {
   const error = payload as FreeTierErrorResponse | undefined;
-  if (status === 402 && error?.code === "license_invalid") {
-    return new ProviderError("license_invalid", "The saved Ondrift Pro license is no longer valid.");
-  }
   if (status === 429 && error?.code === "daily_limit_reached") {
     const reset = typeof error.resetAt === "string" ? ` Try again after ${error.resetAt}.` : "";
-    return new ProviderError("daily_limit_reached", `Today's 3 free rewrites have been used.${reset}`);
+    return new ProviderError("daily_limit_reached", `Today's 10 free rewrites have been used.${reset}`);
   }
   if (status === 502 || status === 503) {
     return new ProviderError("service_unavailable", "Ondrift's free rewrite service is temporarily unavailable.", true);
@@ -71,7 +68,6 @@ export async function rewriteViaFreeTier(
   installId: string,
   fetcher: typeof fetch = (input, init) => fetch(input, init),
   sleep: (milliseconds: number) => Promise<void> = wait,
-  licenseKey?: string,
 ): Promise<RewriteResult & { remaining: number }> {
   let lastError: ProviderError | undefined;
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
@@ -86,7 +82,6 @@ export async function rewriteViaFreeTier(
           persona: request.persona,
           language: request.language,
           installId,
-          ...(licenseKey?.trim() ? { licenseKey: licenseKey.trim() } : {}),
         }),
       });
     } catch (cause) {

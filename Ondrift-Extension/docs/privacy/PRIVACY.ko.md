@@ -35,14 +35,10 @@ Google의 Gemini API로 직접 전송됩니다. 이 경우 Ondrift 서버는 관
 사용자가 Gemini API 키를 추가하지 않은 경우 선택된 프롬프트, 지원 서비스,
 페르소나, 언어 및 무작위 설치 식별자가 HTTPS를 통해 `ondrift.pages.dev`의 Ondrift
 Cloudflare Pages Function으로 전송됩니다. 이 함수는 Ondrift의 API 키를 사용해 다시
-쓰기 요청을 Google Gemini로 전달하고 결과를 반환합니다. 이 경로는 하루 3회의 무료
-요금제를 제공하고 설치별 또는 IP별 한도를 적용하는 용도로만 사용됩니다.
-
-사용자가 Ondrift Pro 라이선스를 적용하거나 사용할 때는 라이선스 코드가 검증 및
-Pro 일일 한도 적용을 위해 HTTPS를 통해 `ondrift.pages.dev`로 전송됩니다. 결제는
-전적으로 공인 재판매사인 Paddle.com Market Limited에서 처리되며 확장 프로그램은
-결제 정보를 전송하지 않고 Ondrift는 카드 정보를 수신하지 않습니다. Pro에서는 위에 설명한 프록시 다시 쓰기 데이터 외에
-다른 데이터를 새로 수집하지 않습니다.
+쓰기 요청을 Google Gemini로 전달하고 결과를 반환합니다. 이 경로는 하루 10회의 무료
+요금제를 제공하고 설치별 또는 IP별 한도를 적용하는 용도로만 사용됩니다. 사용자가
+이 하루 한도에 도달하면 설정 페이지에서 자신의 무료 Gemini API 키를 추가해 하루
+제한 없이 계속 사용할 수 있습니다.
 
 Ondrift는 사용자 데이터를 판매하거나 광고 목적으로 사용하거나 사이트 간 추적을
 수행하거나 사람이 데이터를 열람하도록 허용하지 않습니다. 로컬 기록은 Ondrift
@@ -66,7 +62,7 @@ Chrome 프로필에 저장됩니다. 로컬 기록 기능이 켜져 있으면 �
 - `storage` 권한은 사용자의 키, 설정, 환경설정을 로컬 Chrome 프로필에 저장하는 데 사용됩니다.
 - ChatGPT, Claude, Gemini, Perplexity, Grok에 대한 접근 권한은 프롬프트 입력창을 감지하고, Ondrift 컨트롤을 표시하고, 사용자가 다시 쓰기를 요청한 후 프롬프트를 읽고, 승인된 다시 쓰기를 적용하는 데에만 사용됩니다.
 - `generativelanguage.googleapis.com`에 대한 접근 권한은 자신의 키를 제공한 사용자가 요청한 Gemini API 호출을 수행하는 데에만 사용됩니다.
-- `ondrift.pages.dev`에 대한 접근 권한은 사용자가 Gemini API 키를 제공하지 않은 경우의 무료 또는 Pro 다시 쓰기 요청과 Pro 라이선스 검증에만 사용됩니다.
+- `ondrift.pages.dev`에 대한 접근 권한은 사용자가 Gemini API 키를 제공하지 않은 경우의 무료 다시 쓰기 요청에만 사용됩니다.
 
 ## 보안
 

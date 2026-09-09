@@ -15,7 +15,6 @@ type StringMessageKey = { [K in keyof InlineMessages]: InlineMessages[K] extends
 const ERROR_COPY: Record<ErrorKind, { title: StringMessageKey; detail: StringMessageKey }> = {
   quota: { title: 'quotaTitle', detail: 'quotaDetail' },
   daily_limit: { title: 'dailyLimitTitle', detail: 'dailyLimitDetail' },
-  license_invalid: { title: 'licenseInvalidTitle', detail: 'licenseInvalidDetail' },
   network: { title: 'networkTitle', detail: 'networkDetail' },
   invalid_key: { title: 'invalidKeyTitle', detail: 'invalidKeyDetail' },
   request: { title: 'requestTitle', detail: 'requestDetail' },
@@ -232,7 +231,7 @@ export function createInlineWidget(handlers: InlineWidgetHandlers): InlineWidget
     const detail = needsReload ? messages.reconnectDetail : isMissing ? messages.missingKeyDetail : messages[errorCopy.detail];
     const message = document.createElement('div'); message.className = 'od-message'; message.innerHTML = `<span class="od-message-icon">${isMissing ? icons.settings : icons.retry}</span><div><strong></strong><p></p><div class="od-actions"></div></div>`;
     message.querySelector('strong')!.textContent = title; message.querySelector('p')!.textContent = detail;
-    const action = needsReload ? button(messages.reloadPage, 'od-button', handlers.onReloadPage) : isMissing || kind === 'invalid_key' || kind === 'license_invalid' ? button(messages.openSettings, 'od-button', handlers.onOpenSettings) : button(messages.retry, 'od-button', handlers.onRetry, icons.retry);
+    const action = needsReload ? button(messages.reloadPage, 'od-button', handlers.onReloadPage) : isMissing || kind === 'invalid_key' ? button(messages.openSettings, 'od-button', handlers.onOpenSettings) : button(messages.retry, 'od-button', handlers.onRetry, icons.retry);
     message.querySelector('.od-actions')!.append(action); body.append(message);
   }
 

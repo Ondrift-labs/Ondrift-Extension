@@ -3,43 +3,23 @@
 Effective date: August 25, 2026
 
 These Terms of Service ("Terms") govern your use of the Ondrift Chrome
-extension and the Ondrift Pro subscription (together, "Ondrift"), published by
-Ondrift Labs ("we", "us"). By installing or using Ondrift, you agree to these
-Terms.
+extension ("Ondrift"), published by Ondrift Labs ("we", "us"). By installing
+or using Ondrift, you agree to these Terms.
 
 ## The service
 
 Ondrift is a Chrome extension that helps you rewrite and score prompts before
 submitting them on supported AI chat sites (ChatGPT, Claude, Gemini,
-Perplexity, and Grok). Ondrift offers three tiers:
+Perplexity, and Grok). Ondrift offers two tiers, both free of charge:
 
 - **Free**: a limited number of rewrites per day using Ondrift's own Gemini
   API key. No account is required.
 - **Bring your own key (BYOK)**: unlimited rewrites sent directly from your
   browser to Google's Gemini API using your own API key. Ondrift's servers are
   not involved in this path.
-- **Ondrift Pro**: a paid monthly subscription that raises your daily rewrite
-  limit using Ondrift's own Gemini API key. See Pricing and billing below.
 
-## Pricing and billing
-
-Ondrift Pro is billed at $2.99 per month (plus any applicable tax) on a
-recurring basis until cancelled. Payments are processed by Paddle.com Market
-Limited, our authorized reseller, which acts as the merchant of record for
-your purchase. Paddle handles billing, tax, and payment support; see Paddle's
-own [Buyer Terms](https://www.paddle.com/legal/checkout-buyer-terms) for
-details on the payment relationship.
-
-Your subscription renews automatically each month unless you cancel before the
-renewal date. You can manage or cancel your subscription from the payment
-receipt email Paddle sends you. Removing or replacing a license key inside the
-Ondrift extension only affects that browser profile locally — it does not by
-itself cancel the underlying subscription; the extension's own confirmation
-dialog explains this before you remove a license.
-
-## Refunds
-
-See our [Refund Policy](REFUND.md).
+Once you reach the Free tier's daily limit, you can add your own free Gemini
+API key in the options page to keep rewriting with no daily limit.
 
 ## Acceptable use
 
@@ -47,11 +27,9 @@ You agree not to:
 
 - Use Ondrift to violate any applicable law or the terms of service of a
   supported AI chat site.
-- Attempt to circumvent the Free-tier or Pro-tier daily rewrite limits.
+- Attempt to circumvent the Free tier's daily rewrite limit.
 - Reverse engineer, resell, or redistribute Ondrift's backend services
   without our permission.
-- Share a single Ondrift Pro license across unrelated users in a way designed
-  to circumvent per-license quotas.
 
 ## No warranty
 

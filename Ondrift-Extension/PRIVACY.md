@@ -41,14 +41,9 @@ service, persona, language, and random installation identifier are sent over
 HTTPS to Ondrift's Cloudflare Pages Function at `ondrift.pages.dev`. The
 function forwards the rewrite request to Google Gemini using Ondrift's API key
 and returns the result. This path is used solely to provide the free tier of
-three rewrites per day and to enforce its per-installation or per-IP quota.
-
-When a user applies or uses an Ondrift Pro license, the license code is sent
-over HTTPS to `ondrift.pages.dev` for verification and with proxy rewrite
-requests so the Pro daily limit can be applied. Payment is handled entirely by
-Paddle.com Market Limited, our authorized reseller; no payment details are
-sent by the extension, and Ondrift never receives card data. Pro introduces no
-other data collection beyond the proxy rewrite data described above.
+ten rewrites per day and to enforce its per-installation or per-IP quota. Once
+a user reaches that daily limit, they may add their own free Gemini API key in
+the options page to keep rewriting with no daily limit.
 
 Ondrift does not sell user data, use it for advertising, perform cross-site
 tracking, or allow humans to read it. Local history is not sent to Ondrift's
@@ -76,9 +71,8 @@ to Chrome's extension-data behavior.
   requests a rewrite, and apply an approved rewrite.
 - Access to `generativelanguage.googleapis.com` is used only to make the Gemini
   API request initiated by a user who supplied their own key.
-- Access to `ondrift.pages.dev` is used only for free-tier or Pro rewrite
-  requests when the user has not supplied a Gemini API key, and for Pro license
-  verification.
+- Access to `ondrift.pages.dev` is used only for free-tier rewrite requests
+  when the user has not supplied a Gemini API key.
 
 ## Security
 

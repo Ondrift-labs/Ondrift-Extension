@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, GITHUB_BUG_REPORT_URL, GITHUB_FEATURE_REQUEST_URL, GITHUB_QA_URL, GITHUB_REPO_URL, isValidationError, PRO_UPGRADE_URL, type ApiKeyValidationState, type LanguageId, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
+import { AI_STUDIO_API_KEY_URL, DEFAULT_SETTINGS, GITHUB_BUG_REPORT_URL, GITHUB_FEATURE_REQUEST_URL, GITHUB_QA_URL, GITHUB_REPO_URL, isValidationError, type ApiKeyValidationState, type LanguageId, type PersonaId, type ProviderId, type SiteId, type UiBridge, type UiSettings } from '../shared/contracts';
 import { getUiCopy, LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '../shared/i18n';
 import { GEMINI_MODEL_CHOICES, type GeminiModelId } from '../../shared/models';
 import { Icon } from '../shared/Icon';
@@ -27,19 +27,6 @@ function editableSettingsMatch(current: UiSettings, saved: UiSettings) {
     && SITE_IDS.every((site) => current.siteAccess[site] === saved.siteAccess[site]);
 }
 
-// Falls back to toggling the `open` attribute where `showModal`/`close` aren't implemented
-// (e.g. jsdom in tests) -- real Chrome always supports the native <dialog> API, so this
-// only matters off the extension itself.
-function openDialog(dialog: HTMLDialogElement | null) {
-  if (typeof dialog?.showModal === 'function') dialog.showModal();
-  else dialog?.setAttribute('open', '');
-}
-
-function closeDialog(dialog: HTMLDialogElement | null) {
-  if (typeof dialog?.close === 'function') dialog.close();
-  else dialog?.removeAttribute('open');
-}
-
 function ToggleRow({ title, detail, checked, onChange }: { title: string; detail: string; checked: boolean; onChange(value: boolean): void }) {
   return <div className="toggle-row"><div><strong>{title}</strong><p>{detail}</p></div><label className="ui-switch"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} aria-label={title} /><span /></label></div>;
 }
@@ -56,15 +43,9 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
   // before anything has been typed into the custom field.
   const [customModelSelected, setCustomModelSelected] = useState(false);
   const [validation, setValidation] = useState<ApiKeyValidationState>('idle');
-  const [licenseKey, setLicenseKey] = useState('');
-  const [licenseValidation, setLicenseValidation] = useState<'idle' | 'checking' | 'valid' | 'error'>('idle');
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [confirmClear, setConfirmClear] = useState(false);
   const [confirmRemoveKey, setConfirmRemoveKey] = useState(false);
-  const [removeLicenseConfirmInput, setRemoveLicenseConfirmInput] = useState('');
-  const [showChangeLicense, setShowChangeLicense] = useState(false);
-  const removeLicenseDialogRef = useRef<HTMLDialogElement>(null);
-  const changeLicenseDialogRef = useRef<HTMLDialogElement>(null);
   const autosaveTimer = useRef<number | null>(null);
   const saveRequest = useRef(0);
   // 0 = save as soon as the pending-change effect below sees it (the default, for discrete
@@ -236,72 +217,6 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
     setSaveState('saved');
   }
 
-  async function performApplyLicense(nextLicenseKey: string) {
-    setLicenseValidation('checking');
-    try {
-      await bridge.verifyLicense(nextLicenseKey);
-      setSettings((current) => ({ ...current, licenseKey: nextLicenseKey, licenseStatus: 'active' }));
-      setSavedSettings((current) => current && ({ ...current, licenseKey: nextLicenseKey, licenseStatus: 'active' }));
-      setLicenseKey('');
-      setLicenseValidation('valid');
-      setShowChangeLicense(false);
-    } catch {
-      setLicenseValidation('error');
-    }
-  }
-
-  // A license is already active -- confirm before silently discarding it locally in favor
-  // of the newly typed code (the old subscription itself isn't affected, only which code
-  // this browser currently has applied).
-  function applyLicense() {
-    const nextLicenseKey = licenseKey.trim();
-    if (!nextLicenseKey) return;
-    if (settings.licenseStatus === 'active') {
-      openDialog(changeLicenseDialogRef.current);
-      return;
-    }
-    void performApplyLicense(nextLicenseKey);
-  }
-
-  function closeChangeLicenseDialog() {
-    closeDialog(changeLicenseDialogRef.current);
-  }
-
-  function confirmChangeLicense() {
-    const nextLicenseKey = licenseKey.trim();
-    closeChangeLicenseDialog();
-    if (nextLicenseKey) void performApplyLicense(nextLicenseKey);
-  }
-
-  async function removeLicense() {
-    try {
-      const next = await bridge.saveSettings({ licenseKey: '', licenseStatus: null });
-      setSettings(next);
-      setSavedSettings(next);
-      setLicenseKey('');
-      setLicenseValidation('idle');
-    } catch {
-      setLicenseValidation('error');
-    }
-  }
-
-  function openRemoveLicenseDialog() {
-    setRemoveLicenseConfirmInput('');
-    openDialog(removeLicenseDialogRef.current);
-  }
-
-  function closeRemoveLicenseDialog() {
-    closeDialog(removeLicenseDialogRef.current);
-    setRemoveLicenseConfirmInput('');
-  }
-
-  async function confirmRemoveLicense() {
-    await removeLicense();
-    closeRemoveLicenseDialog();
-  }
-
-  const removeLicenseConfirmMatches = removeLicenseConfirmInput.trim().toLowerCase() === 'remove license';
-
   return <main className="options-shell">
     <aside className="options-sidebar"><div className="options-sidebar-inner"><div className="options-brand"><img className="brand-logo" src="/icons/ondrift-32.png" alt="" /><span>Ondrift</span></div><nav aria-label={copy.header.title}><a href="#provider">{copy.sidebar.nav.provider}</a><a href="#persona">{copy.sidebar.nav.persona}</a><a href="#sites">{copy.sidebar.nav.sites}</a><a href="#privacy">{copy.sidebar.nav.privacy}</a><a href="#support">{copy.sidebar.nav.support}</a></nav><p>{copy.sidebar.version}</p></div></aside>
     <div className="options-content">
@@ -311,52 +226,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
         <div className="settings-card">
           <label className="ui-field"><span className="ui-label">{copy.provider.providerLabel}</span><select className="ui-select" aria-label={copy.provider.providerLabel} value={settings.provider} onChange={(event) => update('provider', event.target.value as ProviderId)}><option value="gemini">{copy.provider.providerGemini}</option><option value="openai" disabled>{copy.provider.providerOpenAi}</option><option value="claude" disabled>{copy.provider.providerClaude}</option></select></label>
           <div className="ui-field"><label className="ui-label" htmlFor="settings-key">{copy.provider.apiKeyLabel}</label><div className="settings-key-row"><input id="settings-key" className="ui-input" type="password" autoComplete="off" value={apiKey} onChange={(event) => { setApiKey(event.target.value); setValidation('idle'); }} placeholder={settings.apiKeyConfigured ? copy.provider.apiKeyPlaceholderSaved : copy.provider.apiKeyPlaceholderEmpty} /><button className="ui-button ui-button--secondary" disabled={(!apiKey.trim() && !settings.apiKeyConfigured) || validation === 'checking'} onClick={verify}>{validation === 'checking' ? common.checking : copy.provider.verifyCta}</button></div><p className="ui-help">{copy.provider.apiKeyHelp} <button className="text-button" onClick={() => bridge.openExternal(AI_STUDIO_API_KEY_URL)}>{copy.provider.getKeyCta} <Icon name="external" /></button></p>
-            {!settings.apiKeyConfigured && <div className="pro-tier">
-              {settings.licenseStatus === 'active'
-                ? <>
-                  <div className="ui-status ui-status--success pro-active-status"><Icon name="check" />{copy.provider.proActive}</div>
-                  {licenseValidation === 'valid' && <div className="ui-status ui-status--success" role="status"><Icon name="check" />{copy.provider.licenseSuccess}</div>}
-                  <div className="pro-active-actions">
-                    <button type="button" className="ui-button ui-button--quiet remove-license" onClick={openRemoveLicenseDialog}>{copy.provider.removeLicenseCta}</button>
-                    <button type="button" className="text-button" onClick={() => setShowChangeLicense((current) => !current)}>{copy.provider.changeLicenseCta}</button>
-                  </div>
-                  {showChangeLicense && <label className="ui-field" htmlFor="settings-license-change"><span className="ui-label">{copy.provider.licenseKeyLabel}</span><div className="settings-key-row"><input id="settings-license-change" className="ui-input" type="text" autoComplete="off" spellCheck={false} value={licenseKey} onChange={(event) => { setLicenseKey(event.target.value); setLicenseValidation('idle'); }} placeholder={copy.provider.licenseKeyPlaceholder} /><button type="button" className="ui-button ui-button--secondary" disabled={!licenseKey.trim() || licenseValidation === 'checking'} onClick={applyLicense}>{licenseValidation === 'checking' ? common.checking : copy.provider.licenseApplyCta}</button></div></label>}
-                  {licenseValidation === 'error' && <div className="ui-status ui-status--error" role="alert">{copy.provider.licenseError}</div>}
-                  <dialog ref={changeLicenseDialogRef} className="remove-license-dialog">
-                    <h3>{copy.provider.changeLicenseConfirmTitle}</h3>
-                    <p>{copy.provider.changeLicenseConfirmBody}</p>
-                    <div className="clear-actions">
-                      <button type="button" className="ui-button ui-button--quiet" onClick={closeChangeLicenseDialog}>{copy.provider.removeLicenseCancelCta}</button>
-                      <button type="button" className="ui-button danger-button" onClick={confirmChangeLicense}>{copy.provider.changeLicenseConfirmCta}</button>
-                    </div>
-                  </dialog>
-                  <dialog ref={removeLicenseDialogRef} className="remove-license-dialog" onClose={() => setRemoveLicenseConfirmInput('')}>
-                    <h3>{copy.provider.removeLicenseConfirmTitle}</h3>
-                    <p>{copy.provider.removeLicenseConfirmBody}</p>
-                    <p className="ui-help">{copy.provider.removeLicenseConfirmReassurance}</p>
-                    <input
-                      className="ui-input"
-                      type="text"
-                      autoComplete="off"
-                      spellCheck={false}
-                      value={removeLicenseConfirmInput}
-                      onChange={(event) => setRemoveLicenseConfirmInput(event.target.value)}
-                      placeholder={copy.provider.removeLicenseConfirmPlaceholder}
-                      aria-label={copy.provider.removeLicenseConfirmPlaceholder}
-                    />
-                    <div className="clear-actions">
-                      <button type="button" className="ui-button ui-button--quiet" onClick={closeRemoveLicenseDialog}>{copy.provider.removeLicenseCancelCta}</button>
-                      <button type="button" className="ui-button danger-button" disabled={!removeLicenseConfirmMatches} onClick={confirmRemoveLicense}>{copy.provider.removeLicenseConfirmCta}</button>
-                    </div>
-                  </dialog>
-                </>
-                : <>
-                  <p className="ui-help free-tier-status">{copy.provider.freeTierStatus(settings.freeTierRemaining)}</p>
-                  <button type="button" className="ui-button ui-button--secondary upgrade-pro" onClick={() => bridge.openExternal(PRO_UPGRADE_URL)}>{copy.provider.upgradeProCta} <Icon name="external" /></button>
-                  <label className="ui-field" htmlFor="settings-license"><span className="ui-label">{copy.provider.licenseKeyLabel}</span><div className="settings-key-row"><input id="settings-license" className="ui-input" type="text" autoComplete="off" spellCheck={false} value={licenseKey} onChange={(event) => { setLicenseKey(event.target.value); setLicenseValidation('idle'); }} placeholder={copy.provider.licenseKeyPlaceholder} /><button type="button" className="ui-button ui-button--secondary" disabled={!licenseKey.trim() || licenseValidation === 'checking'} onClick={applyLicense}>{licenseValidation === 'checking' ? common.checking : copy.provider.licenseApplyCta}</button></div></label>
-                  {licenseValidation === 'error' && <div className="ui-status ui-status--error" role="alert">{copy.provider.licenseError}</div>}
-                </>}
-            </div>}
+            {!settings.apiKeyConfigured && <p className="ui-help free-tier-status">{copy.provider.freeTierStatus(settings.freeTierRemaining)}</p>}
             {settings.apiKeyConfigured && (confirmRemoveKey
               ? <div className="ui-help remove-key-confirm"><span>{copy.provider.removeKeyConfirmDetail}</span><span className="clear-actions"><button className="ui-button ui-button--quiet" onClick={() => setConfirmRemoveKey(false)}>{copy.provider.removeKeyCancelCta}</button><button className="ui-button danger-button" onClick={removeKey}>{copy.provider.removeKeyConfirmCta}</button></span></div>
               : <button type="button" className="text-button" onClick={() => setConfirmRemoveKey(true)}>{copy.provider.removeKeyCta}</button>)}

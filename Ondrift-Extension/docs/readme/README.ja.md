@@ -4,10 +4,11 @@
 
 Ondrift は、ChatGPT、Claude、Gemini、Perplexity、Grok でプロンプトを送信する前に
 書き直してスコアリングする、ローカルファーストの Manifest V3 Chrome 拡張機能です。
-API キーがなくても、Ondrift の Cloudflare プロキシを通じて1日3回無料で
-書き直せます。自分の Gemini キーを追加したユーザーは、Ondrift のバックエンドを
-一切経由せず、拡張機能から Gemini へ直接、回数制限なくリクエストできます。
-アカウントやクラウド同期は必要ありません。
+API キーがなくても、Ondrift の Cloudflare プロキシを通じて1日10回無料で
+書き直せます。この1日の上限に達した場合は、オプションページで自分の無料 Gemini
+API キーを追加すれば、1日の上限なしで使い続けられます。自分の Gemini キーを
+追加したユーザーは、Ondrift のバックエンドを一切経由せず、拡張機能から Gemini
+へ直接、回数制限なくリクエストできます。アカウントやクラウド同期は必要ありません。
 
 製品概要、プライバシーモデル、最新のインストール手順については公式サイト
 [Ondrift website](https://ondrift.pages.dev/) をご覧ください。
@@ -27,7 +28,7 @@ API キーがなくても、Ondrift の Cloudflare プロキシを通じて1日3
 Chrome ウェブストアに反映される前のビルドを試すなど、特定のリリースを手動で
 インストールしたい場合は、公開リリース ZIP からインストールすることもできます。
 
-1. [最新リリース](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest) から `ondrift-0.2.4.zip` をダウンロードします。
+1. [最新リリース](https://github.com/Ondrift-labs/Ondrift-Extension/releases/latest) から `ondrift-0.2.5.zip` をダウンロードします。
 2. ZIP を完全に解凍します。
 3. Chrome で `chrome://extensions` を開きます。
 4. 右上の **デベロッパーモード** を有効にします。
