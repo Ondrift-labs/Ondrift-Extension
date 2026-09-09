@@ -25,6 +25,10 @@ let latestResult: LatestResult = { previousScore: 0, score: 0, improvedText: "" 
 // Guards against a rewrite fired while one is already in flight -- see runRewrite() and
 // showReady() below.
 let rewriteInFlight = false;
+// Mirrors ExtensionSettings.widgetAlwaysVisible (see settings.ts), refreshed on boot() and
+// on live settings changes below so a toggle in the Options page takes effect without a
+// page reload. false (the default) is the safe starting point until settings load.
+let widgetAlwaysVisible = false;
 
 const widget = createInlineWidget({
   onRewrite: () => { void runRewrite(); },
@@ -44,12 +48,13 @@ function promptLength(): number {
 }
 
 // Keeps the widget hidden until the composer actually has text in it, so an empty
-// composer never sits under a floating widget covering the page. This only checks
-// emptiness locally to toggle visibility -- it never leaves the browser, and it's
-// separate from the short-prompt hint below, which still only reads exact text length
-// after an explicit Rewrite request.
+// composer never sits under a floating widget covering the page -- unless the user has
+// opted into always-on via widgetAlwaysVisible. This only checks emptiness locally to
+// toggle visibility -- it never leaves the browser, and it's separate from the
+// short-prompt hint below, which still only reads exact text length after an explicit
+// Rewrite request.
 function syncVisibility(): void {
-  widget.element.hidden = promptLength() === 0;
+  widget.element.hidden = !widgetAlwaysVisible && promptLength() === 0;
 }
 
 function showReady(): void {
@@ -173,7 +178,17 @@ contentController.subscribe(({ input }) => {
   }
   const listener = () => showReady();
   input.addEventListener("input", listener);
-  removeInputListener = () => input.removeEventListener("input", listener);
+  // A user keystroke always fires "input", but a site's own Send action commonly clears a
+  // contenteditable composer by re-rendering it programmatically (e.g. ChatGPT's Lexical
+  // editor after Apply -> Send), which doesn't dispatch a synthetic "input" event. Without
+  // this, the widget could keep showing its last state over a now-empty composer. This only
+  // re-checks local emptiness (syncVisibility), it doesn't re-inspect the draft's content.
+  const mutationObserver = new MutationObserver(() => syncVisibility());
+  mutationObserver.observe(input, { childList: true, subtree: true, characterData: true });
+  removeInputListener = () => {
+    input.removeEventListener("input", listener);
+    mutationObserver.disconnect();
+  };
   const adapter = adapterRegistry.resolve();
   const anchor = adapter?.getComposerAnchor?.(input) ?? findComposerAnchor(input);
   currentAnchor = anchor;
@@ -247,6 +262,7 @@ async function boot(generation = bootGeneration): Promise<void> {
   settingsBootRetryCount = 0;
   clearSettingsBootRetries();
   widget.setLanguage(settings.language);
+  widgetAlwaysVisible = settings.widgetAlwaysVisible;
   if (!settings.enabledSites[adapter.id]) return;
   contentController.start();
 }
@@ -256,7 +272,15 @@ void boot();
 function onStorageChanged(changes: Record<string, chrome.storage.StorageChange>, areaName: string): void {
   if (areaName !== "local") return;
   const next = changes[SETTINGS_STORAGE_KEY]?.newValue as Partial<ExtensionSettings> | undefined;
-  if (next && isLanguageId(next.language)) widget.setLanguage(next.language);
+  if (!next) return;
+  if (isLanguageId(next.language)) widget.setLanguage(next.language);
+  // Lets a widgetAlwaysVisible toggle in the Options page take effect immediately in any
+  // already-open tab, instead of only after the page is reloaded.
+  if (typeof next.widgetAlwaysVisible === "boolean") {
+    widgetAlwaysVisible = next.widgetAlwaysVisible;
+    syncVisibility();
+    floatingPlacement?.update();
+  }
 }
 // `chrome.storage` itself (not just individual calls into it) goes undefined once this
 // tab's extension context is invalidated -- e.g. the extension updates or reloads while

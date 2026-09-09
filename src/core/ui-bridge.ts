@@ -25,6 +25,7 @@ function toUiSettings(settings: ExtensionSettings): UiSettings {
     persona: (settings.persona || "general") as PersonaId,
     language: settings.language || "en",
     siteAccess: settings.enabledSites,
+    widgetAlwaysVisible: settings.widgetAlwaysVisible,
     saveHistory: settings.saveHistory,
     consentGranted: settings.consentGranted,
   };
@@ -61,6 +62,7 @@ export const uiBridge: UiBridge = {
     if (patch.persona !== undefined) runtimePatch.persona = patch.persona;
     if (patch.language !== undefined) runtimePatch.language = patch.language;
     if (patch.siteAccess !== undefined) runtimePatch.enabledSites = patch.siteAccess;
+    if (patch.widgetAlwaysVisible !== undefined) runtimePatch.widgetAlwaysVisible = patch.widgetAlwaysVisible;
     if (patch.saveHistory !== undefined) runtimePatch.saveHistory = patch.saveHistory;
     if (patch.consentGranted !== undefined) {
       runtimePatch.consentGranted = patch.consentGranted;

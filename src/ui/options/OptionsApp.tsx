@@ -24,6 +24,7 @@ function editableSettingsMatch(current: UiSettings, saved: UiSettings) {
     && current.persona === saved.persona
     && current.language === saved.language
     && current.saveHistory === saved.saveHistory
+    && current.widgetAlwaysVisible === saved.widgetAlwaysVisible
     && SITE_IDS.every((site) => current.siteAccess[site] === saved.siteAccess[site]);
 }
 
@@ -243,7 +244,7 @@ export function OptionsApp({ bridge }: { bridge: UiBridge }) {
       </section>
 
       <section id="sites"><div className="section-title"><span>03</span><div><h2>{copy.sites.sectionTitle}</h2><p>{copy.sites.sectionLead}</p></div></div>
-        <div className="settings-card settings-card--rows">{SITE_IDS.map((id) => <ToggleRow key={id} title={copy.sites.sites[id].title} detail={copy.sites.sites[id].detail} checked={settings.siteAccess[id]} onChange={(value) => updateSite(id, value)} />)}</div>
+        <div className="settings-card settings-card--rows">{SITE_IDS.map((id) => <ToggleRow key={id} title={copy.sites.sites[id].title} detail={copy.sites.sites[id].detail} checked={settings.siteAccess[id]} onChange={(value) => updateSite(id, value)} />)}<ToggleRow title={copy.sites.widgetAlwaysVisibleTitle} detail={copy.sites.widgetAlwaysVisibleDetail} checked={settings.widgetAlwaysVisible} onChange={(value) => update('widgetAlwaysVisible', value)} /></div>
       </section>
 
       <section id="privacy"><div className="section-title"><span>04</span><div><h2>{copy.privacy.sectionTitle}</h2><p>{copy.privacy.sectionLead}</p></div></div>

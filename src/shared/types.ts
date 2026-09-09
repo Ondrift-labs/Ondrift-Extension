@@ -55,6 +55,10 @@ export interface ExtensionSettings {
   persona: string;
   language: LanguageId;
   enabledSites: Record<SiteId, boolean>;
+  /** When false (the default), the floating widget only appears once the composer has
+   * text in it. When true, it stays visible as soon as a composer is detected, even
+   * empty -- restores the widget's pre-0.2.6 always-on behavior for users who prefer it. */
+  widgetAlwaysVisible: boolean;
   onboardingComplete: boolean;
   saveHistory: boolean;
   consentGranted: boolean;

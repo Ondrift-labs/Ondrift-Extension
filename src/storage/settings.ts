@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   persona: "general",
   language: "en",
   enabledSites: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true },
+  widgetAlwaysVisible: false,
   onboardingComplete: false,
   saveHistory: true,
   consentGranted: false,

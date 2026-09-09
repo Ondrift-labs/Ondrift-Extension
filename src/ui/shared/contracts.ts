@@ -19,6 +19,9 @@ export interface UiSettings {
   persona: PersonaId;
   language: LanguageId;
   siteAccess: Record<SiteId, boolean>;
+  /** When false (the default), the floating widget only appears once the composer has
+   * text in it; when true it stays visible as soon as a composer is detected. */
+  widgetAlwaysVisible: boolean;
   saveHistory: boolean;
   consentGranted: boolean;
 }
@@ -79,6 +82,7 @@ export const DEFAULT_SETTINGS: UiSettings = {
   persona: 'general',
   language: 'en',
   siteAccess: { chatgpt: true, claude: true, gemini: true, perplexity: true, grok: true },
+  widgetAlwaysVisible: false,
   saveHistory: true,
   consentGranted: false,
 };

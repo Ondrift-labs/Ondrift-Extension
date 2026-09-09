@@ -132,6 +132,8 @@ export interface OptionsCopy {
     sectionTitle: string;
     sectionLead: string;
     sites: Record<SiteId, { title: string; detail: string }>;
+    widgetAlwaysVisibleTitle: string;
+    widgetAlwaysVisibleDetail: string;
   };
   privacy: {
     sectionTitle: string;
@@ -355,6 +357,8 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           perplexity: { title: 'Perplexity', detail: 'perplexity.ai에서 다시 쓰기 위젯을 표시합니다.' },
           grok: { title: 'Grok', detail: 'grok.com에서 다시 쓰기 위젯을 표시합니다.' },
         },
+        widgetAlwaysVisibleTitle: '위젯 항상 표시',
+        widgetAlwaysVisibleDetail: '꺼두면 프롬프트 입력창에 글자를 입력했을 때만 위젯이 나타납니다.',
       },
       privacy: {
         sectionTitle: '개인정보 및 로컬 데이터',
@@ -578,6 +582,8 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           perplexity: { title: 'Perplexity', detail: 'Show the rewrite widget on perplexity.ai.' },
           grok: { title: 'Grok', detail: 'Show the rewrite widget on grok.com.' },
         },
+        widgetAlwaysVisibleTitle: 'Always show the widget',
+        widgetAlwaysVisibleDetail: 'When off, the widget only appears once you start typing a prompt.',
       },
       privacy: {
         sectionTitle: 'Privacy & local data',
@@ -801,6 +807,8 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           perplexity: { title: 'Perplexity', detail: 'perplexity.ai でリライトウィジェットを表示します。' },
           grok: { title: 'Grok', detail: 'grok.com でリライトウィジェットを表示します。' },
         },
+        widgetAlwaysVisibleTitle: 'ウィジェットを常に表示',
+        widgetAlwaysVisibleDetail: 'オフにすると、プロンプトを入力し始めたときだけウィジェットが表示されます。',
       },
       privacy: {
         sectionTitle: 'プライバシーとローカルデータ',
@@ -1024,6 +1032,8 @@ export const uiCopy: Record<LanguageId, UiCopy> = {
           perplexity: { title: 'Perplexity', detail: '在 perplexity.ai 上显示改写小组件。' },
           grok: { title: 'Grok', detail: '在 grok.com 上显示改写小组件。' },
         },
+        widgetAlwaysVisibleTitle: '始终显示小组件',
+        widgetAlwaysVisibleDetail: '关闭后，只有在你开始输入提示词时小组件才会出现。',
       },
       privacy: {
         sectionTitle: '隐私与本地数据',
