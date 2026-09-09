@@ -10,16 +10,18 @@ Only bump the version (`package.json` + `manifest.config.ts`) for changes big en
 
 ## Chrome Web Store dashboard submissions
 
-Whenever the Chrome Web Store Developer Dashboard's **Store listing** or
-**Privacy practices** tab content is entered or changed — whether saved as a
-draft or submitted for review — save an exact copy of what was entered as a
-dated markdown file under `docs/store-submissions/`:
+Don't type directly into the Chrome Web Store Developer Dashboard (no
+computer-use automation typing into its Store listing / Privacy practices
+fields). Instead, write the exact field content into a dated markdown file
+under `docs/store-submissions/`:
 
 - `docs/store-submissions/YYYY-MM-DD-store-listing.md`
 - `docs/store-submissions/YYYY-MM-DD-privacy-practices.md`
 
-List every entry newest-first in `docs/store-submissions/README.md`. Do this
-in the same task as the dashboard edit, not as a follow-up.
+The user copy-pastes each field from that file into the dashboard and
+saves/submits it themselves. List every entry newest-first in
+`docs/store-submissions/README.md`. Do this in the same task as identifying
+what needs to change, not as a follow-up.
 
 ## Social/community posts
 

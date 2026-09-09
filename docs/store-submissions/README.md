@@ -8,18 +8,17 @@ This is a record of the live dashboard content — not the drafting copy in
 
 Newest first:
 
+- [2026-09-09 — Store listing](2026-09-09-store-listing.md): ready-to-paste
+  content for the Description fix (currently holds misplaced Privacy Policy
+  text) plus a reference copy of every other field. **Not yet applied** —
+  copy-paste into the dashboard yourself, then save/submit.
 - [2026-09-09 — Privacy practices](2026-09-09-privacy-practices.md): fixed
   the single-purpose description and host-permission justification (both
   were missing Grok and, for the host permissions, the free-tier proxy
-  mention). Saved as a draft.
+  mention). Already entered and saved as a draft in the dashboard.
 
-## Pending fix
+## Workflow going forward
 
-The dashboard's Store listing **Description** field (separate from Privacy
-practices, above) contains the Privacy Policy text ("Ondrift Privacy Policy
-Last updated: August 24, 2026...") instead of the product description —
-likely pasted into the wrong field at some point. It should read the
-"Detailed description" text from `STORE_LISTING.md` instead. The corrected
-text was handed to the user to paste in manually; once confirmed applied
-(and saved as a draft or submitted), add a
-`docs/store-submissions/YYYY-MM-DD-store-listing.md` snapshot here.
+Don't automate typing into the Chrome Web Store dashboard directly. Instead,
+write the exact field content into a dated markdown file here — the user
+copy-pastes it into the dashboard and submits it themselves.
