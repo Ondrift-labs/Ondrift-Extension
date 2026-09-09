@@ -8,14 +8,18 @@ This is a record of the live dashboard content — not the drafting copy in
 
 Newest first:
 
-- _(none yet — the first snapshot lands once the pending Description-field
-  fix below is applied)_
+- [2026-09-09 — Privacy practices](2026-09-09-privacy-practices.md): fixed
+  the single-purpose description and host-permission justification (both
+  were missing Grok and, for the host permissions, the free-tier proxy
+  mention). Saved as a draft.
 
-## Pending fix (found 2026-09-09)
+## Pending fix
 
-The dashboard's Store listing **Description** field currently contains the
-Privacy Policy text ("Ondrift Privacy Policy Last updated: August 24,
-2026...") instead of the product description — likely pasted into the wrong
-field at some point. It should read the "Detailed description" text from
-`STORE_LISTING.md` instead. Once corrected (and saved as a draft or
-submitted), add the dated snapshot files here.
+The dashboard's Store listing **Description** field (separate from Privacy
+practices, above) contains the Privacy Policy text ("Ondrift Privacy Policy
+Last updated: August 24, 2026...") instead of the product description —
+likely pasted into the wrong field at some point. It should read the
+"Detailed description" text from `STORE_LISTING.md` instead. The corrected
+text was handed to the user to paste in manually; once confirmed applied
+(and saved as a draft or submitted), add a
+`docs/store-submissions/YYYY-MM-DD-store-listing.md` snapshot here.
