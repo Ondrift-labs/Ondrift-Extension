@@ -27,6 +27,16 @@ Tag every field's heading with its status: `(unchanged)` for a field left as
 verified-correct, or `(fixed YYYY-MM-DD)` for one whose content changed —
 never leave a heading untagged.
 
+Whenever asked to update/refresh the store info ("스토어 정보 업데이트"), always
+produce a brand-new dated snapshot file for today (`YYYY-MM-DD-store-listing.md`
+and/or `YYYY-MM-DD-privacy-practices.md`), covering every field currently in
+that dashboard tab — not only the ones that changed — tagged per the rule
+above. Don't edit an older dated file in place (an existing file from today is
+the one exception: update that same file, don't create a second one for the
+same date). Add it to `docs/store-submissions/README.md` (newest first), then
+commit and push both to GitHub in the same task — don't wait to be asked
+separately to commit.
+
 ## Social/community posts
 
 Before drafting, reviewing, scheduling, or publishing any social/community post for Ondrift, read and follow:
