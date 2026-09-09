@@ -4,13 +4,13 @@ Ready-to-paste content for the Chrome Web Store Developer Dashboard's
 **Store listing** tab (item ID `aonkgefdmgjcnhopbkeehmoacncpkeje`). Copy each
 field below into the matching dashboard field, then save/submit yourself.
 
-## 패키지 요약 (Summary) — already correct, no change needed
+## 패키지 요약 (Summary) (unchanged)
 
 ```
 Rewrite and score prompts on ChatGPT, Claude, Gemini, Perplexity, and Grok with 10 free daily rewrites, or your own Gemini key.
 ```
 
-## 설명 (Description) — ⚠️ needs fixing
+## 설명 (Description) — ⚠️ needs fixing (not applied yet)
 
 The dashboard currently has the **Privacy Policy text** pasted into this
 field by mistake ("Ondrift Privacy Policy Last updated: August 24,
@@ -48,12 +48,12 @@ reach that limit, add your own free Gemini API key in the options page to
 keep rewriting with no daily limit.
 ```
 
-## 카테고리 / 언어 — already correct, no change needed
+## 카테고리 / 언어 (unchanged)
 
 - 카테고리: 도구 (Tools)
 - 언어: 영어 (English)
 
-## 홈페이지 URL — currently empty, suggested value
+## 홈페이지 URL — currently empty, needs entering (suggested value below)
 
 ```
 https://ondrift.pages.dev/
@@ -69,7 +69,7 @@ support channel you actually want to use (e.g. a GitHub Issues URL, an email
 support page, or a Chrome Web Store support channel) and enter it here
 yourself; not something to copy-paste from this doc.
 
-## 성인용 콘텐츠 — already correct, no change needed
+## 성인용 콘텐츠 (unchanged)
 
 Off/unchecked.
 
