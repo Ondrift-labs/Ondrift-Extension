@@ -4,6 +4,14 @@ Snapshot of the Chrome Web Store Developer Dashboard's **Privacy practices**
 tab for Ondrift (item ID `aonkgefdmgjcnhopbkeehmoacncpkeje`), taken after
 fixing two stale fields (saved as a draft, not yet submitted for review).
 
+**Re-verified 2026-09-09 against the extension shipped as v0.2.7** (widget
+hide-when-empty fix + a new "always show the widget" Options toggle). Neither
+change adds a host permission or a new collected data type; the new toggle is
+just another value inside the existing `storage` permission's "extension
+settings" already covered by that justification below. Every field below
+stays unchanged from the first pass earlier today. Still not yet submitted
+for review — that remains the user's call.
+
 ## Single purpose description (fixed 2026-09-09)
 
 > Ondrift helps users write clearer, more effective prompts before sending

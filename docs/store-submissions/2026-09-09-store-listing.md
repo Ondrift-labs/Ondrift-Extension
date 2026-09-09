@@ -4,6 +4,14 @@ Ready-to-paste content for the Chrome Web Store Developer Dashboard's
 **Store listing** tab (item ID `aonkgefdmgjcnhopbkeehmoacncpkeje`). Copy each
 field below into the matching dashboard field, then save/submit yourself.
 
+**Re-verified 2026-09-09 against the extension shipped as v0.2.7** (widget
+hide-when-empty fix + a new "always show the widget" Options toggle). Neither
+change adds a permission, a host, or a collected data type, and neither is
+the kind of internal UX detail a store listing describes, so every field
+below is unchanged from the first pass earlier today — nothing new to paste
+beyond what was already queued. The Description fix, Homepage URL, and
+Support URL below are still open action items as of this re-check.
+
 ## 패키지 요약 (Summary) (unchanged)
 
 ```

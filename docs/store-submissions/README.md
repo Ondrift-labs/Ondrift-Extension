@@ -11,11 +11,15 @@ Newest first:
 - [2026-09-09 — Store listing](2026-09-09-store-listing.md): ready-to-paste
   content for the Description fix (currently holds misplaced Privacy Policy
   text) plus a reference copy of every other field. **Not yet applied** —
-  copy-paste into the dashboard yourself, then save/submit.
+  copy-paste into the dashboard yourself, then save/submit. Re-verified
+  against v0.2.7 (widget hide-when-empty fix + always-visible toggle) — no
+  dashboard-relevant change from either.
 - [2026-09-09 — Privacy practices](2026-09-09-privacy-practices.md): fixed
   the single-purpose description and host-permission justification (both
   were missing Grok and, for the host permissions, the free-tier proxy
-  mention). Already entered and saved as a draft in the dashboard.
+  mention). Already entered and saved as a draft in the dashboard, **not yet
+  submitted for review**. Re-verified against v0.2.7 — no dashboard-relevant
+  change from either.
 
 ## Workflow going forward
 
